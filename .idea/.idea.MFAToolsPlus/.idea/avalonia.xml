@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="MFAToolsPlus/App.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/ErrorView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/MainWindow.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Controls/Experimental/DesktopEnvironment/SukiDesktopEnvironment.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Controls/PropertyGrid/PropertyGridDialog.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Controls/PropertyGrid/PropertyGridWindow.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
