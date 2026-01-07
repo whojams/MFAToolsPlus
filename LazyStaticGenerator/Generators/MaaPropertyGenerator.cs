@@ -123,7 +123,7 @@ namespace {namespaceName}
 
     private static string GetNamespace(ClassDeclarationSyntax classSyntax)
         => (classSyntax.Parent as NamespaceDeclarationSyntax)?.Name.ToString()
-            ?? "MFAAvalonia.Extensions.MaaFW";
+            ?? "MFAToolsPlus.Extensions.MaaFW";
 
     private static string GetClassModifiers(ClassDeclarationSyntax classSyntax)
         => string.Join(" ", classSyntax.Modifiers.Select(m => m.Text)) + " ";

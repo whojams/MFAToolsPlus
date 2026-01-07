@@ -10,10 +10,10 @@
         <LangVersion>preview</LangVersion>
 		 <CETCompat>false</CETCompat>
         <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Helper\" />
         <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
@@ -28,16 +28,58 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.10" />
         <PackageReference Include="AvaloniaExtensions.Axaml" Version="11.3.9" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="CrossPlatformProtectedData" Version="1.0.3" />
+        <PackageReference Include="FluentIcons.Avalonia" Version="2.0.316.1" />
+        <PackageReference Include="FluentIcons.Avalonia.Fluent" Version="2.0.316.1" />
         <PackageReference Include="Lang.Avalonia" Version="11.3.9" />
         <PackageReference Include="Maa.AgentBinary" Version="1.2.0" />
         <PackageReference Include="Maa.Framework" Version="5.3.0-preview.1" />
         <PackageReference Include="Maa.Framework.Runtimes" Version="5.3.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.5-beta1" />
+        <PackageReference Include="Semver" Version="3.0.0" />
         <PackageReference Include="Serilog" Version="4.3.1-dev-02395" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-dev-02318" />
+        <PackageReference Include="SharpCompress" Version="0.44.0-beta.28" />
+        <PackageReference Include="SharpHook" Version="7.1.1" />
+        <PackageReference Include="System.Management" Version="10.0.1" />
 		<ProjectReference Include="../LazyStaticGenerator/LazyStaticGenerator.csproj" OutputItemType="Analyzer" ExcludeAssets="runtime;build;native;contentfiles" ReferenceOutputAssembly="false"/>
 		<ProjectReference Include="../SukiUI/SukiUI.csproj"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <None Remove="resource\base\pipeline\mfa.json" />
+      <AvaloniaResource Include="resource\base\pipeline\mfa.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AvaloniaResource>
+      <None Remove="resource\base\model\ocr\rec.onnx" />
+      <AvaloniaResource Include="resource\base\model\ocr\rec.onnx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
+      <None Remove="resource\base\model\ocr\README.md" />
+      <AvaloniaResource Include="resource\base\model\ocr\README.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
+      <None Remove="resource\base\model\ocr\keys.txt" />
+      <AvaloniaResource Include="resource\base\model\ocr\keys.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
+      <None Remove="resource\base\model\ocr\det.onnx" />
+      <AvaloniaResource Include="resource\base\model\ocr\det.onnx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
+      <None Remove="resource\base\model\detect\limbo_stage_lightest.onnx" />
+      <AvaloniaResource Include="resource\base\model\detect\limbo_stage_lightest.onnx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
+      <None Remove="resource\base\model\detect\sos_nodes.onnx" />
+      <AvaloniaResource Include="resource\base\model\detect\sos_nodes.onnx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
     </ItemGroup>
 </Project>

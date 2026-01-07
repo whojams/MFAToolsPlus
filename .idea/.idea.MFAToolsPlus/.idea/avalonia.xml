@@ -4,11 +4,34 @@
     <option name="projectPerEditor">
       <map>
         <entry key="MFAToolsPlus/App.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Assets/Style/Geometry.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Assets/Theme/DarkTheme.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Assets/Theme/LightTheme.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="MFAToolsPlus/Views/ErrorView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="MFAToolsPlus/Views/MainWindow.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/Pages/SettingsView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/Pages/ToolsView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/AdbEditorDialogView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/HotKeyEditor.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/PlayCoverEditorDialog.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/AboutUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/ConfigurationMgrUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/ConnectSettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/ExternalNotificationSettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/GameSettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/GuiSettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/HotKeySettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/PerformanceUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/StartSettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/Settings/VersionUpdateSettingsUserControl.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/UserControls/UserControl1.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/Windows/ErrorView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Views/Windows/RootView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/Experimental/DesktopEnvironment/SukiDesktopEnvironment.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/PropertyGrid/PropertyGridDialog.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/PropertyGrid/PropertyGridWindow.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Controls/SukiImageViewer.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Theme/NumericUpDown.xaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
       </map>
     </option>
   </component>

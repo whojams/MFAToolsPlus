@@ -9,7 +9,13 @@ using Avalonia.Threading;
 using MFAToolsPlus.Configuration;
 using MFAToolsPlus.Helper;
 using MFAToolsPlus.ViewModels;
+using MFAToolsPlus.ViewModels.Pages;
+using MFAToolsPlus.ViewModels.UsersControls;
+using MFAToolsPlus.ViewModels.UsersControls.Settings;
 using MFAToolsPlus.Views;
+using MFAToolsPlus.Views.Pages;
+using MFAToolsPlus.Views.UserControls;
+using MFAToolsPlus.Views.UserControls.Settings;
 using MFAToolsPlus.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Dialogs;
@@ -81,7 +87,21 @@ public partial class App : Application
         return new ViewsHelper()
 
             // Add main view
-            .AddView<RootView, RootViewModel>(services);
+            .AddView<RootView, RootViewModel>(services)
+
+            .AddView<ToolsView, ToolsViewModel>(services)
+            .AddView<SettingsView, SettingsViewModel>(services)
+
+            // Add additional views
+            .AddView<AdbEditorDialogView, AdbEditorDialogViewModel>(services)
+            .AddView<PlayCoverEditorDialog, PlayCoverEditorDialogViewModel>(services)
+            .AddView<ConnectSettingsUserControl, ConnectSettingsUserControlModel>(services)
+            .AddView<GameSettingsUserControl, GameSettingsUserControlModel>(services)
+            .AddView<GuiSettingsUserControl, GuiSettingsUserControlModel>(services)
+            .AddView<PerformanceUserControl, PerformanceUserControlModel>(services)
+            .AddView<VersionUpdateSettingsUserControl, VersionUpdateSettingsUserControlModel>(services)
+            .AddOnlyView<AboutUserControl, SettingsViewModel>(services)
+            .AddOnlyView<HotKeySettingsUserControl, SettingsViewModel>(services);
     }
      private static void ConfigureServices(ServiceCollection services)
     {

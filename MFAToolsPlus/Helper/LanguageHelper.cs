@@ -19,6 +19,7 @@ public static class LanguageHelper
     public static readonly List<SupportedLanguage> SupportedLanguages =
     [
         new("zh-CN", "简体中文"),
+        new("zh-Hant", "繁體中文"),
         new("en-US", "English"),
     ];
 
@@ -55,7 +56,6 @@ public static class LanguageHelper
     }
 
     // 存储语言的字典
-    private static readonly Dictionary<string, Dictionary<string, string>> Langs = new();
     private static string _currentLanguage = ConfigurationManager.Current.GetValue(ConfigurationKeys.CurrentLanguage, LanguageHelper.SupportedLanguages[0].Key, ["zh-CN", "zh-Hant", "en-US"]);
     public static string CurrentLanguage => _currentLanguage;
     public static void Initialize()

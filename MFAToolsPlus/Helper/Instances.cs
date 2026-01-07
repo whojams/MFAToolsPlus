@@ -4,7 +4,11 @@ using Avalonia.Controls.ApplicationLifetimes;
 using MFAToolsPlus.Utilities.Attributes;
 using MFAToolsPlus.Extensions;
 using MFAToolsPlus.ViewModels;
+using MFAToolsPlus.ViewModels.Pages;
+using MFAToolsPlus.ViewModels.UsersControls.Settings;
 using MFAToolsPlus.Views;
+using MFAToolsPlus.Views.Pages;
+using MFAToolsPlus.Views.UserControls.Settings;
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Dialogs;
@@ -325,4 +329,22 @@ public static partial class Instances
 
     private static RootView _rootView;
     private static RootViewModel _rootViewModel;
+    
+    private static ToolsView _toolsView;
+    private static ToolsViewModel _toolsViewModel;
+    private static SettingsView _settingsView;
+    private static SettingsViewModel _settingsViewModel;
+    
+    private static ConnectSettingsUserControl _connectSettingsUserControl;
+    private static ConnectSettingsUserControlModel _connectSettingsUserControlModel;
+    private static GuiSettingsUserControl _guiSettingsUser;
+    private static GuiSettingsUserControlModel _guiSettingsUserControlModel;
+    private static PerformanceUserControl _performanceUserControl;
+    private static PerformanceUserControlModel _performanceUserControlModel;
+    private static GameSettingsUserControl _gameSettingsUserControl;
+    private static GameSettingsUserControlModel _gameSettingsUserControlModel;
+    private static VersionUpdateSettingsUserControl _versionUpdateSettingsUserControl;
+    private static VersionUpdateSettingsUserControlModel _versionUpdateSettingsUserControlModel;
+    private static AboutUserControl _aboutUserControl;
+    private static HotKeySettingsUserControl _hotKeySettingsUserControl;
 }

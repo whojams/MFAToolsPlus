@@ -312,8 +312,7 @@ public class SukiImageViewer : TemplatedControl
     }
 
 
-    private static readonly string TempDir = Path.Combine(Path.GetTempPath(), "MFAAvalonia_Clipboard");
-
+    private static readonly string TempDir = Path.Combine(Path.GetTempPath(), "MFAToolsPlus_Clipboard");
     
     // 应用启动时调用，清理旧的临时文件
     public static void CleanupOnStartup()

@@ -1,0 +1,68 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MaaFramework.Binding;
+using MFAToolsPlus.Views;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MFAToolsPlus.Helper.Other;
+
+
+public partial class MFATask : ObservableObject
+{
+    public enum MFATaskType
+    {
+        MFA,
+        MAAFW
+    }
+
+    public enum MFATaskStatus
+    {
+        NOT_STARTED,
+        STOPPING,
+        STOPPED,
+        SUCCEEDED,
+        FAILED
+    }
+
+    [ObservableProperty] private string? _name = string.Empty;
+    [ObservableProperty] private MFATaskType _type = MFATaskType.MFA;
+    [ObservableProperty] private int _count = 1;
+    [ObservableProperty] private Func<Task> _action;
+    // [ObservableProperty] private Dictionary<string, MaaNode> _tasks = new();
+    [ObservableProperty] private bool _isUpdateRelated;
+
+    public async Task<MFATaskStatus> Run(CancellationToken token)
+    {
+        try
+        {
+            if (Count < 0)
+                Count = int.MaxValue;
+            for (int i = 0; i < Count; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                // if (Type == MFATaskType.MAAFW)
+                // {
+                //     RootView.AddLogByKeys(LangKeys.TaskStart, null, true, LanguageHelper.GetLocalizedString(Name));
+                //     Instances.TaskQueueViewModel.SetCurrentTaskName(LanguageHelper.GetLocalizedString(Name));
+                // }
+                await Action();
+            }
+            return MFATaskStatus.SUCCEEDED;
+        }
+        catch (MaaJobStatusException)
+        {
+            LoggerHelper.Error($"Task {Name} failed to run");
+            return MFATaskStatus.FAILED;
+        }
+        catch (OperationCanceledException)
+        {
+            return MFATaskStatus.STOPPED;
+        }
+        catch (Exception ex)
+        {
+            LoggerHelper.Error(ex);
+            return MFATaskStatus.FAILED;
+        }
+    }
+}

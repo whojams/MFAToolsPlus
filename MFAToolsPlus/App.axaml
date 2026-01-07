@@ -5,7 +5,28 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-    
+             <Application.Resources>
+                 <ResourceDictionary>
+                     <ResourceDictionary.MergedDictionaries>
+                         <ResourceInclude Source="avares://MFAToolsPlus/Assets/Style/Geometry.axaml" />
+                     </ResourceDictionary.MergedDictionaries>
+                     <ResourceDictionary.ThemeDictionaries>
+                         <ResourceDictionary x:Key="Light">
+                             <ResourceDictionary.MergedDictionaries>
+                                 <ResourceInclude Source="avares://sukiUI/ColorTheme/Light.axaml" />
+                                 <ResourceInclude Source="avares://MFAToolsPlus/Assets/Theme/LightTheme.axaml" />
+                             </ResourceDictionary.MergedDictionaries>
+                         </ResourceDictionary>
+                         <ResourceDictionary x:Key="Dark">
+                             <ResourceDictionary.MergedDictionaries>
+                                 <ResourceInclude Source="avares://sukiUI/ColorTheme/Dark.axaml" />
+                                 <ResourceInclude Source="avares://MFAToolsPlus/Assets/Theme/DarkTheme.axaml" />
+                             </ResourceDictionary.MergedDictionaries>
+                         </ResourceDictionary>
+                     </ResourceDictionary.ThemeDictionaries>
+                 </ResourceDictionary>
+
+             </Application.Resources>
     <Application.Styles>
         <FluentTheme />
         <suki:SukiTheme ThemeColor="Blue" />
