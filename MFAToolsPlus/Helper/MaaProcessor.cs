@@ -82,6 +82,7 @@ public class MaaProcessor
             MaaTasker.Dispose();
         }
         MaaTasker = maaTasker;
+        ResetActionFailedCount();
     }
 
     private static bool _isClosed = false;
