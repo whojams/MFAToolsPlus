@@ -2,6 +2,7 @@
 using Avalonia.Media;
 using MaaFramework.Binding;
 using MaaFramework.Binding.Buffers;
+using MaaFramework.Binding.Notification;
 using MFAToolsPlus.Configuration;
 using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Extensions.MaaFW;
@@ -82,9 +83,41 @@ public class MaaProcessor
         }
         MaaTasker = maaTasker;
     }
-    
+
     private static bool _isClosed = false;
     public static bool IsClosed => _isClosed;
+
+    private int _screencapFailedCount;
+    private readonly Lock _screencapLogLock = new();
+    private const int ActionFailedLimit = 1;
+    private void ResetActionFailedCount()
+    {
+        _screencapFailedCount = 0;
+    }
+
+    private bool HandleScreencapFailure()
+    {
+        if (Instances.ToolsViewModel.IsConnected && ++_screencapFailedCount <= ActionFailedLimit)
+        {
+            return false;
+        }
+
+        _screencapFailedCount = 0;
+        Instances.ToolsViewModel.SetConnected(false);
+
+        SetTasker();
+        return true;
+    }
+
+    public void HandleControllerCallBack(object? sender, MaaCallbackEventArgs args)
+    {
+        var message = args.Message;
+        if (message == MaaMsg.Controller.Action.Failed)
+        {
+            HandleScreencapFailure();
+        }
+    }
+
     public async Task TestConnecting()
     {
         await GetTaskerAsync();
@@ -163,7 +196,7 @@ public class MaaProcessor
     {
         await ProcessHelper.ReconnectByAdbAsync(Config.AdbDevice.AdbPath, Config.AdbDevice.AdbSerial);
     }
-    
+
     public async Task HardRestartAdb()
     {
         ProcessHelper.HardRestartAdb(Config.AdbDevice.AdbPath);
@@ -246,7 +279,7 @@ public class MaaProcessor
             maaResource = await TaskManager.RunTaskAsync(() =>
             {
                 token.ThrowIfCancellationRequested();
-                return new MaaResource(Path.Combine(AppContext.BaseDirectory, "resource"));
+                return new MaaResource(Path.Combine(AppContext.BaseDirectory, "resource", "base"));
             }, token: token, name: "资源检测", catchException: true, shouldLog: false, handleError: exception =>
             {
                 HandleInitializationError(exception, LangKeys.LoadResourcesFailed.ToLocalization(), LangKeys.LoadResourcesFailedDetail.ToLocalization());
@@ -342,10 +375,20 @@ public class MaaProcessor
             {
                 LoggerHelper.Error(e);
             }
+            tasker.Releasing += (_, _) =>
+            {
+                tasker.Controller.Callback -= HandleControllerCallBack;
+            };
+            tasker.Controller.Callback += HandleControllerCallBack;
 
 
+            var linkStatus = tasker.Controller?.LinkStart().Wait();
+            if (linkStatus != MaaJobStatus.Succeeded)
+            {
+                tasker.Dispose();
+                return (null, InvalidResource, ShouldRetry);
+            }
             Instances.ToolsViewModel.SetConnected(true);
-
             return (tasker, InvalidResource, ShouldRetry);
         }
         catch (OperationCanceledException)
@@ -524,7 +567,7 @@ public class MaaProcessor
     {
         return Instances.ConnectSettingsUserControlModel.Win32ControlKeyboardType;
     }
-    
+
     public void PostScreencap()
     {
         var controller = GetScreenshotController();
@@ -586,7 +629,7 @@ public class MaaProcessor
             return null;
         }
     }
-    
+
     private IMaaController? GetScreenshotController()
     {
         if (!_isClosed)

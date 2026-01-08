@@ -412,7 +412,7 @@
         </suki:GlassCard>
 
         <Grid Grid.Row="1" Margin="15,5,15,15">
-            <suki:GlassCard  x:Name="LiveViewCard">
+            <suki:GlassCard  x:Name="LiveViewCard" IsAnimated="False">
                 <suki:GroupBox>
                     <suki:GroupBox.Header>
                         <TextBlock FontSize="11"

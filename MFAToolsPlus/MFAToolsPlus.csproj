@@ -13,9 +13,37 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <NoWarn>NU1701;NU1510</NoWarn>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <DebianPackageDependencies>dotnet-runtime-8.0;libc6;libgtk-3-0</DebianPackageDependencies>
+        <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;win-arm64;linux-arm64;osx-arm64</RuntimeIdentifiers>
+        <OutputPath>../bin/$(Platform)/$(Configuration)/</OutputPath>
+        <IntermediateOutputPath>obj/$(Platform)/$(Configuration)/$(TargetFramework)/</IntermediateOutputPath>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <PublishSingleFile>false</PublishSingleFile>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PublishTrimmed>false</PublishTrimmed>
+        <SelfContained>false</SelfContained>
+        <GenerateResource>Always</GenerateResource>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <MaaAgentBinaryPath>libs/MaaAgentBinary</MaaAgentBinaryPath>
+        <BeautyLibsDir>./libs</BeautyLibsDir>
+        <!-- DLLs you want to exclude from being moved (e.g., critical or custom files). -->
+        <!--         <BeautyExcludes>Assets;plugins;runtimes;</BeautyExcludes> -->
+        <!-- Files to hide from end users (e.g., runtime or config files). Only supported on Windows. -->
+        <!-- <BeautyHiddens>hostfxr;hostpolicy;*.deps.json;*.runtimeconfig*.json</BeautyHiddens> -->
+        <BeautyOnPublishOnly>True</BeautyOnPublishOnly>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\"/>
-        <AvaloniaResource Include="Assets\**"/>
+        <Folder Include="Models\" />
+        <AvaloniaResource Include="Assets\**" Exclude="Assets\**\*.axaml" />
     </ItemGroup>
 
 
@@ -47,39 +75,32 @@
         <PackageReference Include="SharpCompress" Version="0.44.0-beta.28" />
         <PackageReference Include="SharpHook" Version="7.1.1" />
         <PackageReference Include="System.Management" Version="10.0.1" />
-		<ProjectReference Include="../LazyStaticGenerator/LazyStaticGenerator.csproj" OutputItemType="Analyzer" ExcludeAssets="runtime;build;native;contentfiles" ReferenceOutputAssembly="false"/>
-		<ProjectReference Include="../SukiUI/SukiUI.csproj"/>
+		<ProjectReference Include="../LazyStaticGenerator/LazyStaticGenerator.csproj" OutputItemType="Analyzer" ExcludeAssets="runtime;build;native;contentfiles" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="../SukiUI/SukiUI.csproj" />
     </ItemGroup>
 
 
     <ItemGroup>
-      <None Remove="resource\base\pipeline\mfa.json" />
-      <AvaloniaResource Include="resource\base\pipeline\mfa.json">
+      <Content Include="resource\base\pipeline\mfa.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AvaloniaResource>
-      <None Remove="resource\base\model\ocr\rec.onnx" />
-      <AvaloniaResource Include="resource\base\model\ocr\rec.onnx">
+      </Content>
+      <Content Include="resource\base\model\ocr\rec.onnx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AvaloniaResource>
-      <None Remove="resource\base\model\ocr\README.md" />
-      <AvaloniaResource Include="resource\base\model\ocr\README.md">
+      </Content>
+      <Content Include="resource\base\model\ocr\README.md">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AvaloniaResource>
-      <None Remove="resource\base\model\ocr\keys.txt" />
-      <AvaloniaResource Include="resource\base\model\ocr\keys.txt">
+      </Content>
+      <Content Include="resource\base\model\ocr\keys.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AvaloniaResource>
-      <None Remove="resource\base\model\ocr\det.onnx" />
-      <AvaloniaResource Include="resource\base\model\ocr\det.onnx">
+      </Content>
+      <Content Include="resource\base\model\ocr\det.onnx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AvaloniaResource>
-      <None Remove="resource\base\model\detect\limbo_stage_lightest.onnx" />
-      <AvaloniaResource Include="resource\base\model\detect\limbo_stage_lightest.onnx">
+      </Content>
+      <Content Include="resource\base\model\detect\limbo_stage_lightest.onnx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AvaloniaResource>
-      <None Remove="resource\base\model\detect\sos_nodes.onnx" />
-      <AvaloniaResource Include="resource\base\model\detect\sos_nodes.onnx">
+      </Content>
+      <Content Include="resource\base\model\detect\sos_nodes.onnx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AvaloniaResource>
+      </Content>
     </ItemGroup>
 </Project>
