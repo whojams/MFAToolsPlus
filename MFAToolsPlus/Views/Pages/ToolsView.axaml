@@ -19,6 +19,57 @@
         <pages:ToolsViewModel />
     </Design.DataContext>
     <UserControl.Styles>
+        <!-- BasicTight 悬停放大与前景变浅 -->
+        <Style Selector="Button.ActionButton">
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style Selector="Button.ActionButton:pointerover">
+            <Setter Property="RenderTransform">
+                <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+            </Setter>
+            <Setter Property="Foreground" Value="{DynamicResource SukiPrimaryColor75}" />
+        </Style>
+        <!-- TaskToggle 外层悬停放大 -->
+        <Style Selector="Border#TaskToggleBorder">
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="Border#TaskToggleBorder:pointerover">
+            <Setter Property="RenderTransform">
+                <ScaleTransform ScaleX="1.12" ScaleY="1.12" />
+            </Setter>
+            <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor75}" />
+        </Style>
+
+        <!-- 单层流光动画 -->
+        <Style Selector="Border#TaskToggleShineLayer">
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform X="-160" />
+                </Setter.Value>
+            </Setter>
+            <Style.Animations>
+                <Animation Duration="0:0:1.8" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="TranslateTransform.X" Value="-160" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="TranslateTransform.X" Value="160" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
         <Style Selector="Button.SyncButton Path">
             <Setter Property="RenderTransformOrigin" Value="50%,50%" />
             <Setter Property="Margin" Value="1" />
@@ -31,6 +82,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style Selector="Button.SyncButton:pointerover Path">
             <Style.Animations>
                 <Animation Duration="0:0:0.15" FillMode="Forward">
@@ -277,22 +329,22 @@
                                   MinWidth="120" VerticalAlignment="Center">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="maa:MaaInterface+MaaResourceController">
-        
-                                        <TextBlock Background="Transparent" Foreground="{DynamicResource SukiText}"
-                       
-                                                   Text="{Binding DisplayName}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   VerticalAlignment="Center" />
-                       
+
+                                    <TextBlock Background="Transparent" Foreground="{DynamicResource SukiText}"
+
+                                               Text="{Binding DisplayName}"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                             <ComboBox.SelectionBoxItemTemplate>
                                 <DataTemplate>
-                                        <TextBlock Background="Transparent" Foreground="{DynamicResource SukiText}"
-                                                   Text="{Binding DisplayName}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   VerticalAlignment="Center" />
-                               
+                                    <TextBlock Background="Transparent" Foreground="{DynamicResource SukiText}"
+                                               Text="{Binding DisplayName}"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+
                                 </DataTemplate>
                             </ComboBox.SelectionBoxItemTemplate>
                         </ComboBox>
@@ -359,7 +411,7 @@
                                 IsVisible="{calcBinding:Binding 'CurrentController == maa:MaaControllerTypes.Adb'}"
                                 Padding="0" ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Custom}}">
                             <avalonia:FluentIcon Height="18" Icon="DesktopEdit" IconSize="Size16"
-                                                  IconVariant="Regular" />
+                                                 IconVariant="Regular" />
                         </Button>
                         <Button Classes="BasicTight TaskQueueBasicTight"
                                 Command="{Binding EditPlayCoverCommand}"
@@ -368,7 +420,7 @@
                                 Padding="0"
                                 ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.EditControllerConfiguration}}">
                             <avalonia:FluentIcon Height="18" Icon="DesktopEdit" IconSize="Size16"
-                                                  IconVariant="Regular" />
+                                                 IconVariant="Regular" />
                         </Button>
                         <Button Classes="BasicTight TaskQueueBasicTight"
                                 Command="{Binding ReconnectCommand}"
@@ -411,34 +463,953 @@
             </Grid>
         </suki:GlassCard>
 
-        <Grid Grid.Row="1" Margin="15,5,15,15">
-            <suki:GlassCard  x:Name="LiveViewCard" IsAnimated="False">
+        <Grid Grid.Row="1" Margin="15,5,15,15" ColumnDefinitions="*,Auto">
+            <suki:GlassCard x:Name="LiveViewCard" IsAnimated="False" Grid.Column="0">
                 <suki:GroupBox>
                     <suki:GroupBox.Header>
-                        <TextBlock FontSize="11"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource SukiLowText}"
-                                   Margin="2,0,0,0"
-                                   Text="{markup:I18n {x:Static helper:LangKeys.LiveView}}"
-                                   VerticalAlignment="Center" />
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <TextBlock Grid.Column="0"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Margin="2,0,0,0"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.LiveView}}"
+                                       VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsDragMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DragModeTooltip}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource DragGeometry}"
+                                             GroupName="LiveToolMode" />
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsRoiMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.EditTaskDialog_SelectionRegion_Tooltip}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource SelectionRegionGeometry}"
+                                             GroupName="LiveToolMode" />
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsColorPickMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.EditTaskDialog_ColorExtraction_Tooltip}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource ColorExtractionGeometry}"
+                                             GroupName="LiveToolMode" />
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsScreenshotMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.EditTaskDialog_Screenshot_Tooltip}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource ScreenshotsGeometry}"
+                                             GroupName="LiveToolMode" />
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsSwipeMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipe}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource SwipeGeometry}"
+                                             GroupName="LiveToolMode" />
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsOcrMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.LiveViewOcr}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource RecognitionTextGeometry}"
+                                             GroupName="LiveToolMode" />
+                            </StackPanel>
+                        </Grid>
                     </suki:GroupBox.Header>
-                    <Border x:Name="LiveViewFrame"
-                            ClipToBounds="True"
-                            Background="Transparent"
-                            BorderBrush="{DynamicResource SukiControlBorderBrush}"
-                            BorderThickness="0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                        <Border CornerRadius="0" ClipToBounds="True">
-                            <Image
-                                Source="{Binding LiveViewImage}"
-                                IsVisible="{Binding LiveViewImage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                Stretch="Uniform"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center" />
+                    <Grid RowDefinitions="*,Auto" ClipToBounds="False">
+                        <Border x:Name="LiveViewFrame"
+                                Grid.Row="0"
+                                ClipToBounds="True"
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource SukiControlBorderBrush}"
+                                BorderThickness="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch">
+                            <Border CornerRadius="0" ClipToBounds="True">
+                                <suki:SukiImageViewer x:Name="LiveViewViewer"
+                                                      Source="{Binding LiveViewDisplayImage}"
+                                                      MinScale="0.1"
+                                                      MaxScale="10"
+                                                      Scale="{Binding LiveViewScale, Mode=TwoWay}"
+                                                      Stretch="Uniform"
+                                                      Background="Transparent"
+                                                      IsDragEnabled="{Binding IsDragMode}"
+                                                      ShowZoomToolbar="{Binding IsLiveViewPaused}"
+                                                      UseCustomZoomToolbar="True"
+                                                      ShowCheckerboardBackground="True"
+                                                      SelectionRect="{Binding SelectionRect, Mode=TwoWay}"
+                                                      HasSelection="{Binding HasSelection}"
+                                                      SelectionStroke="{Binding SelectionStroke}"
+                                                      SelectionFill="{Binding SelectionFill}"
+                                                      SecondarySelectionRect="{Binding SecondarySelectionRect}"
+                                                      HasSecondarySelection="{Binding HasSecondarySelection}"
+                                                      SecondarySelectionStroke="{Binding TargetSelectionStroke}"
+                                                      SecondarySelectionFill="{Binding TargetSelectionFill}"
+                                                      HasSwipeArrow="{Binding HasSwipeArrow}"
+                                                      SwipeArrowGeometry="{Binding SwipeArrowGeometry}"
+                                                      SwipeArrowStroke="{Binding SwipeArrowStroke}"
+                                                      HasBrushPreview="{Binding HasBrushPreview}"
+                                                      BrushPreviewPoint="{Binding BrushPreviewPoint}"
+                                                      BrushPreviewSize="{Binding BrushPreviewSize}"
+                                                      PointerPressed="OnLiveViewPointerPressed"
+                                                      PointerMoved="OnLiveViewPointerMoved"
+                                                      PointerReleased="OnLiveViewPointerReleased" />
+                            </Border>
                         </Border>
-                    </Border>
+
+                        <Grid Grid.Row="1" x:Name="ControlBar" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0"
+                              VerticalAlignment="Center">
+
+                            <Border Grid.Column="0" x:Name="TaskToggleBorder"
+                                    CornerRadius="999" Height="30"
+                                    ClipToBounds="True"
+                                    Margin="2,0,0,0"
+                                    Background="{DynamicResource SukiPrimaryColor}">
+                                <Grid>
+                                    <Border x:Name="TaskToggleShineLayer"
+                                            Width="{Binding Bounds.Width, ElementName=TaskToggleBorder}"
+                                            CornerRadius="999"
+                                            IsHitTestVisible="False"
+                                            HorizontalAlignment="Left">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                                <GradientStop Color="Transparent" Offset="0.0" />
+                                                <GradientStop Color="Transparent" Offset="0.25" />
+                                                <GradientStop Color="#25FFFFFF" Offset="0.45" />
+                                                <GradientStop Color="#50FFFFFF" Offset="0.5" />
+                                                <GradientStop Color="#25FFFFFF" Offset="0.55" />
+                                                <GradientStop Color="Transparent" Offset="0.75" />
+                                                <GradientStop Color="Transparent" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <Button Classes="Flat Rounded ActionButton"
+                                            Command="{Binding ToggleLiveViewPauseCommand}"
+                                            Padding="0,0"
+                                            CornerRadius="999"
+                                            Background="Transparent"
+                                            Foreground="White">
+                                        <Grid Margin="12 2">
+                                            <WrapPanel
+                                                IsVisible="{Binding IsLiveViewPaused}">
+                                                <Path Data="{StaticResource PlayGeometry}"
+                                                      Fill="White"
+                                                      Width="12"
+                                                      Height="12"
+                                                      Stretch="Uniform"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center" />
+                                                <TextBlock Margin="6 0 0 0" FontSize="12"
+                                                           Text="{markup:I18n {x:Static helper:LangKeys.StartTask}}" />
+                                            </WrapPanel>
+                                            <WrapPanel
+                                                IsVisible="{Binding !IsLiveViewPaused}">
+                                                <Path Data="{StaticResource StopGeometry}"
+                                                      Fill="White"
+                                                      Width="12"
+                                                      Height="12"
+                                                      Stretch="Uniform"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center" />
+                                                <TextBlock Margin="6 0 0 0" FontSize="12"
+                                                           Text="{markup:I18n {x:Static helper:LangKeys.StopTask}}" />
+                                            </WrapPanel>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Vertical"
+                                        Spacing="4"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center"
+                                            IsVisible="{Binding IsLiveViewPaused}">
+                                    <Button Classes="BasicTight ActionButton" Width="24" Height="24"
+                                            Command="{Binding ZoomOutCommand, ElementName=LiveViewViewer}">
+                                        <Path Data="{DynamicResource ReduceGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                    <TextBlock VerticalAlignment="Center"
+                                               Text="{Binding LiveViewScale, StringFormat={}{0:P0}}" />
+                                    <Button Classes="BasicTight ActionButton" Width="24" Height="24"
+                                            Command="{Binding ZoomInCommand, ElementName=LiveViewViewer}">
+                                        <Path Data="{DynamicResource EnlargeGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{calcBinding:Binding 'IsDragMode and IsLiveViewPaused'}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintDragModePaused}}" />
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{calcBinding:Binding 'IsDragMode and !IsLiveViewPaused'}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintDragModeRunning}}" />
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{calcBinding:Binding '!IsDragMode and IsLiveViewPaused'}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintCtrlModePaused}}" />
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{calcBinding:Binding '!IsDragMode and !IsLiveViewPaused'}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintCtrlModeRunning}}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        Spacing="6"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.LoadImageTitle}}"
+                                        Command="{Binding ImportImageCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <TextBlock Foreground="{DynamicResource SukiLowText}"
+                                           Text="{Binding LiveViewFps, StringFormat={}{0:0} fps}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
                 </suki:GroupBox>
+            </suki:GlassCard>
+
+            <suki:GlassCard Grid.Column="1"
+                            Margin="10,0,0,0"
+                            IsAnimated="False"
+                            IsVisible="{Binding IsToolPanelVisible}">
+                <ScrollViewer Margin="12" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="10">
+                        <StackPanel IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Roi'}"
+                                    Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.RoiModeLabel}}" />
+                                <ComboBox Width="140"
+                                          SelectedIndex="{Binding RoiModeIndex, Mode=TwoWay}">
+                                    <ComboBoxItem Content="{markup:I18n {x:Static helper:LangKeys.RoiModeOptionRoi}}" />
+                                    <ComboBoxItem
+                                        Content="{markup:I18n {x:Static helper:LangKeys.RoiModeOptionTarget}}" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <Grid>
+                                        <TextBlock FontSize="11"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   Text="{markup:I18n {x:Static helper:LangKeys.OriginRoiTitle}}"
+                                                   IsVisible="{Binding !IsTargetMode}" />
+                                        <TextBlock FontSize="11"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   Text="{markup:I18n {x:Static helper:LangKeys.OriginTargetTitle}}"
+                                                   IsVisible="{Binding IsTargetMode}" />
+                                    </Grid>
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        IsVisible="{Binding !IsTargetMode}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.SelectRoi}}"
+                                        Command="{Binding SelectRoiCommand}">
+                                    <Path Data="{StaticResource SelectionRegionGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        IsVisible="{Binding IsTargetMode}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.SelectRoi}}"
+                                        Command="{Binding SelectOriginTargetCommand}">
+                                    <Path Data="{StaticResource SelectionRegionGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        IsVisible="{Binding !IsTargetMode}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyRoiToClipboardCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        IsVisible="{Binding !IsTargetMode}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteRoiFromClipboardCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        IsVisible="{Binding IsTargetMode}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyOriginTargetToClipboardCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        IsVisible="{Binding IsTargetMode}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteOriginTargetFromClipboardCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearRoiCommand}"
+                                        IsVisible="{Binding !IsTargetMode}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearOriginTargetCommand}"
+                                        IsVisible="{Binding IsTargetMode}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Border Height="1"
+                                    Background="{DynamicResource SukiControlBorderBrush}"
+                                    Opacity="0.6" />
+                            <Grid IsVisible="{Binding !IsTargetMode}"
+                                  ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding RoiX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding RoiY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding RoiW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding RoiH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <Grid IsVisible="{Binding IsTargetMode}"
+                                  ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding OriginTargetX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding OriginTargetY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding OriginTargetW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding OriginTargetH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
+                                    <Grid>
+                                        <TextBlock FontSize="11"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   Text="{markup:I18n {x:Static helper:LangKeys.TargetRoiTitle}}"
+                                                   IsVisible="{Binding !IsTargetMode}" />
+                                        <TextBlock FontSize="11"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   Text="{markup:I18n {x:Static helper:LangKeys.TargetTargetTitle}}"
+                                                   IsVisible="{Binding IsTargetMode}" />
+                                    </Grid>
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.SelectTarget}}"
+                                        Command="{Binding SelectTargetCommand}">
+                                    <Path Data="{StaticResource SelectionRegionGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyTargetToClipboardCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteTargetFromClipboardCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteTarget}}"
+                                        Command="{Binding ClearTargetCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Border Height="1"
+                                    Background="{DynamicResource SukiControlBorderBrush}"
+                                    Opacity="0.6" />
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding TargetX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding TargetY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding TargetW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding TargetH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left"
+                                        VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="LimeGreen" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.OffsetTitle}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyOffsetToClipboardCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Border Height="1"
+                                    Background="{DynamicResource SukiControlBorderBrush}"
+                                    Opacity="0.6" />
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="ΔX:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding OffsetX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="ΔY:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding OffsetY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="ΔW:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding OffsetW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="ΔH:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding OffsetH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel
+                            IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.ColorPick'}"
+                            Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewColorPickRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyColorPickRectCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteColorPickRectCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ColorPickX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ColorPickY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ColorPickW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ColorPickH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewExpandedRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyColorPickExpandedRectCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ColorPickExpandedX}" IsReadOnly="True" Grid.Row="0"
+                                         Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ColorPickExpandedY}" IsReadOnly="True" Grid.Row="0"
+                                         Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ColorPickExpandedW}" IsReadOnly="True" Grid.Row="1"
+                                         Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ColorPickExpandedH}" IsReadOnly="True" Grid.Row="1"
+                                         Grid.Column="3" />
+                            </Grid>
+
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <RadioButton GroupName="ColorMode"
+                                             IsChecked="{calcBinding:Binding 'ColorMode == 0'}"
+                                             Command="{Binding SetColorModeCommand}"
+                                             CommandParameter="0">
+                                    <TextBlock Text="RGB" />
+                                </RadioButton>
+                                <RadioButton GroupName="ColorMode"
+                                             IsChecked="{calcBinding:Binding 'ColorMode == 1'}"
+                                             Command="{Binding SetColorModeCommand}"
+                                             CommandParameter="1">
+                                    <TextBlock Text="HSV" />
+                                </RadioButton>
+                                <RadioButton GroupName="ColorMode"
+                                             IsChecked="{calcBinding:Binding 'ColorMode == 2'}"
+                                             Command="{Binding SetColorModeCommand}"
+                                             CommandParameter="2">
+                                    <TextBlock Text="Gray" />
+                                </RadioButton>
+                            </StackPanel>
+
+                            <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 0'}" Spacing="6">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11" FontWeight="Bold"
+                                               Foreground="White" Text="RGB Upper" />
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
+                                    <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1" Text="{Binding RgbUpperR, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="2" Text="G:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="3" Text="{Binding RgbUpperG, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="4" Text="B:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="5" Text="{Binding RgbUpperB, Mode=TwoWay}" />
+                                </Grid>
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="RGB Lower" />
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
+                                    <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1" Text="{Binding RgbLowerR, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="2" Text="G:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="3" Text="{Binding RgbLowerG, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="4" Text="B" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="5" Text="{Binding RgbLowerB, Mode=TwoWay}" />
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 1'}" Spacing="6">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Upper" />
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
+                                    <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1" Text="{Binding HsvUpperH, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="2" Text="S:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="3" Text="{Binding HsvUpperS, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="4" Text="V:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="5" Text="{Binding HsvUpperV, Mode=TwoWay}" />
+                                </Grid>
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Lower" />
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
+                                    <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1" Text="{Binding HsvLowerH, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="2" Text="S:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="3" Text="{Binding HsvLowerS, Mode=TwoWay}" />
+                                    <TextBlock Grid.Column="4" Text="V:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="5" Text="{Binding HsvLowerV, Mode=TwoWay}" />
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 2'}" Spacing="6">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Upper" />
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,3*">
+                                    <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1" Text="{Binding GrayUpper, Mode=TwoWay}" />
+                                </Grid>
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Lower" />
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,3*">
+                                    <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1" Text="{Binding GrayLower, Mode=TwoWay}" />
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Classes="Flat ActionButton"
+                                        IsVisible="{Binding !IsColorPreviewActive}"
+                                        Command="{Binding ToggleColorPreviewCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewPreview}}" />
+                                </Button>
+                                <Button Classes="Flat ActionButton"
+                                        IsVisible="{Binding IsColorPreviewActive}"
+                                        Command="{Binding ToggleColorPreviewCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRestore}}" />
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+
+                        <StackPanel
+                            IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Screenshot'}"
+                            Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <RadioButton GroupName="ScreenshotMode"
+                                             IsChecked="{calcBinding:Binding '!IsScreenshotBrushMode'}"
+                                             Command="{Binding SetScreenshotModeCommand}"
+                                             CommandParameter="Crop">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.ScreenshotCropMode}}" />
+                                </RadioButton>
+                                <RadioButton GroupName="ScreenshotMode"
+                                             IsChecked="{Binding IsScreenshotBrushMode}"
+                                             Command="{Binding SetScreenshotModeCommand}"
+                                             CommandParameter="Brush">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.ScreenshotBrushMode}}" />
+                                </RadioButton>
+                                <Button Classes="Flat ActionButton"
+                                        IsVisible="{Binding IsScreenshotBrushMode}"
+                                        Command="{Binding ResetScreenshotBrushCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.ScreenshotRestore}}" />
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
+                                        IsVisible="{Binding IsScreenshotBrushMode}">
+                                <TextBlock FontSize="12" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.ScreenshotBrushSize}}" />
+                                <Slider Width="140"
+                                        Minimum="1"
+                                        Maximum="20"
+                                        Value="{Binding ScreenshotBrushSize, Mode=TwoWay}" />
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           Text="{Binding ScreenshotBrushSize}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center"
+                                        IsVisible="{calcBinding:Binding '!IsScreenshotBrushMode'}">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewScreenshotRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyScreenshotRectCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteScreenshotRectCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ScreenshotX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ScreenshotY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ScreenshotW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ScreenshotH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewExpandedRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyScreenshotExpandedRectCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ScreenshotExpandedX}" IsReadOnly="True" Grid.Row="0"
+                                         Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ScreenshotExpandedY}" IsReadOnly="True" Grid.Row="0"
+                                         Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ScreenshotExpandedW}" IsReadOnly="True" Grid.Row="1"
+                                         Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ScreenshotExpandedH}" IsReadOnly="True" Grid.Row="1"
+                                         Grid.Column="3" />
+                            </Grid>
+
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRelativePathPrefix}}" />
+                            <TextBox Text="{Binding ScreenshotRelativePath, Mode=TwoWay}" />
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="LimeGreen" Padding="8 5"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.Result}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        Command="{Binding SaveScreenshotCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.SaveScreenshot}}" />
+                                </Button>
+                            </StackPanel>
+                            <TextBox Text="{Binding ScreenshotRelativeResult}"
+                                     IsReadOnly="True" />
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Swipe'}"
+                                    Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipeStart}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopySwipeStartCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
+                                <TextBox Text="{Binding SwipeStartX}" IsReadOnly="True" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
+                                <TextBox Text="{Binding SwipeStartY}" IsReadOnly="True" Grid.Column="3" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipeEnd}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopySwipeEndCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
+                                <TextBox Text="{Binding SwipeEndX}" IsReadOnly="True" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
+                                <TextBox Text="{Binding SwipeEndY}" IsReadOnly="True" Grid.Column="3" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Ocr'}"
+                                    Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewOcrRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyOcrRectCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteOcrRectCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding OcrX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding OcrY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding OcrW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding OcrH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewExpandedRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyOcrExpandedRectCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding OcrExpandedX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding OcrExpandedY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding OcrExpandedW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding OcrExpandedH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="LimeGreen" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewOcrResult}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                        Command="{Binding CopyOcrResultCommand}">
+                                    <Path Data="{StaticResource CopyGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        Command="{Binding RunOcrCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRunOcr}}" />
+                                </Button>
+                            </StackPanel>
+                            <TextBox Text="{Binding OcrResult}"
+                                     IsReadOnly="True" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
             </suki:GlassCard>
         </Grid>
     </Grid>

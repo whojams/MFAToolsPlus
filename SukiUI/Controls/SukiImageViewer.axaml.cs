@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
@@ -10,9 +11,11 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace SukiUI.Controls;
 
@@ -21,6 +24,12 @@ namespace SukiUI.Controls;
 [PseudoClasses(PC_Moving)]
 public class SukiImageViewer : TemplatedControl
 {
+    public SukiImageViewer()
+    {
+        SelectionRects = new AvaloniaList<Rect>();
+        ZoomInCommand = new RelayCommand(_ => ZoomIn());
+        ZoomOutCommand = new RelayCommand(_ => ZoomOut());
+    }
     public const string PART_Image = "PART_Image";
     public const string PART_Layer = "PART_Layer";
     public const string PC_Moving = ":moving";
@@ -29,6 +38,7 @@ public class SukiImageViewer : TemplatedControl
     private Point? _lastClickPoint;
     private Point? _lastLocation;
     private bool _moving;
+    private bool _ctrlDragActive;
 
     public static readonly StyledProperty<Control?> OverlayerProperty = AvaloniaProperty.Register<SukiImageViewer, Control?>(
         nameof(Overlayer));
@@ -50,6 +60,216 @@ public class SukiImageViewer : TemplatedControl
     public static readonly DirectProperty<SukiImageViewer, double> ScaleProperty = AvaloniaProperty.RegisterDirect<SukiImageViewer, double>(
         nameof(Scale), o => o.Scale, (o, v) => o.Scale = v, unsetValue: 1);
 
+    public static readonly StyledProperty<bool> IsDragEnabledProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(IsDragEnabled), defaultValue: true);
+
+    public static readonly StyledProperty<bool> ShowZoomToolbarProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(ShowZoomToolbar), defaultValue: false);
+
+    public static readonly StyledProperty<bool> UseCustomZoomToolbarProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(UseCustomZoomToolbar), defaultValue: false);
+
+    public static readonly DirectProperty<SukiImageViewer, bool> ShowDefaultZoomToolbarProperty = AvaloniaProperty.RegisterDirect<SukiImageViewer, bool>(
+        nameof(ShowDefaultZoomToolbar), o => o.ShowDefaultZoomToolbar);
+
+    public static readonly StyledProperty<bool> ShowCheckerboardBackgroundProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(ShowCheckerboardBackground), defaultValue: false);
+
+    public static readonly StyledProperty<AvaloniaList<Rect>> SelectionRectsProperty = AvaloniaProperty.Register<SukiImageViewer, AvaloniaList<Rect>>(
+        nameof(SelectionRects));
+
+    public AvaloniaList<Rect> SelectionRects
+    {
+        get => GetValue(SelectionRectsProperty) ?? new AvaloniaList<Rect>();
+        set => SetValue(SelectionRectsProperty, value);
+    }
+
+
+    public bool IsDragEnabled
+    {
+        get => GetValue(IsDragEnabledProperty);
+        set => SetValue(IsDragEnabledProperty, value);
+    }
+
+    public bool ShowZoomToolbar
+    {
+        get => GetValue(ShowZoomToolbarProperty);
+        set => SetValue(ShowZoomToolbarProperty, value);
+    }
+
+    public bool UseCustomZoomToolbar
+    {
+        get => GetValue(UseCustomZoomToolbarProperty);
+        set => SetValue(UseCustomZoomToolbarProperty, value);
+    }
+
+    public bool ShowDefaultZoomToolbar
+    {
+        get;
+        private set => SetAndRaise(ShowDefaultZoomToolbarProperty, ref field, value);
+    }
+
+    public bool ShowCheckerboardBackground
+    {
+        get => GetValue(ShowCheckerboardBackgroundProperty);
+        set => SetValue(ShowCheckerboardBackgroundProperty, value);
+    }
+
+    public static readonly StyledProperty<Rect> SelectionRectProperty = AvaloniaProperty.Register<SukiImageViewer, Rect>(
+        nameof(SelectionRect));
+
+    public Rect SelectionRect
+    {
+        get => GetValue(SelectionRectProperty);
+        set => SetValue(SelectionRectProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> HasBrushPreviewProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(HasBrushPreview));
+
+    public bool HasBrushPreview
+    {
+        get => GetValue(HasBrushPreviewProperty);
+        set => SetValue(HasBrushPreviewProperty, value);
+    }
+
+    public static readonly StyledProperty<Point> BrushPreviewPointProperty = AvaloniaProperty.Register<SukiImageViewer, Point>(
+        nameof(BrushPreviewPoint));
+
+    public Point BrushPreviewPoint
+    {
+        get => GetValue(BrushPreviewPointProperty);
+        set => SetValue(BrushPreviewPointProperty, value);
+    }
+
+    public static readonly StyledProperty<double> BrushPreviewSizeProperty = AvaloniaProperty.Register<SukiImageViewer, double>(
+        nameof(BrushPreviewSize), 1);
+
+    public double BrushPreviewSize
+    {
+        get => GetValue(BrushPreviewSizeProperty);
+        set => SetValue(BrushPreviewSizeProperty, value);
+    }
+
+    public static readonly DirectProperty<SukiImageViewer, Rect> BrushPreviewRectProperty =
+        AvaloniaProperty.RegisterDirect<SukiImageViewer, Rect>(
+            nameof(BrushPreviewRect),
+            o => o.BrushPreviewRect);
+
+    public Rect BrushPreviewRect
+    {
+        get => _brushPreviewRect;
+        private set => SetAndRaise(BrushPreviewRectProperty, ref _brushPreviewRect, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> BrushPreviewStrokeProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(BrushPreviewStroke), defaultValue: new SolidColorBrush(Colors.LimeGreen));
+
+    public IBrush? BrushPreviewStroke
+    {
+        get => GetValue(BrushPreviewStrokeProperty);
+        set => SetValue(BrushPreviewStrokeProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> BrushPreviewFillProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(BrushPreviewFill), defaultValue: new SolidColorBrush(Color.FromArgb(30, 0, 255, 0)));
+
+    public IBrush? BrushPreviewFill
+    {
+        get => GetValue(BrushPreviewFillProperty);
+        set => SetValue(BrushPreviewFillProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> HasSwipeArrowProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(HasSwipeArrow));
+
+    public bool HasSwipeArrow
+    {
+        get => GetValue(HasSwipeArrowProperty);
+        set => SetValue(HasSwipeArrowProperty, value);
+    }
+
+    public static readonly StyledProperty<Geometry?> SwipeArrowGeometryProperty = AvaloniaProperty.Register<SukiImageViewer, Geometry?>(
+        nameof(SwipeArrowGeometry));
+
+    public Geometry? SwipeArrowGeometry
+    {
+        get => GetValue(SwipeArrowGeometryProperty);
+        set => SetValue(SwipeArrowGeometryProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> SwipeArrowStrokeProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(SwipeArrowStroke), defaultValue: new SolidColorBrush(Colors.Orange));
+
+    public IBrush? SwipeArrowStroke
+    {
+        get => GetValue(SwipeArrowStrokeProperty);
+        set => SetValue(SwipeArrowStrokeProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> HasSelectionProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(HasSelection));
+
+    public bool HasSelection
+    {
+        get => GetValue(HasSelectionProperty);
+        set => SetValue(HasSelectionProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> SelectionStrokeProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(SelectionStroke), defaultValue: new SolidColorBrush(Colors.DodgerBlue));
+
+    public IBrush? SelectionStroke
+    {
+        get => GetValue(SelectionStrokeProperty);
+        set => SetValue(SelectionStrokeProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> SelectionFillProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(SelectionFill), defaultValue: new SolidColorBrush(Color.FromArgb(40, 64, 128, 255)));
+
+    public IBrush? SelectionFill
+    {
+        get => GetValue(SelectionFillProperty);
+        set => SetValue(SelectionFillProperty, value);
+    }
+
+    public static readonly StyledProperty<Rect> SecondarySelectionRectProperty = AvaloniaProperty.Register<SukiImageViewer, Rect>(
+        nameof(SecondarySelectionRect));
+
+    public Rect SecondarySelectionRect
+    {
+        get => GetValue(SecondarySelectionRectProperty);
+        set => SetValue(SecondarySelectionRectProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> HasSecondarySelectionProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
+        nameof(HasSecondarySelection));
+
+    public bool HasSecondarySelection
+    {
+        get => GetValue(HasSecondarySelectionProperty);
+        set => SetValue(HasSecondarySelectionProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> SecondarySelectionStrokeProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(SecondarySelectionStroke), defaultValue: new SolidColorBrush(Colors.Orange));
+
+    public IBrush? SecondarySelectionStroke
+    {
+        get => GetValue(SecondarySelectionStrokeProperty);
+        set => SetValue(SecondarySelectionStrokeProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> SecondarySelectionFillProperty = AvaloniaProperty.Register<SukiImageViewer, IBrush?>(
+        nameof(SecondarySelectionFill), defaultValue: new SolidColorBrush(Color.FromArgb(40, 255, 165, 0)));
+
+    public IBrush? SecondarySelectionFill
+    {
+        get => GetValue(SecondarySelectionFillProperty);
+        set => SetValue(SecondarySelectionFillProperty, value);
+    }
+
     public double Scale
     {
         get;
@@ -63,6 +283,15 @@ public class SukiImageViewer : TemplatedControl
     {
         get;
         set => SetAndRaise(MinScaleProperty, ref field, value);
+    }
+
+    public static readonly DirectProperty<SukiImageViewer, double> MaxScaleProperty = AvaloniaProperty.RegisterDirect<SukiImageViewer, double>(
+        nameof(MaxScale), o => o.MaxScale, (o, v) => o.MaxScale = v, unsetValue: 1);
+
+    public double MaxScale
+    {
+        get;
+        set => SetAndRaise(MaxScaleProperty, ref field, value);
     }
 
     public static readonly DirectProperty<SukiImageViewer, double> TranslateXProperty = AvaloniaProperty.RegisterDirect<SukiImageViewer, double>(
@@ -102,6 +331,10 @@ public class SukiImageViewer : TemplatedControl
         set => SetValue(LargeChangeProperty, value);
     }
 
+    public ICommand ZoomInCommand { get; }
+
+    public ICommand ZoomOutCommand { get; }
+
     public static readonly StyledProperty<Stretch> StretchProperty =
         Image.StretchProperty.AddOwner<SukiImageViewer>(new StyledPropertyMetadata<Stretch>(Stretch.Uniform));
 
@@ -123,6 +356,8 @@ public class SukiImageViewer : TemplatedControl
     }
 
     private double _sourceMinScale = 0.1;
+    private double _sourceMaxScale = 1;
+    private Rect _brushPreviewRect;
 
     static SukiImageViewer()
     {
@@ -133,8 +368,14 @@ public class SukiImageViewer : TemplatedControl
         TranslateYProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnTranslateYChanged(e));
         StretchProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnStretchChanged(e));
         MinScaleProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnMinScaleChanged(e));
+        MaxScaleProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnMaxScaleChanged(e));
+        SelectionRectProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnSelectionRectChanged(e));
         BoundsProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnBoundsChanged(e));
         BitmapInterpolationModeProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnBitmapInterpolationModeChanged(e));
+        BrushPreviewPointProperty.Changed.AddClassHandler<SukiImageViewer>((o, _) => o.UpdateBrushPreviewRect());
+        BrushPreviewSizeProperty.Changed.AddClassHandler<SukiImageViewer>((o, _) => o.UpdateBrushPreviewRect());
+        ShowZoomToolbarProperty.Changed.AddClassHandler<SukiImageViewer>((o, _) => o.UpdateZoomToolbarVisibility());
+        UseCustomZoomToolbarProperty.Changed.AddClassHandler<SukiImageViewer>((o, _) => o.UpdateZoomToolbarVisibility());
     }
 
     private void OnBitmapInterpolationModeChanged(AvaloniaPropertyChangedEventArgs args)
@@ -142,6 +383,20 @@ public class SukiImageViewer : TemplatedControl
         if (_image is null) return;
         var mode = args.GetNewValue<BitmapInterpolationMode>();
         RenderOptions.SetBitmapInterpolationMode(_image, mode);
+    }
+
+    private void UpdateZoomToolbarVisibility()
+    {
+        ShowDefaultZoomToolbar = ShowZoomToolbar && !UseCustomZoomToolbar;
+    }
+
+    private void UpdateBrushPreviewRect()
+    {
+        var sizeValue = Math.Max(1, (int)Math.Round(BrushPreviewSize));
+        var half = (sizeValue - 1) / 2.0;
+        var x = Math.Floor(BrushPreviewPoint.X - half);
+        var y = Math.Floor(BrushPreviewPoint.Y - half);
+        BrushPreviewRect = new Rect(x, y, sizeValue, sizeValue);
     }
 
 
@@ -168,6 +423,22 @@ public class SukiImageViewer : TemplatedControl
         }
     }
 
+    private void OnSelectionRectChanged(AvaloniaPropertyChangedEventArgs args)
+    {
+        var rect = args.GetNewValue<Rect>();
+        SelectionRects ??= new AvaloniaList<Rect>();
+        SelectionRects.Clear();
+        if (rect.Width > 0 && rect.Height > 0)
+        {
+            SelectionRects.Add(rect);
+            HasSelection = true;
+        }
+        else
+        {
+            HasSelection = false;
+        }
+    }
+
     private void OnSourceChanged(AvaloniaPropertyChangedEventArgs args)
     {
         if (!IsLoaded) return;
@@ -181,12 +452,22 @@ public class SukiImageViewer : TemplatedControl
         double height = this.Bounds.Height;
         if (_image is not null)
         {
+            var sameSize = Math.Abs(_image.Width - size.Width) < 0.01
+                           && Math.Abs(_image.Height - size.Height) < 0.01;
+
             _image.Width = size.Width;
             _image.Height = size.Height;
             RenderOptions.SetBitmapInterpolationMode(_image, BitmapInterpolationMode);
+
+            if (sameSize)
+            {
+                return;
+            }
         }
         Scale = GetScaleRatio(width / size.Width, height / size.Height, this.Stretch);
-        _sourceMinScale = Math.Min(width * MinScale / size.Width, height * MinScale / size.Height);
+        _sourceMinScale = Math.Max(MinScale, Math.Min(width * MinScale / size.Width, height * MinScale / size.Height));
+        _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
+        Scale = Math.Clamp(Scale, _sourceMinScale, _sourceMaxScale);
     }
 
     private void OnStretchChanged(AvaloniaPropertyChangedEventArgs args)
@@ -194,17 +475,23 @@ public class SukiImageViewer : TemplatedControl
         if (_image is null) return;
         var stretch = args.GetNewValue<Stretch>();
         Scale = GetScaleRatio(Width / _image.Width, Height / _image.Height, stretch);
-        _sourceMinScale = _image is not null ? Math.Min(Width * MinScale / _image.Width, Height * MinScale / _image.Height) : MinScale;
+        _sourceMinScale = _image is not null ? Math.Max(MinScale, Math.Min(Width * MinScale / _image.Width, Height * MinScale / _image.Height)) : MinScale;
+        _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
+        Scale = Math.Clamp(Scale, _sourceMinScale, _sourceMaxScale);
     }
 
     private void OnMinScaleChanged(AvaloniaPropertyChangedEventArgs _)
     {
-        _sourceMinScale = _image is not null ? Math.Min(Width * MinScale / _image.Width, Height * MinScale / _image.Height) : MinScale;
+        _sourceMinScale = _image is not null ? Math.Max(MinScale, Math.Min(Width * MinScale / _image.Width, Height * MinScale / _image.Height)) : MinScale;
+        _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
 
-        if (_sourceMinScale > Scale)
-        {
-            Scale = _sourceMinScale;
-        }
+        Scale = Math.Clamp(Scale, _sourceMinScale, _sourceMaxScale);
+    }
+
+    private void OnMaxScaleChanged(AvaloniaPropertyChangedEventArgs _)
+    {
+        _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
+        Scale = Math.Clamp(Scale, _sourceMinScale, _sourceMaxScale);
     }
 
     private void OnBoundsChanged(AvaloniaPropertyChangedEventArgs args)
@@ -218,13 +505,10 @@ public class SukiImageViewer : TemplatedControl
         if (width <= 0 || height <= 0) return;
 
         // 重新计算最小缩放系数
-        _sourceMinScale = Math.Min(width * MinScale / _image.Width, height * MinScale / _image.Height);
+        _sourceMinScale = Math.Max(MinScale, Math.Min(width * MinScale / _image.Width, height * MinScale / _image.Height));
+        _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
 
-        // 如果当前缩放小于新的最小值，需要调整
-        if (_sourceMinScale > Scale)
-        {
-            Scale = _sourceMinScale;
-        }
+        Scale = Math.Clamp(Scale, _sourceMinScale, _sourceMaxScale);
 
         // 重新应用边界限制，确保图片不会跑到看不见的地方
         ApplyClampedTranslation(TranslateX, TranslateY);
@@ -280,6 +564,7 @@ public class SukiImageViewer : TemplatedControl
     {
         base.OnApplyTemplate(e);
         _image = e.NameScope.Get<Image>(PART_Image);
+        SelectionRects ??= new AvaloniaList<Rect>();
 
         if (Overlayer is { } c)
         {
@@ -288,6 +573,8 @@ public class SukiImageViewer : TemplatedControl
 
         // 设置图像渲染质量
         RenderOptions.SetBitmapInterpolationMode(_image, BitmapInterpolationMode);
+
+        UpdateZoomToolbarVisibility();
 
         // 设置右键菜单
         SetupContextMenu();
@@ -313,7 +600,7 @@ public class SukiImageViewer : TemplatedControl
 
 
     private static readonly string TempDir = Path.Combine(Path.GetTempPath(), "MFAToolsPlus_Clipboard");
-    
+
     // 应用启动时调用，清理旧的临时文件
     public static void CleanupOnStartup()
     {
@@ -374,11 +661,14 @@ public class SukiImageViewer : TemplatedControl
             _image.Width = size.Width;
             _image.Height = size.Height;
             Scale = GetScaleRatio(width / size.Width, height / size.Height, this.Stretch);
-            _sourceMinScale = Math.Min(width * MinScale / size.Width, height * MinScale / size.Height);
+            _sourceMinScale = Math.Max(MinScale, Math.Min(width * MinScale / size.Width, height * MinScale / size.Height));
+            _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
+            Scale = Math.Clamp(Scale, _sourceMinScale, _sourceMaxScale);
         }
         else
         {
             _sourceMinScale = MinScale;
+            _sourceMaxScale = Math.Max(MaxScale, _sourceMinScale);
         }
     }
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
@@ -387,9 +677,15 @@ public class SukiImageViewer : TemplatedControl
         if (_image == null)
             return;
 
+        if (!ShowZoomToolbar)
+            return;
+
+        if (!IsDragEnabled && !e.KeyModifiers.HasFlag(KeyModifiers.Control))
+            return;
+
         var oldScale = Scale;
         double newScale = e.Delta.Y > 0 ? oldScale * 1.1 : oldScale / 1.1;
-        newScale = Math.Max(newScale, _sourceMinScale);
+        newScale = Math.Clamp(newScale, _sourceMinScale, _sourceMaxScale);
         newScale = Math.Round(newScale, 6); // 精度修正
         var imgP = e.GetPosition(_image);
         Scale = newScale;
@@ -403,6 +699,8 @@ public class SukiImageViewer : TemplatedControl
     protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
+        if (!IsDragEnabled && !_ctrlDragActive)
+            return;
         if (Equals(e.Pointer.Captured, this) && _lastClickPoint != null)
         {
             PseudoClasses.Set(PC_Moving, true);
@@ -418,23 +716,43 @@ public class SukiImageViewer : TemplatedControl
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
+        if (!IsDragEnabled)
+        {
+            if (!e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                return;
+            _ctrlDragActive = e.GetCurrentPoint(this).Properties.IsLeftButtonPressed;
+            if (!_ctrlDragActive)
+                return;
+        }
+
         e.Pointer.Capture(this);
         Point p = e.GetPosition(_image);
         _lastClickPoint = e.GetPosition(this);
         _moving = true;
+        e.Handled = true;
     }
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
+        if (!IsDragEnabled && !_ctrlDragActive)
+            return;
         e.Pointer.Capture(null);
         _lastLocation = new Point(TranslateX, TranslateY);
         PseudoClasses.Set(PC_Moving, false);
         _moving = false;
+        _ctrlDragActive = false;
+        e.Handled = true;
     }
 
 // 在 OnSourceChanged 末尾调用居中
     protected override void OnKeyDown(KeyEventArgs e)
     {
+        if (!IsDragEnabled)
+        {
+            base.OnKeyDown(e);
+            return;
+        }
+
         double step = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? LargeChange : SmallChange;
         double newTranslateX = TranslateX;
         double newTranslateY = TranslateY;
@@ -456,5 +774,69 @@ public class SukiImageViewer : TemplatedControl
         // 应用边界限制
         ApplyClampedTranslation(newTranslateX, newTranslateY);
         base.OnKeyDown(e);
+    }
+
+    public void DrawSelectionRect(Rect rect)
+    {
+        SelectionRect = rect;
+    }
+
+    private void ZoomIn()
+    {
+        var newScale = Math.Clamp(Scale * 1.1, _sourceMinScale, _sourceMaxScale);
+        Scale = Math.Round(newScale, 6);
+        ApplyClampedTranslation(TranslateX, TranslateY);
+    }
+
+    private void ZoomOut()
+    {
+        var newScale = Math.Clamp(Scale / 1.1, _sourceMinScale, _sourceMaxScale);
+        Scale = Math.Round(newScale, 6);
+        ApplyClampedTranslation(TranslateX, TranslateY);
+    }
+
+    public void DrawSelectionRects(IEnumerable<Rect> rects)
+    {
+        SelectionRects ??= new AvaloniaList<Rect>();
+        SelectionRects.Clear();
+        foreach (var rect in rects)
+        {
+            if (rect.Width > 0 && rect.Height > 0)
+            {
+                SelectionRects.Add(rect);
+            }
+        }
+
+        HasSelection = SelectionRects.Count > 0;
+        if (SelectionRects.Count == 1)
+        {
+            SelectionRect = SelectionRects[0];
+        }
+    }
+
+    public Rect GetSelectionRect() => SelectionRect;
+
+    public IReadOnlyList<Rect> GetSelectionRects() => SelectionRects;
+
+    private sealed class RelayCommand : ICommand
+    {
+        private readonly Action<object?> _execute;
+        private readonly Func<object?, bool>? _canExecute;
+
+        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+        {
+            _execute = execute;
+            _canExecute = canExecute;
+        }
+
+        public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+
+        public void Execute(object? parameter) => _execute(parameter);
+
+        public event EventHandler? CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
     }
 }

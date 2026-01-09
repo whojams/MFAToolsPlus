@@ -7,24 +7,169 @@
         <Setter Property="Template">
             <ControlTemplate TargetType="{x:Type u:SukiImageViewer}">
                 <VisualLayerManager Name="{x:Static u:SukiImageViewer.PART_Layer}">
-                    <Border Background="{TemplateBinding Background}" ClipToBounds="True">
-                        <Image
-                            Name="{x:Static u:SukiImageViewer.PART_Image}"
-                            Source="{TemplateBinding Source}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                            Stretch="Uniform">
-                            <Image.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform
-                                        ScaleX="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}}"
-                                        ScaleY="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}}" />
-                                    <TranslateTransform
-                                        X="{Binding TranslateX, RelativeSource={RelativeSource TemplatedParent}}"
-                                        Y="{Binding TranslateY, RelativeSource={RelativeSource TemplatedParent}}" />
-                                    <RotateTransform Angle="0" />
-                                </TransformGroup>
-                            </Image.RenderTransform>
-                        </Image>
-                    </Border>
+                    <VisualLayerManager.Resources>
+                        <DrawingBrush x:Key="CheckerboardBrush"
+                                      TileMode="Tile"
+                                      DestinationRect="0,0,16,16">
+                            <DrawingBrush.Drawing>
+                                <DrawingGroup>
+                                    <GeometryDrawing Brush="#FFDCDCDC">
+                                        <GeometryDrawing.Geometry>
+                                            <RectangleGeometry Rect="0,0,16,16" />
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                    <GeometryDrawing Brush="#FFFFFFFF">
+                                        <GeometryDrawing.Geometry>
+                                            <RectangleGeometry Rect="0,0,8,8" />
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                    <GeometryDrawing Brush="#FFFFFFFF">
+                                        <GeometryDrawing.Geometry>
+                                            <RectangleGeometry Rect="8,8,8,8" />
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingBrush.Drawing>
+                        </DrawingBrush>
+                    </VisualLayerManager.Resources>
+                    <Grid RowDefinitions="Auto,*">
+
+                        <Border Grid.Row="0" IsVisible="{TemplateBinding ShowDefaultZoomToolbar}" HorizontalAlignment="Right"
+                                VerticalAlignment="Top" Margin="10 4"
+                                CornerRadius="6"
+                                Padding="6,4">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Button Classes="BasicTight" Width="24" Height="24"
+                                        Command="{Binding ZoomOutCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <Path Data="{DynamicResource ReduceGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <TextBlock VerticalAlignment="Center"
+                                           Text="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0:P0}}" />
+                                <Button Classes="BasicTight" Width="24" Height="24"
+                                        Command="{Binding ZoomInCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <Path Data="{DynamicResource EnlargeGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="1" Background="{TemplateBinding Background}" ClipToBounds="True">
+                            <Grid>
+                                <Border IsVisible="{TemplateBinding ShowCheckerboardBackground}"
+                                        Background="{StaticResource CheckerboardBrush}" />
+                                <Image
+                                    Name="{x:Static u:SukiImageViewer.PART_Image}"
+                                    Source="{TemplateBinding Source}" VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Stretch="Uniform">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform
+                                                ScaleX="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}}"
+                                                ScaleY="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}}" />
+                                            <TranslateTransform
+                                                X="{Binding TranslateX, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Y="{Binding TranslateY, RelativeSource={RelativeSource TemplatedParent}}" />
+                                            <RotateTransform Angle="0" />
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <Canvas IsHitTestVisible="False"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Width="{Binding Width, ElementName=PART_Image}"
+                                        Height="{Binding Height, ElementName=PART_Image}"
+                                        Panel.ZIndex="1">
+                                    <Canvas.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform
+                                                ScaleX="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}}"
+                                                ScaleY="{Binding Scale, RelativeSource={RelativeSource TemplatedParent}}" />
+                                            <TranslateTransform
+                                                X="{Binding TranslateX, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Y="{Binding TranslateY, RelativeSource={RelativeSource TemplatedParent}}" />
+                                        </TransformGroup>
+                                    </Canvas.RenderTransform>
+                                    <Path IsVisible="{TemplateBinding HasSwipeArrow}"
+                                          Data="{TemplateBinding SwipeArrowGeometry}"
+                                          Stroke="{TemplateBinding SwipeArrowStroke}"
+                                          StrokeThickness="2"
+                                          Fill="Transparent" />
+                                    <Rectangle IsVisible="{TemplateBinding HasBrushPreview}"
+                                               Stroke="{TemplateBinding BrushPreviewStroke}"
+                                               Fill="{TemplateBinding BrushPreviewFill}"
+                                               StrokeThickness="0">
+                                        <Canvas.Left>
+                                            <Binding Path="BrushPreviewRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="BrushPreviewRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="BrushPreviewRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="BrushPreviewRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding HasSelection}"
+                                               Stroke="{TemplateBinding SelectionStroke}"
+                                               Fill="{TemplateBinding SelectionFill}"
+                                               StrokeThickness="1">
+                                        <Canvas.Left>
+                                            <Binding Path="SelectionRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="SelectionRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="SelectionRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="SelectionRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding HasSecondarySelection}"
+                                               Stroke="{TemplateBinding SecondarySelectionStroke}"
+                                               Fill="{TemplateBinding SecondarySelectionFill}"
+                                               StrokeThickness="1">
+                                        <Canvas.Left>
+                                            <Binding Path="SecondarySelectionRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="SecondarySelectionRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="SecondarySelectionRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="SecondarySelectionRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
+                                </Canvas>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
                 </VisualLayerManager>
             </ControlTemplate>
         </Setter>

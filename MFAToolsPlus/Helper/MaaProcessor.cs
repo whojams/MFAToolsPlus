@@ -6,6 +6,7 @@ using MaaFramework.Binding.Notification;
 using MFAToolsPlus.Configuration;
 using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Extensions.MaaFW;
+using MFAToolsPlus.Extensions.MaaFW.Custom;
 using MFAToolsPlus.Views;
 using System;
 using System.Collections.Generic;
@@ -382,7 +383,7 @@ public class MaaProcessor
             };
             tasker.Controller.Callback += HandleControllerCallBack;
 
-
+            tasker.Resource.Register(new MFAOCRRecognition());
             var linkStatus = tasker.Controller?.LinkStart().Wait();
             if (linkStatus != MaaJobStatus.Succeeded)
             {

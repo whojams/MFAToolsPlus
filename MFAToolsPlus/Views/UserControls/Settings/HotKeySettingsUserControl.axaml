@@ -36,22 +36,22 @@
                             VerticalAlignment="Center" />
                     </StackPanel>
                 </DockPanel>
-                <!-- <DockPanel> -->
-                <!--     <userControls:HotKeyEditor -->
-                <!--         DockPanel.Dock="Right" -->
-                <!--         Height="40" -->
-                <!--         HotKey="{Binding HotKeyLinkStart}" -->
-                <!--         IsEnabled="{Binding EnableHotKey}" -->
-                <!--         Margin="0,0,4,0" -->
-                <!--         Width="205" /> -->
-                <!--     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center"> -->
-                <!--         <TextBlock -->
-                <!--             FontSize="16" -->
-                <!--             FontWeight="SemiBold" -->
-                <!--             Text="{markup:I18n {x:Static helper:LangKeys.HotKeyLinkStart}}" -->
-                <!--             VerticalAlignment="Center" /> -->
-                <!--     </StackPanel> -->
-                <!-- </DockPanel> -->
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyPause}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{markup:I18n {x:Static helper:LangKeys.HotKeyPause}}"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
             </StackPanel>
 
         </suki:GlassCard>

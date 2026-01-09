@@ -25,10 +25,10 @@
                  d:DesignWidth="800" ShowTitle="False">
     <suki:SukiWindow.LogoContent>
         <Image
-            Height="18"
+            Height="24"
             Source="{x:Static helper:IconHelper.Icon}"
             Stretch="Uniform"
-            Width="18" />
+            Width="24" />
 
     </suki:SukiWindow.LogoContent>
     <suki:SukiWindow.NonClientAreaContent>

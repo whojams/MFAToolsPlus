@@ -6,7 +6,7 @@ public static class ConfigurationKeys
 
     public const string DefaultConfig = "DefaultConfig";
     public const string ShowGui = "ShowGui";
-    public const string LinkStart = "LinkStart";
+    public const string Pause = "Pause";
     public const string DoNotShowAnnouncementAgain = "AnnouncementInfo.DoNotShowAgain";
     public const string DoNotShowChangelogAgain = "Changelog.DoNotShowAgain";
     public const string ForceScheduledStart = "ForceScheduledStart";
@@ -164,8 +164,12 @@ public static class ConfigurationKeys
     public const string TaskQueueRightPanelCollapsed = "UI.TaskQueue.RightPanelCollapsed";
     public const string TaskQueueDashboardLayout = "UI.TaskQueue.DashboardLayout";
     public const string DashboardCardGridLayout = "UI.DashboardCardGrid.Layout";
+    public const string DashboardCardGridResourceLayoutHash = "UI.DashboardCardGrid.ResourceLayoutHash";
     public const string EnableLiveView = "UI.LiveView.EnableLiveView";
     public const string LiveViewRefreshRate = "UI.LiveView.RefreshRate";
+    public const string LiveViewHorizontalExpansion = "UI.LiveView.HorizontalExpansion";
+    public const string LiveViewVerticalExpansion = "UI.LiveView.VerticalExpansion";
+    public const string LiveViewScreenshotRelativePath = "UI.LiveView.ScreenshotRelativePath";
     public const string MainWindowWidth = "UI.MainWindow.Width";
     public const string MainWindowHeight = "UI.MainWindow.Height";
     public const string MainWindowPositionX = "UI.MainWindow.PositionX";

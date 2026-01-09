@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <NoWarn>NU1701;NU1510</NoWarn>
+        <NoWarn>NU1701;NU1510;CS8767;CS8601:</NoWarn>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -23,7 +23,7 @@
         <OutputPath>../bin/$(Platform)/$(Configuration)/</OutputPath>
         <IntermediateOutputPath>obj/$(Platform)/$(Configuration)/$(TargetFramework)/</IntermediateOutputPath>
         <PublishReadyToRun>false</PublishReadyToRun>
-        <PublishSingleFile>false</PublishSingleFile>
+        <PublishSingleFile>true</PublishSingleFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <PublishTrimmed>false</PublishTrimmed>
         <SelfContained>false</SelfContained>
@@ -108,5 +108,20 @@
       <Content Include="resource\base\model\detect\sos_nodes.onnx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <None Update="Helper\LangKeys.tt">
+        <Generator>TextTemplatingFileGenerator</Generator>
+        <LastGenOutput>LangKeys.cs</LastGenOutput>
+      </None>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Compile Update="Helper\LangKeys.cs">
+        <DependentUpon>LangKeys.tt</DependentUpon>
+      </Compile>
     </ItemGroup>
 </Project>

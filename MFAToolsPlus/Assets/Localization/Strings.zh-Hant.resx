@@ -552,8 +552,8 @@
     <data name="HotKeyChangingTip" xml:space="preserve">
         <value>鍵入 退格/Esc/Delete 清除當前快速鍵</value>
     </data>
-    <data name="HotKeyLinkStart" xml:space="preserve">
-        <value>[快速鍵] 開始/停止任務</value>
+    <data name="HotKeyPause" xml:space="preserve">
+        <value>[快速鍵] 暫停/恢復</value>
     </data>
     <data name="HotKeyNotSet" xml:space="preserve">
         <value>未設定</value>
@@ -726,6 +726,9 @@
     <data name="PasteBelow" xml:space="preserve">
         <value>貼到下方</value>
     </data>
+    <data name="ReadFromClipboard" xml:space="preserve">
+        <value>從剪貼簿讀取</value>
+    </data>
     <data name="PerformanceSettings" xml:space="preserve">
         <value>效能設定</value>
     </data>
@@ -877,7 +880,7 @@
         <value>軟體版本</value>
     </data>
     <data name="StartTask" xml:space="preserve">
-        <value>開始任務</value>
+        <value>恢復</value>
     </data>
     <data name="StartupParameter" xml:space="preserve">
         <value>啟動參數</value>
@@ -904,7 +907,7 @@
         <value>停止任務失敗</value>
     </data>
     <data name="StopTask" xml:space="preserve">
-        <value>停止任務</value>
+        <value>暫停</value>
     </data>
     <data name="SwitchConfiguration" xml:space="preserve">
         <value>切換配置</value>
@@ -1464,5 +1467,143 @@
     </data>
     <data name="Reconnect" xml:space="preserve">
         <value>重新連接</value>
+    </data>
+    <data name="RoiTitle" xml:space="preserve">
+        <value>ROI</value>
+    </data>
+    <data name="TargetTitle" xml:space="preserve">
+        <value>Target</value>
+    </data>
+    <data name="SelectRoi" xml:space="preserve">
+        <value>選擇 ROI</value>
+    </data>
+    <data name="SelectTarget" xml:space="preserve">
+        <value>選擇 Target</value>
+    </data>
+    <data name="CopyToTarget" xml:space="preserve">
+        <value>複製到 Target</value>
+    </data>
+    <data name="CopyToRoi" xml:space="preserve">
+        <value>複製到 ROI</value>
+    </data>
+    <data name="DeleteRoi" xml:space="preserve">
+        <value>清空 ROI</value>
+    </data>
+    <data name="DeleteTarget" xml:space="preserve">
+        <value>清空 Target</value>
+    </data>
+    <data name="OffsetTitle" xml:space="preserve">
+        <value>Offset</value>
+    </data>
+    <data name="TargetMode" xml:space="preserve">
+        <value>Target 模式</value>
+    </data>
+    <data name="RoiModeLabel" xml:space="preserve">
+        <value>模式</value>
+    </data>
+    <data name="RoiModeOptionRoi" xml:space="preserve">
+        <value>ROI 模式</value>
+    </data>
+    <data name="RoiModeOptionTarget" xml:space="preserve">
+        <value>Target 模式</value>
+    </data>
+    <data name="OriginRoiTitle" xml:space="preserve">
+        <value>原 ROI</value>
+    </data>
+    <data name="OriginTargetTitle" xml:space="preserve">
+        <value>原 Target</value>
+    </data>
+    <data name="TargetRoiTitle" xml:space="preserve">
+        <value>目標 ROI</value>
+    </data>
+    <data name="TargetTargetTitle" xml:space="preserve">
+        <value>目標 Target</value>
+    </data>
+    <data name="LiveViewHintDragModePaused" xml:space="preserve">
+        <value>拖拽模式：直接拖拽平移，滾輪縮放</value>
+    </data>
+    <data name="LiveViewHintDragModeRunning" xml:space="preserve">
+        <value>拖拽模式：直接拖拽平移</value>
+    </data>
+    <data name="LiveViewHintCtrlModePaused" xml:space="preserve">
+        <value>選擇模式：按住 Ctrl + 左鍵拖拽，Ctrl + 滾輪縮放</value>
+    </data>
+    <data name="LiveViewHintCtrlModeRunning" xml:space="preserve">
+        <value>選擇模式：按住 Ctrl + 左鍵拖拽</value>
+    </data>
+    <data name="DragModeTooltip" xml:space="preserve">
+        <value>拖拽模式</value>
+    </data>
+    <data name="LiveViewSwipe" xml:space="preserve">
+        <value>滑動</value>
+    </data>
+    <data name="LiveViewOcr" xml:space="preserve">
+        <value>文字辨識</value>
+    </data>
+    <data name="LiveViewColorPickRoi" xml:space="preserve">
+        <value>取色ROI</value>
+    </data>
+    <data name="LiveViewExpandedRoi" xml:space="preserve">
+        <value>擴展ROI</value>
+    </data>
+    <data name="LiveViewPreview" xml:space="preserve">
+        <value>預覽</value>
+    </data>
+    <data name="LiveViewRestore" xml:space="preserve">
+        <value>還原</value>
+    </data>
+    <data name="LiveViewScreenshotRoi" xml:space="preserve">
+        <value>截圖ROI</value>
+    </data>
+    <data name="LiveViewRelativePathPrefix" xml:space="preserve">
+        <value>相對目錄前綴</value>
+    </data>
+    <data name="LiveViewSwipeStart" xml:space="preserve">
+        <value>起點</value>
+    </data>
+    <data name="LiveViewSwipeEnd" xml:space="preserve">
+        <value>終點</value>
+    </data>
+    <data name="LiveViewOcrRoi" xml:space="preserve">
+        <value>OCR ROI</value>
+    </data>
+    <data name="LiveViewOcrResult" xml:space="preserve">
+        <value>OCR結果</value>
+    </data>
+    <data name="LiveViewRunOcr" xml:space="preserve">
+        <value>執行OCR</value>
+    </data>
+    <data name="LiveViewNoScreenshot" xml:space="preserve">
+        <value>沒有可用截圖</value>
+    </data>
+    <data name="LiveViewSelectOcrRegion" xml:space="preserve">
+        <value>請先選擇OCR區域</value>
+    </data>
+    <data name="LiveViewRecognizerUnavailable" xml:space="preserve">
+        <value>識別器不可用</value>
+    </data>
+    <data name="LiveViewSelectScreenshotRegion" xml:space="preserve">
+        <value>請先選擇截圖區域</value>
+    </data>
+    <data name="LiveViewInvalidScreenshotRegion" xml:space="preserve">
+        <value>截圖區域無效</value>
+    </data>
+    <data name="LiveViewScreenshotSaved" xml:space="preserve">
+        <value>保存截圖: {0}</value>
+    </data>
+    <data name="ScreenshotCropMode" xml:space="preserve">
+        <value>裁剪模式</value>
+    </data>
+    <data name="ScreenshotBrushMode" xml:space="preserve">
+        <value>畫筆模式</value>
+    </data>
+    <data name="ScreenshotBrushSize" xml:space="preserve">
+        <value>畫筆粗細</value>
+    </data>
+    <data name="ScreenshotRestore" xml:space="preserve">
+        <value>還原畫面</value>
+    </data>
+    <data name="Result" xml:space="preserve">
+        <value>結果</value>
     </data>
 </root>

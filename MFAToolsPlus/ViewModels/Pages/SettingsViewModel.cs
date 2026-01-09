@@ -23,7 +23,7 @@ public partial class SettingsViewModel : ViewModelBase
     protected override void Initialize()
     {
         _hotKeyShowGui = MFAHotKey.Parse(GlobalConfiguration.GetValue(ConfigurationKeys.ShowGui, ""));
-        _hotKeyLinkStart = MFAHotKey.Parse(GlobalConfiguration.GetValue(ConfigurationKeys.LinkStart, ""));
+        _hotKeyPause = MFAHotKey.Parse(GlobalConfiguration.GetValue(ConfigurationKeys.Pause, ""));
 
         DispatcherHelper.PostOnMainThread(InitializeHotkeysAfterStartup);
     }
@@ -40,8 +40,8 @@ public partial class SettingsViewModel : ViewModelBase
         SetHotKey(ref _hotKeyShowGui, _hotKeyShowGui, ConfigurationKeys.ShowGui,
             Instances.RootViewModel.ToggleVisibleCommand);
 
-        // SetHotKey(ref _hotKeyLinkStart, _hotKeyLinkStart, ConfigurationKeys.LinkStart,
-        //     Instances.TaskQueueViewModel.ToggleCommand);
+        SetHotKey(ref _hotKeyPause, _hotKeyPause, ConfigurationKeys.Pause,
+            Instances.ToolsViewModel.ToggleLiveViewPauseCommand);
     }
 
     #region HotKey
@@ -54,13 +54,13 @@ public partial class SettingsViewModel : ViewModelBase
         set => SetHotKey(ref _hotKeyShowGui, value, ConfigurationKeys.ShowGui, Instances.RootViewModel.ToggleVisibleCommand);
     }
 
-    private MFAHotKey _hotKeyLinkStart = MFAHotKey.NOTSET;
+    private MFAHotKey _hotKeyPause = MFAHotKey.NOTSET;
 
-    // public MFAHotKey HotKeyLinkStart
-    // {
-    //     get => _hotKeyLinkStart;
-    //     set => SetHotKey(ref _hotKeyLinkStart, value, ConfigurationKeys.LinkStart, Instances.TaskQueueViewModel.ToggleCommand);
-    // }
+    public MFAHotKey HotKeyPause
+    {
+        get => _hotKeyPause;
+        set => SetHotKey(ref _hotKeyPause, value, ConfigurationKeys.Pause, Instances.ToolsViewModel.ToggleLiveViewPauseCommand);
+    }
 
     public void SetHotKey(ref MFAHotKey value, MFAHotKey? newValue, string type, ICommand command)
     {
