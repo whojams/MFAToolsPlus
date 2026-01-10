@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -36,7 +37,23 @@ public enum LiveViewToolMode
     ColorPick,
     Swipe,
     Ocr,
-    Screenshot
+    Screenshot,
+    Key
+}
+
+public enum KeyCodeMode
+{
+    Win32,
+    Adb
+}
+
+public enum TestPanelMode
+{
+    None,
+    Ocr,
+    Screenshot,
+    Click,
+    Swipe
 }
 
 public enum LiveViewRoiSelectionType
@@ -71,10 +88,23 @@ public partial class ToolsViewModel : ViewModelBase
             CurrentController = value.ControllerType;
         }
     }
+    
+    partial void OnCurrentControllerChanged(MaaControllerTypes value)
+    {
+        ConfigurationManager.Current.SetValue(ConfigurationKeys.CurrentController, value.ToString());
+
+        if (value == MaaControllerTypes.PlayCover)
+        {
+            TryReadPlayCoverConfig();
+        }
+        Refresh();
+    }
+    
     partial void OnCurrentDeviceChanged(object? value)
     {
         ChangedDevice(value);
     }
+    
     private DateTime? _lastExecutionTime;
 
     public void ChangedDevice(object? value)
@@ -117,6 +147,11 @@ public partial class ToolsViewModel : ViewModelBase
     protected override void Initialize()
     {
         InitializeControllerOptions();
+        AdbKeyOptions = new ObservableCollection<string>(AdbKeyOptionList);
+        if (IsKeyCodeAdb)
+        {
+            UpdateAdbKeyFromInput(AdbKeyInput);
+        }
     }
     /// <summary>
     /// 初始化控制器列表
@@ -679,12 +714,19 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private Rect _secondarySelectionRect;
     [ObservableProperty] private bool _hasSecondarySelection;
     [ObservableProperty] private bool _isToolPanelVisible;
+    [ObservableProperty] private bool _isTestPanelVisible;
+    [ObservableProperty] private TestPanelMode _activeTestPanelMode = TestPanelMode.None;
+    [ObservableProperty] private bool _isOcrTestPanelVisible;
+    [ObservableProperty] private bool _isScreenshotTestPanelVisible;
+    [ObservableProperty] private bool _isClickTestPanelVisible;
+    [ObservableProperty] private bool _isSwipeTestPanelVisible;
     [ObservableProperty] private bool _isDragMode = true;
     [ObservableProperty] private bool _isRoiMode;
     [ObservableProperty] private bool _isColorPickMode;
     [ObservableProperty] private bool _isSwipeMode;
     [ObservableProperty] private bool _isOcrMode;
     [ObservableProperty] private bool _isScreenshotMode;
+    [ObservableProperty] private bool _isKeyMode;
     [ObservableProperty] private bool _isTargetMode;
     [ObservableProperty] private bool _isScreenshotBrushMode;
     [ObservableProperty] private int _screenshotBrushSize = 1;
@@ -747,6 +789,39 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private string _ocrExpandedH = "0";
     [ObservableProperty] private string _ocrResult = string.Empty;
 
+    [ObservableProperty] private string _ocrMatchRoiX = "0";
+    [ObservableProperty] private string _ocrMatchRoiY = "0";
+    [ObservableProperty] private string _ocrMatchRoiW = "0";
+    [ObservableProperty] private string _ocrMatchRoiH = "0";
+    [ObservableProperty] private string _ocrMatchTargetText = string.Empty;
+    [ObservableProperty] private string _ocrMatchThreshold = "0.3";
+    [ObservableProperty] private bool _ocrMatchOnlyRec = false;
+
+    [ObservableProperty] private string _templateMatchRoiX = "0";
+    [ObservableProperty] private string _templateMatchRoiY = "0";
+    [ObservableProperty] private string _templateMatchRoiW = "0";
+    [ObservableProperty] private string _templateMatchRoiH = "0";
+    [ObservableProperty] private string _templateMatchThreshold = "0.7";
+    [ObservableProperty] private bool _templateMatchGreenMask;
+    [ObservableProperty] private int _templateMatchMethod = 5;
+    [ObservableProperty] private Bitmap? _templateMatchImage;
+    [ObservableProperty] private ObservableCollection<int> _templateMatchMethodOptions = [5, 3, 10001];
+
+    [ObservableProperty] private string _clickTestTargetX = "0";
+    [ObservableProperty] private string _clickTestTargetY = "0";
+    [ObservableProperty] private string _clickTestTargetW = "0";
+    [ObservableProperty] private string _clickTestTargetH = "0";
+    [ObservableProperty] private string _clickTestOffsetX = "0";
+    [ObservableProperty] private string _clickTestOffsetY = "0";
+    [ObservableProperty] private string _clickTestOffsetW = "0";
+    [ObservableProperty] private string _clickTestOffsetH = "0";
+
+    [ObservableProperty] private string _swipeTestStartX = "0";
+    [ObservableProperty] private string _swipeTestStartY = "0";
+    [ObservableProperty] private string _swipeTestEndX = "0";
+    [ObservableProperty] private string _swipeTestEndY = "0";
+    [ObservableProperty] private string _swipeTestDuration = "200";
+
     [ObservableProperty] private string _swipeStartX = "0";
     [ObservableProperty] private string _swipeStartY = "0";
     [ObservableProperty] private string _swipeEndX = "0";
@@ -798,6 +873,10 @@ public partial class ToolsViewModel : ViewModelBase
     private bool _suppressTargetSync;
     private bool _suppressToolModeSync;
     private bool _suppressRoiTargetSync;
+    private bool _suppressColorPickSync;
+    private bool _suppressScreenshotSync;
+    private bool _suppressOcrSync;
+    private bool _suppressTestPanelSync;
 
     private readonly int _horizontalExpansion =
         ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewHorizontalExpansion, 25);
@@ -807,11 +886,705 @@ public partial class ToolsViewModel : ViewModelBase
     private Bitmap? _colorPreviewImage;
     private WriteableBitmap? _screenshotBrushImage;
 
+    [ObservableProperty] private bool _isKeyCodeAdb;
+    [ObservableProperty] private bool _isKeyCaptureActive;
+    [ObservableProperty] private string _keyCaptureKey = string.Empty;
+    [ObservableProperty] private string _keyCaptureCode = string.Empty;
+    [ObservableProperty] private ObservableCollection<string> _adbKeyOptions = new(AdbKeyOptionList);
+    [ObservableProperty] private string _adbKeyInput = string.Empty;
+    private static readonly Dictionary<string, int> AdbKeyDefinitions = new(StringComparer.Ordinal)
+    {
+        { "KEYCODE_0", 7 },
+        { "KEYCODE_1", 8 },
+        { "KEYCODE_11", 227 },
+        { "KEYCODE_12", 228 },
+        { "KEYCODE_2", 9 },
+        { "KEYCODE_3", 10 },
+        { "KEYCODE_3D_MODE", 206 },
+        { "KEYCODE_4", 11 },
+        { "KEYCODE_5", 12 },
+        { "KEYCODE_6", 13 },
+        { "KEYCODE_7", 14 },
+        { "KEYCODE_8", 15 },
+        { "KEYCODE_9", 16 },
+        { "KEYCODE_A", 29 },
+        { "KEYCODE_ALL_APPS", 284 },
+        { "KEYCODE_ALT_LEFT", 57 },
+        { "KEYCODE_ALT_RIGHT", 58 },
+        { "KEYCODE_APOSTROPHE", 75 },
+        { "KEYCODE_APP_SWITCH", 187 },
+        { "KEYCODE_ASSIST", 219 },
+        { "KEYCODE_AT", 77 },
+        { "KEYCODE_AVR_INPUT", 182 },
+        { "KEYCODE_AVR_POWER", 181 },
+        { "KEYCODE_B", 30 },
+        { "KEYCODE_BACK", 4 },
+        { "KEYCODE_BACKSLASH", 73 },
+        { "KEYCODE_BOOKMARK", 174 },
+        { "KEYCODE_BREAK", 121 },
+        { "KEYCODE_BRIGHTNESS_DOWN", 220 },
+        { "KEYCODE_BRIGHTNESS_UP", 221 },
+        { "KEYCODE_BUTTON_1", 188 },
+        { "KEYCODE_BUTTON_10", 197 },
+        { "KEYCODE_BUTTON_11", 198 },
+        { "KEYCODE_BUTTON_12", 199 },
+        { "KEYCODE_BUTTON_13", 200 },
+        { "KEYCODE_BUTTON_14", 201 },
+        { "KEYCODE_BUTTON_15", 202 },
+        { "KEYCODE_BUTTON_16", 203 },
+        { "KEYCODE_BUTTON_2", 189 },
+        { "KEYCODE_BUTTON_3", 190 },
+        { "KEYCODE_BUTTON_4", 191 },
+        { "KEYCODE_BUTTON_5", 192 },
+        { "KEYCODE_BUTTON_6", 193 },
+        { "KEYCODE_BUTTON_7", 194 },
+        { "KEYCODE_BUTTON_8", 195 },
+        { "KEYCODE_BUTTON_9", 196 },
+        { "KEYCODE_BUTTON_A", 96 },
+        { "KEYCODE_BUTTON_B", 97 },
+        { "KEYCODE_BUTTON_C", 98 },
+        { "KEYCODE_BUTTON_L1", 102 },
+        { "KEYCODE_BUTTON_L2", 104 },
+        { "KEYCODE_BUTTON_MODE", 110 },
+        { "KEYCODE_BUTTON_R1", 103 },
+        { "KEYCODE_BUTTON_R2", 105 },
+        { "KEYCODE_BUTTON_SELECT", 109 },
+        { "KEYCODE_BUTTON_START", 108 },
+        { "KEYCODE_BUTTON_THUMBL", 106 },
+        { "KEYCODE_BUTTON_THUMBR", 107 },
+        { "KEYCODE_BUTTON_X", 99 },
+        { "KEYCODE_BUTTON_Y", 100 },
+        { "KEYCODE_BUTTON_Z", 101 },
+        { "KEYCODE_C", 31 },
+        { "KEYCODE_CALCULATOR", 210 },
+        { "KEYCODE_CALENDAR", 208 },
+        { "KEYCODE_CALL", 5 },
+        { "KEYCODE_CAMERA", 27 },
+        { "KEYCODE_CAPS_LOCK", 115 },
+        { "KEYCODE_CAPTIONS", 175 },
+        { "KEYCODE_CHANNEL_DOWN", 167 },
+        { "KEYCODE_CHANNEL_UP", 166 },
+        { "KEYCODE_CLEAR", 28 },
+        { "KEYCODE_CLOSE", 321 },
+        { "KEYCODE_COMMA", 55 },
+        { "KEYCODE_CONTACTS", 207 },
+        { "KEYCODE_COPY", 278 },
+        { "KEYCODE_CTRL_LEFT", 113 },
+        { "KEYCODE_CTRL_RIGHT", 114 },
+        { "KEYCODE_CUT", 277 },
+        { "KEYCODE_D", 32 },
+        { "KEYCODE_DEL", 67 },
+        { "KEYCODE_DEMO_APP_1", 301 },
+        { "KEYCODE_DEMO_APP_2", 302 },
+        { "KEYCODE_DEMO_APP_3", 303 },
+        { "KEYCODE_DEMO_APP_4", 304 },
+        { "KEYCODE_DICTATE", 319 },
+        { "KEYCODE_DO_NOT_DISTURB", 322 },
+        { "KEYCODE_DPAD_CENTER", 23 },
+        { "KEYCODE_DPAD_DOWN", 20 },
+        { "KEYCODE_DPAD_DOWN_LEFT", 269 },
+        { "KEYCODE_DPAD_DOWN_RIGHT", 271 },
+        { "KEYCODE_DPAD_LEFT", 21 },
+        { "KEYCODE_DPAD_RIGHT", 22 },
+        { "KEYCODE_DPAD_UP", 19 },
+        { "KEYCODE_DPAD_UP_LEFT", 268 },
+        { "KEYCODE_DPAD_UP_RIGHT", 270 },
+        { "KEYCODE_DVR", 173 },
+        { "KEYCODE_E", 33 },
+        { "KEYCODE_EISU", 212 },
+        { "KEYCODE_EMOJI_PICKER", 317 },
+        { "KEYCODE_ENDCALL", 6 },
+        { "KEYCODE_ENTER", 66 },
+        { "KEYCODE_ENVELOPE", 65 },
+        { "KEYCODE_EQUALS", 70 },
+        { "KEYCODE_ESCAPE", 111 },
+        { "KEYCODE_EXPLORER", 64 },
+        { "KEYCODE_F", 34 },
+        { "KEYCODE_F1", 131 },
+        { "KEYCODE_F10", 140 },
+        { "KEYCODE_F11", 141 },
+        { "KEYCODE_F12", 142 },
+        { "KEYCODE_F13", 326 },
+        { "KEYCODE_F14", 327 },
+        { "KEYCODE_F15", 328 },
+        { "KEYCODE_F16", 329 },
+        { "KEYCODE_F17", 330 },
+        { "KEYCODE_F18", 331 },
+        { "KEYCODE_F19", 332 },
+        { "KEYCODE_F2", 132 },
+        { "KEYCODE_F20", 333 },
+        { "KEYCODE_F21", 334 },
+        { "KEYCODE_F22", 335 },
+        { "KEYCODE_F23", 336 },
+        { "KEYCODE_F24", 337 },
+        { "KEYCODE_F3", 133 },
+        { "KEYCODE_F4", 134 },
+        { "KEYCODE_F5", 135 },
+        { "KEYCODE_F6", 136 },
+        { "KEYCODE_F7", 137 },
+        { "KEYCODE_F8", 138 },
+        { "KEYCODE_F9", 139 },
+        { "KEYCODE_FEATURED_APP_1", 297 },
+        { "KEYCODE_FEATURED_APP_2", 298 },
+        { "KEYCODE_FEATURED_APP_3", 299 },
+        { "KEYCODE_FEATURED_APP_4", 300 },
+        { "KEYCODE_FOCUS", 80 },
+        { "KEYCODE_FORWARD", 125 },
+        { "KEYCODE_FORWARD_DEL", 112 },
+        { "KEYCODE_FULLSCREEN", 325 },
+        { "KEYCODE_FUNCTION", 119 },
+        { "KEYCODE_G", 35 },
+        { "KEYCODE_GRAVE", 68 },
+        { "KEYCODE_GUIDE", 172 },
+        { "KEYCODE_H", 36 },
+        { "KEYCODE_HEADSETHOOK", 79 },
+        { "KEYCODE_HELP", 259 },
+        { "KEYCODE_HENKAN", 214 },
+        { "KEYCODE_HOME", 3 },
+        { "KEYCODE_I", 37 },
+        { "KEYCODE_INFO", 165 },
+        { "KEYCODE_INSERT", 124 },
+        { "KEYCODE_J", 38 },
+        { "KEYCODE_K", 39 },
+        { "KEYCODE_KANA", 218 },
+        { "KEYCODE_KATAKANA_HIRAGANA", 215 },
+        { "KEYCODE_KEYBOARD_BACKLIGHT_DOWN", 305 },
+        { "KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE", 307 },
+        { "KEYCODE_KEYBOARD_BACKLIGHT_UP", 306 },
+        { "KEYCODE_L", 40 },
+        { "KEYCODE_LANGUAGE_SWITCH", 204 },
+        { "KEYCODE_LAST_CHANNEL", 229 },
+        { "KEYCODE_LEFT_BRACKET", 71 },
+        { "KEYCODE_LOCK", 324 },
+        { "KEYCODE_M", 41 },
+        { "KEYCODE_MACRO_1", 313 },
+        { "KEYCODE_MACRO_2", 314 },
+        { "KEYCODE_MACRO_3", 315 },
+        { "KEYCODE_MACRO_4", 316 },
+        { "KEYCODE_MANNER_MODE", 205 },
+        { "KEYCODE_MEDIA_AUDIO_TRACK", 222 },
+        { "KEYCODE_MEDIA_CLOSE", 128 },
+        { "KEYCODE_MEDIA_EJECT", 129 },
+        { "KEYCODE_MEDIA_FAST_FORWARD", 90 },
+        { "KEYCODE_MEDIA_NEXT", 87 },
+        { "KEYCODE_MEDIA_PAUSE", 127 },
+        { "KEYCODE_MEDIA_PLAY", 126 },
+        { "KEYCODE_MEDIA_PLAY_PAUSE", 85 },
+        { "KEYCODE_MEDIA_PREVIOUS", 88 },
+        { "KEYCODE_MEDIA_RECORD", 130 },
+        { "KEYCODE_MEDIA_REWIND", 89 },
+        { "KEYCODE_MEDIA_SKIP_BACKWARD", 273 },
+        { "KEYCODE_MEDIA_SKIP_FORWARD", 272 },
+        { "KEYCODE_MEDIA_STEP_BACKWARD", 275 },
+        { "KEYCODE_MEDIA_STEP_FORWARD", 274 },
+        { "KEYCODE_MEDIA_STOP", 86 },
+        { "KEYCODE_MEDIA_TOP_MENU", 226 },
+        { "KEYCODE_MENU", 82 },
+        { "KEYCODE_META_LEFT", 117 },
+        { "KEYCODE_META_RIGHT", 118 },
+        { "KEYCODE_MINUS", 69 },
+        { "KEYCODE_MOVE_END", 123 },
+        { "KEYCODE_MOVE_HOME", 122 },
+        { "KEYCODE_MUHENKAN", 213 },
+        { "KEYCODE_MUSIC", 209 },
+        { "KEYCODE_MUTE", 91 },
+        { "KEYCODE_N", 42 },
+        { "KEYCODE_NAVIGATE_IN", 262 },
+        { "KEYCODE_NAVIGATE_NEXT", 261 },
+        { "KEYCODE_NAVIGATE_OUT", 263 },
+        { "KEYCODE_NAVIGATE_PREVIOUS", 260 },
+        { "KEYCODE_NEW", 320 },
+        { "KEYCODE_NOTIFICATION", 83 },
+        { "KEYCODE_NUM", 78 },
+        { "KEYCODE_NUMPAD_0", 144 },
+        { "KEYCODE_NUMPAD_1", 145 },
+        { "KEYCODE_NUMPAD_2", 146 },
+        { "KEYCODE_NUMPAD_3", 147 },
+        { "KEYCODE_NUMPAD_4", 148 },
+        { "KEYCODE_NUMPAD_5", 149 },
+        { "KEYCODE_NUMPAD_6", 150 },
+        { "KEYCODE_NUMPAD_7", 151 },
+        { "KEYCODE_NUMPAD_8", 152 },
+        { "KEYCODE_NUMPAD_9", 153 },
+        { "KEYCODE_NUMPAD_ADD", 157 },
+        { "KEYCODE_NUMPAD_COMMA", 159 },
+        { "KEYCODE_NUMPAD_DIVIDE", 154 },
+        { "KEYCODE_NUMPAD_DOT", 158 },
+        { "KEYCODE_NUMPAD_ENTER", 160 },
+        { "KEYCODE_NUMPAD_EQUALS", 161 },
+        { "KEYCODE_NUMPAD_LEFT_PAREN", 162 },
+        { "KEYCODE_NUMPAD_MULTIPLY", 155 },
+        { "KEYCODE_NUMPAD_RIGHT_PAREN", 163 },
+        { "KEYCODE_NUMPAD_SUBTRACT", 156 },
+        { "KEYCODE_NUM_LOCK", 143 },
+        { "KEYCODE_O", 43 },
+        { "KEYCODE_P", 44 },
+        { "KEYCODE_PAGE_DOWN", 93 },
+        { "KEYCODE_PAGE_UP", 92 },
+        { "KEYCODE_PAIRING", 225 },
+        { "KEYCODE_PASTE", 279 },
+        { "KEYCODE_PERIOD", 56 },
+        { "KEYCODE_PICTSYMBOLS", 94 },
+        { "KEYCODE_PLUS", 81 },
+        { "KEYCODE_POUND", 18 },
+        { "KEYCODE_POWER", 26 },
+        { "KEYCODE_PRINT", 323 },
+        { "KEYCODE_PROFILE_SWITCH", 288 },
+        { "KEYCODE_PROG_BLUE", 186 },
+        { "KEYCODE_PROG_GREEN", 184 },
+        { "KEYCODE_PROG_RED", 183 },
+        { "KEYCODE_PROG_YELLOW", 185 },
+        { "KEYCODE_Q", 45 },
+        { "KEYCODE_R", 46 },
+        { "KEYCODE_RECENT_APPS", 312 },
+        { "KEYCODE_REFRESH", 285 },
+        { "KEYCODE_RIGHT_BRACKET", 72 },
+        { "KEYCODE_RO", 217 },
+        { "KEYCODE_S", 47 },
+        { "KEYCODE_SCREENSHOT", 318 },
+        { "KEYCODE_SCROLL_LOCK", 116 },
+        { "KEYCODE_SEARCH", 84 },
+        { "KEYCODE_SEMICOLON", 74 },
+        { "KEYCODE_SETTINGS", 176 },
+        { "KEYCODE_SHIFT_LEFT", 59 },
+        { "KEYCODE_SHIFT_RIGHT", 60 },
+        { "KEYCODE_SLASH", 76 },
+        { "KEYCODE_SLEEP", 223 },
+        { "KEYCODE_SOFT_LEFT", 1 },
+        { "KEYCODE_SOFT_RIGHT", 2 },
+        { "KEYCODE_SOFT_SLEEP", 276 },
+        { "KEYCODE_SPACE", 62 },
+        { "KEYCODE_STAR", 17 },
+        { "KEYCODE_STB_INPUT", 180 },
+        { "KEYCODE_STB_POWER", 179 },
+        { "KEYCODE_STEM_1", 265 },
+        { "KEYCODE_STEM_2", 266 },
+        { "KEYCODE_STEM_3", 267 },
+        { "KEYCODE_STEM_PRIMARY", 264 },
+        { "KEYCODE_STYLUS_BUTTON_PRIMARY", 308 },
+        { "KEYCODE_STYLUS_BUTTON_SECONDARY", 309 },
+        { "KEYCODE_STYLUS_BUTTON_TAIL", 311 },
+        { "KEYCODE_STYLUS_BUTTON_TERTIARY", 310 },
+        { "KEYCODE_SWITCH_CHARSET", 95 },
+        { "KEYCODE_SYM", 63 },
+        { "KEYCODE_SYSRQ", 120 },
+        { "KEYCODE_SYSTEM_NAVIGATION_DOWN", 281 },
+        { "KEYCODE_SYSTEM_NAVIGATION_LEFT", 282 },
+        { "KEYCODE_SYSTEM_NAVIGATION_RIGHT", 283 },
+        { "KEYCODE_SYSTEM_NAVIGATION_UP", 280 },
+        { "KEYCODE_T", 48 },
+        { "KEYCODE_TAB", 61 },
+        { "KEYCODE_THUMBS_DOWN", 287 },
+        { "KEYCODE_THUMBS_UP", 286 },
+        { "KEYCODE_TV", 170 },
+        { "KEYCODE_TV_ANTENNA_CABLE", 242 },
+        { "KEYCODE_TV_AUDIO_DESCRIPTION", 252 },
+        { "KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN", 254 },
+        { "KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP", 253 },
+        { "KEYCODE_TV_CONTENTS_MENU", 256 },
+        { "KEYCODE_TV_DATA_SERVICE", 230 },
+        { "KEYCODE_TV_INPUT", 178 },
+        { "KEYCODE_TV_INPUT_COMPONENT_1", 249 },
+        { "KEYCODE_TV_INPUT_COMPONENT_2", 250 },
+        { "KEYCODE_TV_INPUT_COMPOSITE_1", 247 },
+        { "KEYCODE_TV_INPUT_COMPOSITE_2", 248 },
+        { "KEYCODE_TV_INPUT_HDMI_1", 243 },
+        { "KEYCODE_TV_INPUT_HDMI_2", 244 },
+        { "KEYCODE_TV_INPUT_HDMI_3", 245 },
+        { "KEYCODE_TV_INPUT_HDMI_4", 246 },
+        { "KEYCODE_TV_INPUT_VGA_1", 251 },
+        { "KEYCODE_TV_MEDIA_CONTEXT_MENU", 257 },
+        { "KEYCODE_TV_NETWORK", 241 },
+        { "KEYCODE_TV_NUMBER_ENTRY", 234 },
+        { "KEYCODE_TV_POWER", 177 },
+        { "KEYCODE_TV_RADIO_SERVICE", 232 },
+        { "KEYCODE_TV_SATELLITE", 237 },
+        { "KEYCODE_TV_SATELLITE_BS", 238 },
+        { "KEYCODE_TV_SATELLITE_CS", 239 },
+        { "KEYCODE_TV_SATELLITE_SERVICE", 240 },
+        { "KEYCODE_TV_TELETEXT", 233 },
+        { "KEYCODE_TV_TERRESTRIAL_ANALOG", 235 },
+        { "KEYCODE_TV_TERRESTRIAL_DIGITAL", 236 },
+        { "KEYCODE_TV_TIMER_PROGRAMMING", 258 },
+        { "KEYCODE_TV_ZOOM_MODE", 255 },
+        { "KEYCODE_U", 49 },
+        { "KEYCODE_UNKNOWN", 0 },
+        { "KEYCODE_V", 50 },
+        { "KEYCODE_VIDEO_APP_1", 289 },
+        { "KEYCODE_VIDEO_APP_2", 290 },
+        { "KEYCODE_VIDEO_APP_3", 291 },
+        { "KEYCODE_VIDEO_APP_4", 292 },
+        { "KEYCODE_VIDEO_APP_5", 293 },
+        { "KEYCODE_VIDEO_APP_6", 294 },
+        { "KEYCODE_VIDEO_APP_7", 295 },
+        { "KEYCODE_VIDEO_APP_8", 296 },
+        { "KEYCODE_VOICE_ASSIST", 231 },
+        { "KEYCODE_VOLUME_DOWN", 25 },
+        { "KEYCODE_VOLUME_MUTE", 164 },
+        { "KEYCODE_VOLUME_UP", 24 },
+        { "KEYCODE_W", 51 },
+        { "KEYCODE_WAKEUP", 224 },
+        { "KEYCODE_WINDOW", 171 },
+        { "KEYCODE_X", 52 },
+        { "KEYCODE_Y", 53 },
+        { "KEYCODE_YEN", 216 },
+        { "KEYCODE_Z", 54 },
+        { "KEYCODE_ZENKAKU_HANKAKU", 211 },
+        { "KEYCODE_ZOOM_IN", 168 },
+        { "KEYCODE_ZOOM_OUT", 169 },
+    };
+
+    private static readonly string[] AdbKeyOptionList =
+    [
+        "KEYCODE_0",
+        "KEYCODE_1",
+        "KEYCODE_11",
+        "KEYCODE_12",
+        "KEYCODE_2",
+        "KEYCODE_3",
+        "KEYCODE_3D_MODE",
+        "KEYCODE_4",
+        "KEYCODE_5",
+        "KEYCODE_6",
+        "KEYCODE_7",
+        "KEYCODE_8",
+        "KEYCODE_9",
+        "KEYCODE_A",
+        "KEYCODE_ALL_APPS",
+        "KEYCODE_ALT_LEFT",
+        "KEYCODE_ALT_RIGHT",
+        "KEYCODE_APOSTROPHE",
+        "KEYCODE_APP_SWITCH",
+        "KEYCODE_ASSIST",
+        "KEYCODE_AT",
+        "KEYCODE_AVR_INPUT",
+        "KEYCODE_AVR_POWER",
+        "KEYCODE_B",
+        "KEYCODE_BACK",
+        "KEYCODE_BACKSLASH",
+        "KEYCODE_BOOKMARK",
+        "KEYCODE_BREAK",
+        "KEYCODE_BRIGHTNESS_DOWN",
+        "KEYCODE_BRIGHTNESS_UP",
+        "KEYCODE_BUTTON_1",
+        "KEYCODE_BUTTON_10",
+        "KEYCODE_BUTTON_11",
+        "KEYCODE_BUTTON_12",
+        "KEYCODE_BUTTON_13",
+        "KEYCODE_BUTTON_14",
+        "KEYCODE_BUTTON_15",
+        "KEYCODE_BUTTON_16",
+        "KEYCODE_BUTTON_2",
+        "KEYCODE_BUTTON_3",
+        "KEYCODE_BUTTON_4",
+        "KEYCODE_BUTTON_5",
+        "KEYCODE_BUTTON_6",
+        "KEYCODE_BUTTON_7",
+        "KEYCODE_BUTTON_8",
+        "KEYCODE_BUTTON_9",
+        "KEYCODE_BUTTON_A",
+        "KEYCODE_BUTTON_B",
+        "KEYCODE_BUTTON_C",
+        "KEYCODE_BUTTON_L1",
+        "KEYCODE_BUTTON_L2",
+        "KEYCODE_BUTTON_MODE",
+        "KEYCODE_BUTTON_R1",
+        "KEYCODE_BUTTON_R2",
+        "KEYCODE_BUTTON_SELECT",
+        "KEYCODE_BUTTON_START",
+        "KEYCODE_BUTTON_THUMBL",
+        "KEYCODE_BUTTON_THUMBR",
+        "KEYCODE_BUTTON_X",
+        "KEYCODE_BUTTON_Y",
+        "KEYCODE_BUTTON_Z",
+        "KEYCODE_C",
+        "KEYCODE_CALCULATOR",
+        "KEYCODE_CALENDAR",
+        "KEYCODE_CALL",
+        "KEYCODE_CAMERA",
+        "KEYCODE_CAPS_LOCK",
+        "KEYCODE_CAPTIONS",
+        "KEYCODE_CHANNEL_DOWN",
+        "KEYCODE_CHANNEL_UP",
+        "KEYCODE_CLEAR",
+        "KEYCODE_CLOSE",
+        "KEYCODE_COMMA",
+        "KEYCODE_CONTACTS",
+        "KEYCODE_COPY",
+        "KEYCODE_CTRL_LEFT",
+        "KEYCODE_CTRL_RIGHT",
+        "KEYCODE_CUT",
+        "KEYCODE_D",
+        "KEYCODE_DEL",
+        "KEYCODE_DEMO_APP_1",
+        "KEYCODE_DEMO_APP_2",
+        "KEYCODE_DEMO_APP_3",
+        "KEYCODE_DEMO_APP_4",
+        "KEYCODE_DICTATE",
+        "KEYCODE_DO_NOT_DISTURB",
+        "KEYCODE_DPAD_CENTER",
+        "KEYCODE_DPAD_DOWN",
+        "KEYCODE_DPAD_DOWN_LEFT",
+        "KEYCODE_DPAD_DOWN_RIGHT",
+        "KEYCODE_DPAD_LEFT",
+        "KEYCODE_DPAD_RIGHT",
+        "KEYCODE_DPAD_UP",
+        "KEYCODE_DPAD_UP_LEFT",
+        "KEYCODE_DPAD_UP_RIGHT",
+        "KEYCODE_DVR",
+        "KEYCODE_E",
+        "KEYCODE_EISU",
+        "KEYCODE_EMOJI_PICKER",
+        "KEYCODE_ENDCALL",
+        "KEYCODE_ENTER",
+        "KEYCODE_ENVELOPE",
+        "KEYCODE_EQUALS",
+        "KEYCODE_ESCAPE",
+        "KEYCODE_EXPLORER",
+        "KEYCODE_F",
+        "KEYCODE_F1",
+        "KEYCODE_F10",
+        "KEYCODE_F11",
+        "KEYCODE_F12",
+        "KEYCODE_F13",
+        "KEYCODE_F14",
+        "KEYCODE_F15",
+        "KEYCODE_F16",
+        "KEYCODE_F17",
+        "KEYCODE_F18",
+        "KEYCODE_F19",
+        "KEYCODE_F2",
+        "KEYCODE_F20",
+        "KEYCODE_F21",
+        "KEYCODE_F22",
+        "KEYCODE_F23",
+        "KEYCODE_F24",
+        "KEYCODE_F3",
+        "KEYCODE_F4",
+        "KEYCODE_F5",
+        "KEYCODE_F6",
+        "KEYCODE_F7",
+        "KEYCODE_F8",
+        "KEYCODE_F9",
+        "KEYCODE_FEATURED_APP_1",
+        "KEYCODE_FEATURED_APP_2",
+        "KEYCODE_FEATURED_APP_3",
+        "KEYCODE_FEATURED_APP_4",
+        "KEYCODE_FOCUS",
+        "KEYCODE_FORWARD",
+        "KEYCODE_FORWARD_DEL",
+        "KEYCODE_FULLSCREEN",
+        "KEYCODE_FUNCTION",
+        "KEYCODE_G",
+        "KEYCODE_GRAVE",
+        "KEYCODE_GUIDE",
+        "KEYCODE_H",
+        "KEYCODE_HEADSETHOOK",
+        "KEYCODE_HELP",
+        "KEYCODE_HENKAN",
+        "KEYCODE_HOME",
+        "KEYCODE_I",
+        "KEYCODE_INFO",
+        "KEYCODE_INSERT",
+        "KEYCODE_J",
+        "KEYCODE_K",
+        "KEYCODE_KANA",
+        "KEYCODE_KATAKANA_HIRAGANA",
+        "KEYCODE_KEYBOARD_BACKLIGHT_DOWN",
+        "KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE",
+        "KEYCODE_KEYBOARD_BACKLIGHT_UP",
+        "KEYCODE_L",
+        "KEYCODE_LANGUAGE_SWITCH",
+        "KEYCODE_LAST_CHANNEL",
+        "KEYCODE_LEFT_BRACKET",
+        "KEYCODE_LOCK",
+        "KEYCODE_M",
+        "KEYCODE_MACRO_1",
+        "KEYCODE_MACRO_2",
+        "KEYCODE_MACRO_3",
+        "KEYCODE_MACRO_4",
+        "KEYCODE_MANNER_MODE",
+        "KEYCODE_MEDIA_AUDIO_TRACK",
+        "KEYCODE_MEDIA_CLOSE",
+        "KEYCODE_MEDIA_EJECT",
+        "KEYCODE_MEDIA_FAST_FORWARD",
+        "KEYCODE_MEDIA_NEXT",
+        "KEYCODE_MEDIA_PAUSE",
+        "KEYCODE_MEDIA_PLAY",
+        "KEYCODE_MEDIA_PLAY_PAUSE",
+        "KEYCODE_MEDIA_PREVIOUS",
+        "KEYCODE_MEDIA_RECORD",
+        "KEYCODE_MEDIA_REWIND",
+        "KEYCODE_MEDIA_SKIP_BACKWARD",
+        "KEYCODE_MEDIA_SKIP_FORWARD",
+        "KEYCODE_MEDIA_STEP_BACKWARD",
+        "KEYCODE_MEDIA_STEP_FORWARD",
+        "KEYCODE_MEDIA_STOP",
+        "KEYCODE_MEDIA_TOP_MENU",
+        "KEYCODE_MENU",
+        "KEYCODE_META_LEFT",
+        "KEYCODE_META_RIGHT",
+        "KEYCODE_MINUS",
+        "KEYCODE_MOVE_END",
+        "KEYCODE_MOVE_HOME",
+        "KEYCODE_MUHENKAN",
+        "KEYCODE_MUSIC",
+        "KEYCODE_MUTE",
+        "KEYCODE_N",
+        "KEYCODE_NAVIGATE_IN",
+        "KEYCODE_NAVIGATE_NEXT",
+        "KEYCODE_NAVIGATE_OUT",
+        "KEYCODE_NAVIGATE_PREVIOUS",
+        "KEYCODE_NEW",
+        "KEYCODE_NOTIFICATION",
+        "KEYCODE_NUM",
+        "KEYCODE_NUMPAD_0",
+        "KEYCODE_NUMPAD_1",
+        "KEYCODE_NUMPAD_2",
+        "KEYCODE_NUMPAD_3",
+        "KEYCODE_NUMPAD_4",
+        "KEYCODE_NUMPAD_5",
+        "KEYCODE_NUMPAD_6",
+        "KEYCODE_NUMPAD_7",
+        "KEYCODE_NUMPAD_8",
+        "KEYCODE_NUMPAD_9",
+        "KEYCODE_NUMPAD_ADD",
+        "KEYCODE_NUMPAD_COMMA",
+        "KEYCODE_NUMPAD_DIVIDE",
+        "KEYCODE_NUMPAD_DOT",
+        "KEYCODE_NUMPAD_ENTER",
+        "KEYCODE_NUMPAD_EQUALS",
+        "KEYCODE_NUMPAD_LEFT_PAREN",
+        "KEYCODE_NUMPAD_MULTIPLY",
+        "KEYCODE_NUMPAD_RIGHT_PAREN",
+        "KEYCODE_NUMPAD_SUBTRACT",
+        "KEYCODE_NUM_LOCK",
+        "KEYCODE_O",
+        "KEYCODE_P",
+        "KEYCODE_PAGE_DOWN",
+        "KEYCODE_PAGE_UP",
+        "KEYCODE_PAIRING",
+        "KEYCODE_PASTE",
+        "KEYCODE_PERIOD",
+        "KEYCODE_PICTSYMBOLS",
+        "KEYCODE_PLUS",
+        "KEYCODE_POUND",
+        "KEYCODE_POWER",
+        "KEYCODE_PRINT",
+        "KEYCODE_PROFILE_SWITCH",
+        "KEYCODE_PROG_BLUE",
+        "KEYCODE_PROG_GREEN",
+        "KEYCODE_PROG_RED",
+        "KEYCODE_PROG_YELLOW",
+        "KEYCODE_Q",
+        "KEYCODE_R",
+        "KEYCODE_RECENT_APPS",
+        "KEYCODE_REFRESH",
+        "KEYCODE_RIGHT_BRACKET",
+        "KEYCODE_RO",
+        "KEYCODE_S",
+        "KEYCODE_SCREENSHOT",
+        "KEYCODE_SCROLL_LOCK",
+        "KEYCODE_SEARCH",
+        "KEYCODE_SEMICOLON",
+        "KEYCODE_SETTINGS",
+        "KEYCODE_SHIFT_LEFT",
+        "KEYCODE_SHIFT_RIGHT",
+        "KEYCODE_SLASH",
+        "KEYCODE_SLEEP",
+        "KEYCODE_SOFT_LEFT",
+        "KEYCODE_SOFT_RIGHT",
+        "KEYCODE_SOFT_SLEEP",
+        "KEYCODE_SPACE",
+        "KEYCODE_STAR",
+        "KEYCODE_STB_INPUT",
+        "KEYCODE_STB_POWER",
+        "KEYCODE_STEM_1",
+        "KEYCODE_STEM_2",
+        "KEYCODE_STEM_3",
+        "KEYCODE_STEM_PRIMARY",
+        "KEYCODE_STYLUS_BUTTON_PRIMARY",
+        "KEYCODE_STYLUS_BUTTON_SECONDARY",
+        "KEYCODE_STYLUS_BUTTON_TAIL",
+        "KEYCODE_STYLUS_BUTTON_TERTIARY",
+        "KEYCODE_SWITCH_CHARSET",
+        "KEYCODE_SYM",
+        "KEYCODE_SYSRQ",
+        "KEYCODE_SYSTEM_NAVIGATION_DOWN",
+        "KEYCODE_SYSTEM_NAVIGATION_LEFT",
+        "KEYCODE_SYSTEM_NAVIGATION_RIGHT",
+        "KEYCODE_SYSTEM_NAVIGATION_UP",
+        "KEYCODE_T",
+        "KEYCODE_TAB",
+        "KEYCODE_THUMBS_DOWN",
+        "KEYCODE_THUMBS_UP",
+        "KEYCODE_TV",
+        "KEYCODE_TV_ANTENNA_CABLE",
+        "KEYCODE_TV_AUDIO_DESCRIPTION",
+        "KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN",
+        "KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP",
+        "KEYCODE_TV_CONTENTS_MENU",
+        "KEYCODE_TV_DATA_SERVICE",
+        "KEYCODE_TV_INPUT",
+        "KEYCODE_TV_INPUT_COMPONENT_1",
+        "KEYCODE_TV_INPUT_COMPONENT_2",
+        "KEYCODE_TV_INPUT_COMPOSITE_1",
+        "KEYCODE_TV_INPUT_COMPOSITE_2",
+        "KEYCODE_TV_INPUT_HDMI_1",
+        "KEYCODE_TV_INPUT_HDMI_2",
+        "KEYCODE_TV_INPUT_HDMI_3",
+        "KEYCODE_TV_INPUT_HDMI_4",
+        "KEYCODE_TV_INPUT_VGA_1",
+        "KEYCODE_TV_MEDIA_CONTEXT_MENU",
+        "KEYCODE_TV_NETWORK",
+        "KEYCODE_TV_NUMBER_ENTRY",
+        "KEYCODE_TV_POWER",
+        "KEYCODE_TV_RADIO_SERVICE",
+        "KEYCODE_TV_SATELLITE",
+        "KEYCODE_TV_SATELLITE_BS",
+        "KEYCODE_TV_SATELLITE_CS",
+        "KEYCODE_TV_SATELLITE_SERVICE",
+        "KEYCODE_TV_TELETEXT",
+        "KEYCODE_TV_TERRESTRIAL_ANALOG",
+        "KEYCODE_TV_TERRESTRIAL_DIGITAL",
+        "KEYCODE_TV_TIMER_PROGRAMMING",
+        "KEYCODE_TV_ZOOM_MODE",
+        "KEYCODE_U",
+        "KEYCODE_UNKNOWN",
+        "KEYCODE_V",
+        "KEYCODE_VIDEO_APP_1",
+        "KEYCODE_VIDEO_APP_2",
+        "KEYCODE_VIDEO_APP_3",
+        "KEYCODE_VIDEO_APP_4",
+        "KEYCODE_VIDEO_APP_5",
+        "KEYCODE_VIDEO_APP_6",
+        "KEYCODE_VIDEO_APP_7",
+        "KEYCODE_VIDEO_APP_8",
+        "KEYCODE_VOICE_ASSIST",
+        "KEYCODE_VOLUME_DOWN",
+        "KEYCODE_VOLUME_MUTE",
+        "KEYCODE_VOLUME_UP",
+        "KEYCODE_W",
+        "KEYCODE_WAKEUP",
+        "KEYCODE_WINDOW",
+        "KEYCODE_X",
+        "KEYCODE_Y",
+        "KEYCODE_YEN",
+        "KEYCODE_Z",
+        "KEYCODE_ZENKAKU_HANKAKU",
+        "KEYCODE_ZOOM_IN",
+        "KEYCODE_ZOOM_OUT"
+    ];
+
     [ObservableProperty] private bool _hasBrushPreview;
     [ObservableProperty] private Point _brushPreviewPoint;
     [ObservableProperty] private double _brushPreviewSize = 1;
+    [ObservableProperty] private string _brushPreviewRectText = string.Empty;
+    [ObservableProperty] private IBrush _brushPreviewStroke = new SolidColorBrush(Colors.LimeGreen);
+    [ObservableProperty] private IBrush _brushPreviewFill = new SolidColorBrush(Color.FromArgb(30, 0, 255, 0));
 
     private Bitmap? _pausedLiveViewImage;
+    private Size? _lastLiveViewSize;
 
     public Bitmap? LiveViewDisplayImage
     {
@@ -860,7 +1633,7 @@ public partial class ToolsViewModel : ViewModelBase
 
     partial void OnLiveViewScaleChanged(double value)
     {
-        var clamped = Math.Clamp(value, 0.1, 10.0);
+        var clamped = Math.Clamp(value, 0.1, 15.0);
         if (Math.Abs(clamped - value) > 0.0001)
         {
             LiveViewScale = clamped;
@@ -882,6 +1655,26 @@ public partial class ToolsViewModel : ViewModelBase
     partial void OnTargetWChanged(string value) => UpdateTargetRectFromText();
     partial void OnTargetHChanged(string value) => UpdateTargetRectFromText();
 
+    partial void OnColorPickXChanged(string value) => UpdateColorPickRectFromText();
+    partial void OnColorPickYChanged(string value) => UpdateColorPickRectFromText();
+    partial void OnColorPickWChanged(string value) => UpdateColorPickRectFromText();
+    partial void OnColorPickHChanged(string value) => UpdateColorPickRectFromText();
+
+    partial void OnScreenshotXChanged(string value) => UpdateScreenshotRectFromText();
+    partial void OnScreenshotYChanged(string value) => UpdateScreenshotRectFromText();
+    partial void OnScreenshotWChanged(string value) => UpdateScreenshotRectFromText();
+    partial void OnScreenshotHChanged(string value) => UpdateScreenshotRectFromText();
+
+    partial void OnOcrXChanged(string value) => UpdateOcrRectFromText();
+    partial void OnOcrYChanged(string value) => UpdateOcrRectFromText();
+    partial void OnOcrWChanged(string value) => UpdateOcrRectFromText();
+    partial void OnOcrHChanged(string value) => UpdateOcrRectFromText();
+
+    partial void OnSwipeStartXChanged(string value) => UpdateSwipeFromText();
+    partial void OnSwipeStartYChanged(string value) => UpdateSwipeFromText();
+    partial void OnSwipeEndXChanged(string value) => UpdateSwipeFromText();
+    partial void OnSwipeEndYChanged(string value) => UpdateSwipeFromText();
+
     partial void OnActiveToolModeChanged(LiveViewToolMode value)
     {
         if (value != LiveViewToolMode.ColorPick)
@@ -893,6 +1686,26 @@ public partial class ToolsViewModel : ViewModelBase
         {
             IsScreenshotBrushMode = false;
             ResetScreenshotBrushPreview();
+        }
+
+        if (value != LiveViewToolMode.Ocr
+            && value != LiveViewToolMode.Screenshot
+            && value != LiveViewToolMode.Roi
+            && value != LiveViewToolMode.Swipe)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsScreenshotTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+
+        if (value != LiveViewToolMode.Key)
+        {
+            IsKeyCaptureActive = false;
         }
 
         IsToolPanelVisible = value != LiveViewToolMode.None;
@@ -907,7 +1720,7 @@ public partial class ToolsViewModel : ViewModelBase
 
         SyncToolModeFlags();
 
-        if (value == LiveViewToolMode.Roi)
+        if (value != LiveViewToolMode.None)
         {
             ApplySelectionPreview();
         }
@@ -921,6 +1734,19 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveToolMode = LiveViewToolMode.None;
             HasSelection = false;
             HasSecondarySelection = false;
+        }
+    }
+
+    partial void OnIsKeyModeChanged(bool value)
+    {
+        if (_suppressToolModeSync) return;
+        if (value)
+        {
+            ActiveToolMode = LiveViewToolMode.Key;
+        }
+        else if (ActiveToolMode == LiveViewToolMode.Key)
+        {
+            ActiveToolMode = LiveViewToolMode.None;
         }
     }
 
@@ -1037,6 +1863,123 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveToolMode = LiveViewToolMode.None;
         }
     }
+
+    partial void OnIsTestPanelVisibleChanged(bool value)
+    {
+        if (value)
+        {
+            return;
+        }
+
+        _suppressTestPanelSync = true;
+        IsOcrTestPanelVisible = false;
+        IsScreenshotTestPanelVisible = false;
+        IsClickTestPanelVisible = false;
+        IsSwipeTestPanelVisible = false;
+        _suppressTestPanelSync = false;
+        ActiveTestPanelMode = TestPanelMode.None;
+    }
+
+    partial void OnIsOcrTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsScreenshotTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.Ocr;
+            SyncOcrMatchDefaults(true);
+        }
+        else if (!IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+
+    partial void OnIsScreenshotTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.Screenshot;
+            SyncTemplateMatchDefaults(true);
+        }
+        else if (!IsOcrTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+
+    partial void OnIsClickTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsScreenshotTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.Click;
+            SyncClickTestDefaults(true);
+        }
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsSwipeTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+
+    partial void OnIsSwipeTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsScreenshotTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.Swipe;
+            SyncSwipeTestDefaults(true);
+        }
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+
     partial void OnIsScreenshotBrushModeChanged(bool value)
     {
         if (!value)
@@ -1057,6 +2000,7 @@ public partial class ToolsViewModel : ViewModelBase
     partial void OnScreenshotBrushSizeChanged(int value)
     {
         BrushPreviewSize = Math.Max(1, value);
+        UpdateBrushPreviewRectText();
     }
 
     [RelayCommand]
@@ -1316,6 +2260,12 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
+        if (x == 0 && y == 0 && w == 0 && h == 0)
+        {
+            applyAction(new Rect(0, 0, 0, 0));
+            return true;
+        }
+
         if (w <= 0 || h <= 0)
         {
             return false;
@@ -1323,6 +2273,66 @@ public partial class ToolsViewModel : ViewModelBase
 
         var rect = new Rect(Math.Max(0, x), Math.Max(0, y), Math.Max(1, w), Math.Max(1, h));
         applyAction(rect);
+        return true;
+    }
+
+    private async Task<bool> TryGetClipboardPointAsync(Action<Point> applyAction)
+    {
+        var clipboard = Instances.RootView?.Clipboard;
+        if (clipboard == null)
+        {
+            return false;
+        }
+
+        var text = await clipboard.GetTextAsync();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        var matches = Regex.Matches(text, @"-?\d+");
+        if (matches.Count < 2)
+        {
+            return false;
+        }
+
+        if (!double.TryParse(matches[0].Value, out var x)
+            || !double.TryParse(matches[1].Value, out var y))
+        {
+            return false;
+        }
+
+        var point = new Point(Math.Max(0, x), Math.Max(0, y));
+        applyAction(point);
+        return true;
+    }
+
+    private async Task<bool> TryGetClipboardNumberAsync(Action<double> applyAction)
+    {
+        var clipboard = Instances.RootView?.Clipboard;
+        if (clipboard == null)
+        {
+            return false;
+        }
+
+        var text = await clipboard.GetTextAsync();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        var matches = Regex.Matches(text, @"-?\d+");
+        if (matches.Count < 1)
+        {
+            return false;
+        }
+
+        if (!double.TryParse(matches[0].Value, out var value))
+        {
+            return false;
+        }
+
+        applyAction(value);
         return true;
     }
 
@@ -1352,6 +2362,7 @@ public partial class ToolsViewModel : ViewModelBase
         IsSwipeMode = ActiveToolMode == LiveViewToolMode.Swipe;
         IsOcrMode = ActiveToolMode == LiveViewToolMode.Ocr;
         IsScreenshotMode = ActiveToolMode == LiveViewToolMode.Screenshot;
+        IsKeyMode = ActiveToolMode == LiveViewToolMode.Key;
         _suppressToolModeSync = false;
     }
 
@@ -1367,7 +2378,16 @@ public partial class ToolsViewModel : ViewModelBase
 
     public void UpdateSelection(Rect rect, bool hasSelection)
     {
-        UpdateSelectionWithSecondary(rect, hasSelection, RoiSelectionType);
+        if (ActiveToolMode == LiveViewToolMode.Roi)
+        {
+            UpdateSelectionWithSecondary(rect, hasSelection, RoiSelectionType);
+            return;
+        }
+
+        SelectionRect = rect;
+        HasSelection = hasSelection;
+        SecondarySelectionRect = default;
+        HasSecondarySelection = false;
     }
 
     public void ApplySelection(Rect rect)
@@ -1561,6 +2581,20 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ClearColorPick()
+    {
+        _suppressColorPickSync = true;
+        _colorPickRect = default;
+        ColorPickX = "0";
+        ColorPickY = "0";
+        ColorPickW = "0";
+        ColorPickH = "0";
+        _suppressColorPickSync = false;
+        UpdateColorPickExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    [RelayCommand]
     private void CopyScreenshotRect()
     {
         CopyTextToClipboard(BuildRectClipboardText(ScreenshotX, ScreenshotY, ScreenshotW, ScreenshotH), "复制截图ROI到剪贴板");
@@ -1579,6 +2613,20 @@ public partial class ToolsViewModel : ViewModelBase
     private void CopyScreenshotExpandedRect()
     {
         CopyTextToClipboard(BuildRectClipboardText(ScreenshotExpandedX, ScreenshotExpandedY, ScreenshotExpandedW, ScreenshotExpandedH), "复制截图扩展ROI到剪贴板");
+    }
+
+    [RelayCommand]
+    private void ClearScreenshot()
+    {
+        _suppressScreenshotSync = true;
+        _screenshotRect = default;
+        ScreenshotX = "0";
+        ScreenshotY = "0";
+        ScreenshotW = "0";
+        ScreenshotH = "0";
+        _suppressScreenshotSync = false;
+        UpdateScreenshotExpandedRect();
+        ApplySelectionPreview();
     }
 
     [RelayCommand]
@@ -1603,9 +2651,142 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ClearOcr()
+    {
+        _suppressOcrSync = true;
+        _ocrRect = default;
+        OcrX = "0";
+        OcrY = "0";
+        OcrW = "0";
+        OcrH = "0";
+        _suppressOcrSync = false;
+        UpdateOcrExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    [RelayCommand]
     private void CopyOcrResult()
     {
         CopyTextToClipboard(OcrResult ?? string.Empty, "复制OCR结果到剪贴板");
+    }
+
+    [RelayCommand]
+    private async Task PasteOcrMatchRect()
+    {
+        if (await TryGetClipboardRectAsync(SetOcrMatchRect))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearOcrMatchRect()
+    {
+        OcrMatchRoiX = "0";
+        OcrMatchRoiY = "0";
+        OcrMatchRoiW = "0";
+        OcrMatchRoiH = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteTemplateMatchRect()
+    {
+        if (await TryGetClipboardRectAsync(SetTemplateMatchRect))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearTemplateMatchRect()
+    {
+        TemplateMatchRoiX = "0";
+        TemplateMatchRoiY = "0";
+        TemplateMatchRoiW = "0";
+        TemplateMatchRoiH = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteClickTestTarget()
+    {
+        if (await TryGetClipboardRectAsync(SetClickTestTargetRect))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearClickTestTarget()
+    {
+        ClickTestTargetX = "0";
+        ClickTestTargetY = "0";
+        ClickTestTargetW = "0";
+        ClickTestTargetH = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteClickTestOffset()
+    {
+        if (await TryGetClipboardRectAsync(SetClickTestOffsetRect))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearClickTestOffset()
+    {
+        ClickTestOffsetX = "0";
+        ClickTestOffsetY = "0";
+        ClickTestOffsetW = "0";
+        ClickTestOffsetH = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteSwipeTestStart()
+    {
+        if (await TryGetClipboardPointAsync(SetSwipeTestStart))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSwipeTestStart()
+    {
+        SwipeTestStartX = "0";
+        SwipeTestStartY = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteSwipeTestEnd()
+    {
+        if (await TryGetClipboardPointAsync(SetSwipeTestEnd))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSwipeTestEnd()
+    {
+        SwipeTestEndX = "0";
+        SwipeTestEndY = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteSwipeTestDuration()
+    {
+        if (await TryGetClipboardNumberAsync(SetSwipeTestDuration))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSwipeTestDuration()
+    {
+        SwipeTestDuration = "0";
     }
 
     [RelayCommand]
@@ -1652,7 +2833,6 @@ public partial class ToolsViewModel : ViewModelBase
             ApplyColorFilter();
         }
     }
-
     [RelayCommand]
     private async Task RunOcr()
     {
@@ -1676,16 +2856,211 @@ public partial class ToolsViewModel : ViewModelBase
             return;
         }
 
-        var result = RecognitionHelper.ReadTextFromMaaTasker(
+        TaskManager.RunTask(() =>
+        {
+            var result = RecognitionHelper.ReadTextFromMaaTasker(
+                tasker,
+                bitmap,
+                (int)Math.Round(rect.X),
+                (int)Math.Round(rect.Y),
+                Math.Max(1, (int)Math.Round(rect.Width)),
+                Math.Max(1, (int)Math.Round(rect.Height)));
+            DispatcherHelper.PostOnMainThread(() => OcrResult = result);
+
+        }, "OCR");
+    }
+
+    [RelayCommand]
+    private async Task RunOcrHitTest()
+    {
+        IsOcrTestPanelVisible = true;
+        SyncOcrMatchDefaults();
+
+        if (!TryParseRect(OcrMatchRoiX, OcrMatchRoiY, OcrMatchRoiW, OcrMatchRoiH, out var rect))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectOcrRegion.ToLocalization());
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(OcrMatchTargetText))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.EditTaskDialog_RecognitionText_Tooltip.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        if (!double.TryParse(OcrMatchThreshold, out var threshold))
+        {
+            threshold = 0.3;
+        }
+
+        RecognitionHelper.RunOcrMatch(
             tasker,
-            bitmap,
             (int)Math.Round(rect.X),
             (int)Math.Round(rect.Y),
-            Math.Max(1, (int)Math.Round(rect.Width)),
-            Math.Max(1, (int)Math.Round(rect.Height)));
-
-        OcrResult = result;
+            Math.Max(0, (int)Math.Round(rect.Width)),
+            Math.Max(0, (int)Math.Round(rect.Height)),
+            OcrMatchTargetText,
+            threshold,
+            OcrMatchOnlyRec);
     }
+
+    [RelayCommand]
+    private async Task RunTemplateMatchTest()
+    {
+        IsScreenshotTestPanelVisible = true;
+        SyncTemplateMatchDefaults();
+
+        if (TemplateMatchImage == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.SelectExistingImage.ToLocalization());
+            return;
+        }
+
+        if (!TryParseRect(TemplateMatchRoiX, TemplateMatchRoiY, TemplateMatchRoiW, TemplateMatchRoiH, out var rect))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectScreenshotRegion.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        if (!double.TryParse(TemplateMatchThreshold, out var threshold))
+        {
+            threshold = 0.7;
+        }
+
+        RecognitionHelper.RunTemplateMatch(
+            tasker,
+            (int)Math.Round(rect.X),
+            (int)Math.Round(rect.Y),
+            Math.Max(0, (int)Math.Round(rect.Width)),
+            Math.Max(0, (int)Math.Round(rect.Height)),
+            TemplateMatchImage,
+            TemplateMatchGreenMask,
+            threshold,
+            TemplateMatchMethod);
+    }
+
+    [RelayCommand]
+    private async Task RunClickHitTest()
+    {
+        IsClickTestPanelVisible = true;
+        SyncClickTestDefaults();
+
+        if (!TryParseRect(ClickTestTargetX, ClickTestTargetY, ClickTestTargetW, ClickTestTargetH, out var targetRect))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.EditTaskDialog_SelectionRegion_Tooltip.ToLocalization());
+            return;
+        }
+
+        if (!TryParseOffset(ClickTestOffsetX, ClickTestOffsetY, ClickTestOffsetW, ClickTestOffsetH,
+                out var offsetX, out var offsetY, out var offsetW, out var offsetH))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.EditTaskDialog_SelectionRegion_Tooltip.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        if (IsLiveViewPaused)
+            IsLiveViewPaused = false;
+        RecognitionHelper.RunClickTest(
+            tasker,
+            (int)Math.Round(targetRect.X),
+            (int)Math.Round(targetRect.Y),
+            Math.Max(0, (int)Math.Round(targetRect.Width)),
+            Math.Max(0, (int)Math.Round(targetRect.Height)),
+            (int)Math.Round(offsetX),
+            (int)Math.Round(offsetY),
+            (int)Math.Round(offsetW),
+            (int)Math.Round(offsetH));
+    }
+
+    [RelayCommand]
+    private async Task RunSwipeHitTest()
+    {
+        IsSwipeTestPanelVisible = true;
+        SyncSwipeTestDefaults();
+
+        if (!TryParsePoint(SwipeTestStartX, SwipeTestStartY, out var start)
+            || !TryParsePoint(SwipeTestEndX, SwipeTestEndY, out var end))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectScreenshotRegion.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        if (!int.TryParse(SwipeTestDuration, out var duration) || duration <= 0)
+        {
+            duration = 200;
+        }
+
+        if (IsLiveViewPaused)
+            IsLiveViewPaused = false;
+        RecognitionHelper.RunSwipeTest(
+            tasker,
+            (int)Math.Round(start.X),
+            (int)Math.Round(start.Y),
+            (int)Math.Round(end.X),
+            (int)Math.Round(end.Y),
+            duration);
+    }
+
+    [RelayCommand]
+    private async Task SelectTemplateImage()
+    {
+        var topLevel = TopLevel.GetTopLevel(Instances.RootView);
+        if (topLevel == null)
+        {
+            return;
+        }
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = LangKeys.SelectExistingImage.ToLocalization(),
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Images")
+                {
+                    Patterns = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.webp"]
+                }
+            ]
+        });
+
+        var file = files?.FirstOrDefault();
+        if (file == null)
+        {
+            return;
+        }
+
+        await using var stream = await file.OpenReadAsync();
+        TemplateMatchImage = new Bitmap(stream);
+    }
+
 
     [RelayCommand]
     private async Task SaveScreenshot()
@@ -1696,7 +3071,7 @@ public partial class ToolsViewModel : ViewModelBase
             return;
         }
 
-        if (_screenshotRect.Width <= 0 || _screenshotRect.Height <= 0)
+        if (_screenshotRect.Width < 0 || _screenshotRect.Height < 0)
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectScreenshotRegion.ToLocalization());
             return;
@@ -1761,9 +3136,37 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task PasteSwipeStart()
+    {
+        if (await TryGetClipboardPointAsync(SetSwipeStart))
+        {
+            ApplySelectionPreview();
+        }
+    }
+
+    [RelayCommand]
     private void CopySwipeEnd()
     {
         CopyTextToClipboard(BuildPointClipboardText(SwipeEndX, SwipeEndY), "复制Swipe终点到剪贴板");
+    }
+
+    [RelayCommand]
+    private async Task PasteSwipeEnd()
+    {
+        if (await TryGetClipboardPointAsync(SetSwipeEnd))
+        {
+            ApplySelectionPreview();
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSwipe()
+    {
+        SwipeStartX = "0";
+        SwipeStartY = "0";
+        SwipeEndX = "0";
+        SwipeEndY = "0";
+        UpdateSwipeArrow();
     }
 
     private static string BuildPointClipboardText(string xText, string yText)
@@ -1792,6 +3195,62 @@ public partial class ToolsViewModel : ViewModelBase
         _roiRect = rect;
         UpdateOffsets();
         ApplySelectionPreview();
+    }
+
+    private void UpdateColorPickRectFromText()
+    {
+        if (_suppressColorPickSync)
+        {
+            return;
+        }
+
+        if (!TryParseRect(ColorPickX, ColorPickY, ColorPickW, ColorPickH, out var rect))
+        {
+            return;
+        }
+
+        _colorPickRect = rect;
+        UpdateColorPickExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    private void UpdateScreenshotRectFromText()
+    {
+        if (_suppressScreenshotSync)
+        {
+            return;
+        }
+
+        if (!TryParseRect(ScreenshotX, ScreenshotY, ScreenshotW, ScreenshotH, out var rect))
+        {
+            return;
+        }
+
+        _screenshotRect = rect;
+        UpdateScreenshotExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    private void UpdateOcrRectFromText()
+    {
+        if (_suppressOcrSync)
+        {
+            return;
+        }
+
+        if (!TryParseRect(OcrX, OcrY, OcrW, OcrH, out var rect))
+        {
+            return;
+        }
+
+        _ocrRect = rect;
+        UpdateOcrExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    private void UpdateSwipeFromText()
+    {
+        UpdateSwipeArrow();
     }
 
     private void UpdateOriginTargetRectFromText()
@@ -1842,31 +3301,37 @@ public partial class ToolsViewModel : ViewModelBase
 
     private void SetColorPickRect(Rect rect)
     {
+        _suppressColorPickSync = true;
         _colorPickRect = rect;
         ColorPickX = ((int)Math.Round(rect.X)).ToString();
         ColorPickY = ((int)Math.Round(rect.Y)).ToString();
         ColorPickW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
         ColorPickH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+        _suppressColorPickSync = false;
         UpdateColorPickExpandedRect();
     }
 
     private void SetScreenshotRect(Rect rect)
     {
+        _suppressScreenshotSync = true;
         _screenshotRect = rect;
         ScreenshotX = ((int)Math.Round(rect.X)).ToString();
         ScreenshotY = ((int)Math.Round(rect.Y)).ToString();
         ScreenshotW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
         ScreenshotH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+        _suppressScreenshotSync = false;
         UpdateScreenshotExpandedRect();
     }
 
     private void SetOcrRect(Rect rect)
     {
+        _suppressOcrSync = true;
         _ocrRect = rect;
         OcrX = ((int)Math.Round(rect.X)).ToString();
         OcrY = ((int)Math.Round(rect.Y)).ToString();
         OcrW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
         OcrH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+        _suppressOcrSync = false;
         UpdateOcrExpandedRect();
     }
 
@@ -1895,6 +3360,198 @@ public partial class ToolsViewModel : ViewModelBase
         OcrExpandedY = ((int)Math.Round(_ocrExpandedRect.Y)).ToString();
         OcrExpandedW = Math.Max(1, (int)Math.Round(_ocrExpandedRect.Width)).ToString();
         OcrExpandedH = Math.Max(1, (int)Math.Round(_ocrExpandedRect.Height)).ToString();
+    }
+
+    private void SetOcrMatchRect(Rect rect)
+    {
+        OcrMatchRoiX = ((int)Math.Round(rect.X)).ToString();
+        OcrMatchRoiY = ((int)Math.Round(rect.Y)).ToString();
+        OcrMatchRoiW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
+        OcrMatchRoiH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+    }
+
+    private void SetTemplateMatchRect(Rect rect)
+    {
+        TemplateMatchRoiX = ((int)Math.Round(rect.X)).ToString();
+        TemplateMatchRoiY = ((int)Math.Round(rect.Y)).ToString();
+        TemplateMatchRoiW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
+        TemplateMatchRoiH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+    }
+
+    private void SetClickTestTargetRect(Rect rect)
+    {
+        ClickTestTargetX = ((int)Math.Round(rect.X)).ToString();
+        ClickTestTargetY = ((int)Math.Round(rect.Y)).ToString();
+        ClickTestTargetW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
+        ClickTestTargetH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+    }
+
+    private void SetClickTestOffsetRect(Rect rect)
+    {
+        ClickTestOffsetX = ((int)Math.Round(rect.X)).ToString();
+        ClickTestOffsetY = ((int)Math.Round(rect.Y)).ToString();
+        ClickTestOffsetW = ((int)Math.Round(rect.Width)).ToString();
+        ClickTestOffsetH = ((int)Math.Round(rect.Height)).ToString();
+    }
+
+    private void SetSwipeTestStart(Point point)
+    {
+        SwipeTestStartX = ((int)Math.Round(point.X)).ToString();
+        SwipeTestStartY = ((int)Math.Round(point.Y)).ToString();
+    }
+
+    private void SetSwipeTestEnd(Point point)
+    {
+        SwipeTestEndX = ((int)Math.Round(point.X)).ToString();
+        SwipeTestEndY = ((int)Math.Round(point.Y)).ToString();
+    }
+
+    private void SetSwipeTestDuration(double duration)
+    {
+        SwipeTestDuration = ((int)Math.Round(duration)).ToString();
+    }
+
+    private void SyncOcrMatchDefaults(bool force = false)
+    {
+        if (force)
+        {
+            if (TryParseRect(OcrExpandedX, OcrExpandedY, OcrExpandedW, OcrExpandedH, out var expandedRect)
+                && expandedRect.Width > 0
+                && expandedRect.Height > 0)
+            {
+                OcrMatchRoiX = OcrExpandedX;
+                OcrMatchRoiY = OcrExpandedY;
+                OcrMatchRoiW = OcrExpandedW;
+                OcrMatchRoiH = OcrExpandedH;
+            }
+        }
+        else if (!TryParseRect(OcrMatchRoiX, OcrMatchRoiY, OcrMatchRoiW, OcrMatchRoiH, out var matchRect)
+                 || matchRect.Width <= 0
+                 || matchRect.Height <= 0)
+        {
+            OcrMatchRoiX = OcrExpandedX;
+            OcrMatchRoiY = OcrExpandedY;
+            OcrMatchRoiW = OcrExpandedW;
+            OcrMatchRoiH = OcrExpandedH;
+        }
+
+        if (!string.IsNullOrWhiteSpace(OcrResult))
+        {
+            OcrMatchTargetText = OcrResult;
+        }
+    }
+
+    private void SyncTemplateMatchDefaults(bool force = false)
+    {
+        if (force)
+        {
+            if (TryParseRect(ScreenshotX, ScreenshotY, ScreenshotW, ScreenshotH, out var screenshotRect)
+                && screenshotRect.Width > 0
+                && screenshotRect.Height > 0)
+            {
+                TemplateMatchRoiX = ScreenshotX;
+                TemplateMatchRoiY = ScreenshotY;
+                TemplateMatchRoiW = ScreenshotW;
+                TemplateMatchRoiH = ScreenshotH;
+            }
+        }
+        else if (!TryParseRect(TemplateMatchRoiX, TemplateMatchRoiY, TemplateMatchRoiW, TemplateMatchRoiH, out var matchRect)
+                 || matchRect.Width <= 0
+                 || matchRect.Height <= 0)
+        {
+            TemplateMatchRoiX = ScreenshotX;
+            TemplateMatchRoiY = ScreenshotY;
+            TemplateMatchRoiW = ScreenshotW;
+            TemplateMatchRoiH = ScreenshotH;
+        }
+
+        if (TemplateMatchMethod == 0)
+        {
+            TemplateMatchMethod = 5;
+        }
+    }
+
+    private void SyncClickTestDefaults(bool force = false)
+    {
+        var baseRect = IsTargetMode ? _originTargetRect : _roiRect;
+        if (force)
+        {
+            if (baseRect.Width > 0 && baseRect.Height > 0)
+            {
+                SetClickTestTargetRect(baseRect);
+            }
+        }
+        else if (!TryParseRect(ClickTestTargetX, ClickTestTargetY, ClickTestTargetW, ClickTestTargetH, out var targetRect)
+                 || targetRect.Width < 0
+                 || targetRect.Height < 0)
+        {
+            if (baseRect.Width > 0 && baseRect.Height > 0)
+            {
+                SetClickTestTargetRect(baseRect);
+            }
+        }
+
+        if (force)
+        {
+            if (TryParseOffset(OffsetX, OffsetY, OffsetW, OffsetH, out _, out _, out _, out _))
+            {
+                ClickTestOffsetX = OffsetX;
+                ClickTestOffsetY = OffsetY;
+                ClickTestOffsetW = OffsetW;
+                ClickTestOffsetH = OffsetH;
+            }
+        }
+        else if (!TryParseOffset(ClickTestOffsetX, ClickTestOffsetY, ClickTestOffsetW, ClickTestOffsetH,
+                     out _, out _, out _, out _))
+        {
+            ClickTestOffsetX = OffsetX;
+            ClickTestOffsetY = OffsetY;
+            ClickTestOffsetW = OffsetW;
+            ClickTestOffsetH = OffsetH;
+        }
+    }
+
+    private void SyncSwipeTestDefaults(bool force = false)
+    {
+        if (force)
+        {
+            if (TryParsePoint(SwipeStartX, SwipeStartY, out _))
+            {
+                SwipeTestStartX = SwipeStartX;
+                SwipeTestStartY = SwipeStartY;
+            }
+
+            if (TryParsePoint(SwipeEndX, SwipeEndY, out _))
+            {
+                SwipeTestEndX = SwipeEndX;
+                SwipeTestEndY = SwipeEndY;
+            }
+        }
+        else
+        {
+            if (!TryParsePoint(SwipeTestStartX, SwipeTestStartY, out _))
+            {
+                if (TryParsePoint(SwipeStartX, SwipeStartY, out _))
+                {
+                    SwipeTestStartX = SwipeStartX;
+                    SwipeTestStartY = SwipeStartY;
+                }
+            }
+
+            if (!TryParsePoint(SwipeTestEndX, SwipeTestEndY, out _))
+            {
+                if (TryParsePoint(SwipeEndX, SwipeEndY, out _))
+                {
+                    SwipeTestEndX = SwipeEndX;
+                    SwipeTestEndY = SwipeEndY;
+                }
+            }
+        }
+
+        if (!int.TryParse(SwipeTestDuration, out var duration) || duration <= 0)
+        {
+            SwipeTestDuration = "200";
+        }
     }
 
     private Rect BuildExpandedRect(Rect rect)
@@ -1961,6 +3618,11 @@ public partial class ToolsViewModel : ViewModelBase
 
     private void ApplySelectionPreview()
     {
+        SelectionStroke = RoiSelectionStroke;
+        SelectionFill = RoiSelectionFill;
+        TargetSelectionStroke = TargetSelectionStrokeDefault;
+        TargetSelectionFill = TargetSelectionFillDefault;
+
         switch (ActiveToolMode)
         {
             case LiveViewToolMode.Roi:
@@ -1989,6 +3651,10 @@ public partial class ToolsViewModel : ViewModelBase
             case LiveViewToolMode.Swipe:
                 ClearSelectionPreview();
                 UpdateSwipeArrow();
+                break;
+            case LiveViewToolMode.Key:
+                HasSwipeArrow = false;
+                ClearSelectionPreview();
                 break;
         }
     }
@@ -2100,6 +3766,66 @@ public partial class ToolsViewModel : ViewModelBase
         return IsLiveViewPaused ? _pausedLiveViewImage ?? LiveViewImage : LiveViewImage;
     }
 
+    public void UpdatePointerPreview(Point point)
+    {
+        var bitmap = GetLiveViewBaseImage();
+        if (bitmap == null)
+        {
+            HasBrushPreview = false;
+            BrushPreviewRectText = string.Empty;
+            return;
+        }
+
+        var maxX = Math.Max(0, bitmap.Size.Width - 1);
+        var maxY = Math.Max(0, bitmap.Size.Height - 1);
+        var snapped = new Point(
+            Math.Clamp(Math.Round(point.X), 0, maxX),
+            Math.Clamp(Math.Round(point.Y), 0, maxY));
+
+        BrushPreviewSize = IsScreenshotBrushMode ? Math.Max(1, ScreenshotBrushSize) : 1;
+        BrushPreviewPoint = snapped;
+        HasBrushPreview = true;
+        UpdateBrushPreviewRectText();
+
+        var color = ReadPixelColor(bitmap, snapped);
+        var inverted = Color.FromArgb(220, (byte)(255 - color.R), (byte)(255 - color.G), (byte)(255 - color.B));
+        BrushPreviewStroke = new SolidColorBrush(inverted);
+
+        var fillAlpha = BrushPreviewSize <= 1 ? (byte)220 : (byte)40;
+        BrushPreviewFill = new SolidColorBrush(Color.FromArgb(fillAlpha, inverted.R, inverted.G, inverted.B));
+    }
+
+    private static Color ReadPixelColor(Bitmap bitmap, Point point)
+    {
+        var x = (int)Math.Clamp(point.X, 0, Math.Max(0, bitmap.Size.Width - 1));
+        var y = (int)Math.Clamp(point.Y, 0, Math.Max(0, bitmap.Size.Height - 1));
+        var buffer = new byte[4];
+        var rect = new PixelRect(x, y, 1, 1);
+        unsafe
+        {
+            fixed (byte* ptr = buffer)
+            {
+                bitmap.CopyPixels(rect, (IntPtr)ptr, buffer.Length, 4);
+            }
+        }
+
+        var a = buffer[3];
+        if (a == 0)
+        {
+            return Colors.Transparent;
+        }
+
+        if (a < 255)
+        {
+            var r = (byte)Math.Clamp(buffer[2] * 255.0 / a, 0, 255);
+            var g = (byte)Math.Clamp(buffer[1] * 255.0 / a, 0, 255);
+            var b = (byte)Math.Clamp(buffer[0] * 255.0 / a, 0, 255);
+            return Color.FromArgb(a, r, g, b);
+        }
+
+        return Color.FromArgb(a, buffer[2], buffer[1], buffer[0]);
+    }
+
     private void ResetScreenshotBrushPreview()
     {
         _screenshotBrushImage?.Dispose();
@@ -2107,24 +3833,35 @@ public partial class ToolsViewModel : ViewModelBase
         OnPropertyChanged(nameof(LiveViewDisplayImage));
     }
 
+    private void UpdateBrushPreviewRectText()
+    {
+        if (!HasBrushPreview)
+        {
+            BrushPreviewRectText = string.Empty;
+            return;
+        }
+
+        var sizeValue = Math.Max(1, (int)Math.Round(BrushPreviewSize));
+        var half = (sizeValue - 1) / 2.0;
+        var x = (int)Math.Floor(BrushPreviewPoint.X - half);
+        var y = (int)Math.Floor(BrushPreviewPoint.Y - half);
+        BrushPreviewRectText = $"[{x}, {y}, {sizeValue}, {sizeValue}]";
+    }
+
     private void UpdateBrushPreviewAvailability()
     {
-        HasBrushPreview = IsScreenshotBrushMode && IsLiveViewPaused && GetLiveViewBaseImage() != null;
+        HasBrushPreview = GetLiveViewBaseImage() != null;
         if (!HasBrushPreview)
         {
             BrushPreviewPoint = default;
         }
+
+        UpdateBrushPreviewRectText();
     }
 
     public void UpdateScreenshotBrushPreview(Point point)
     {
-        if (!IsScreenshotBrushMode || !IsLiveViewPaused)
-        {
-            return;
-        }
-
-        BrushPreviewPoint = point;
-        HasBrushPreview = true;
+        UpdatePointerPreview(point);
     }
 
     private void EnsureScreenshotBrushImage()
@@ -2503,9 +4240,42 @@ public partial class ToolsViewModel : ViewModelBase
         if (!double.TryParse(yText, out var y)) return false;
         if (!double.TryParse(wText, out var w)) return false;
         if (!double.TryParse(hText, out var h)) return false;
+
+        if (x == 0 && y == 0 && w == 0 && h == 0)
+        {
+            rect = new Rect(0, 0, 0, 0);
+            return true;
+        }
+
         if (w <= 0 || h <= 0) return false;
 
         rect = new Rect(Math.Max(0, x), Math.Max(0, y), w, h);
+        return true;
+    }
+
+    private static bool TryParseOffset(string xText,
+        string yText,
+        string wText,
+        string hText,
+        out double x,
+        out double y,
+        out double w,
+        out double h)
+    {
+        x = y = w = h = 0;
+        if (!double.TryParse(xText, out x)) return false;
+        if (!double.TryParse(yText, out y)) return false;
+        if (!double.TryParse(wText, out w)) return false;
+        if (!double.TryParse(hText, out h)) return false;
+        return true;
+    }
+
+    private static bool TryParsePoint(string xText, string yText, out Point point)
+    {
+        point = default;
+        if (!double.TryParse(xText, out var x)) return false;
+        if (!double.TryParse(yText, out var y)) return false;
+        point = new Point(x, y);
         return true;
     }
 
@@ -2547,6 +4317,659 @@ public partial class ToolsViewModel : ViewModelBase
         s = (int)Math.Round(sat * 255);
         v = (int)Math.Round(max * 255);
     }
+    private static readonly Dictionary<Key, int> Win32KeyMap = new()
+    {
+        {
+            Key.Back, 0x08
+        },
+        {
+            Key.Tab, 0x09
+        },
+        {
+            Key.Enter, 0x0D
+        },
+        {
+            Key.Escape, 0x1B
+        },
+        {
+            Key.Space, 0x20
+        },
+        {
+            Key.PageUp, 0x21
+        },
+        {
+            Key.PageDown, 0x22
+        },
+        {
+            Key.End, 0x23
+        },
+        {
+            Key.Home, 0x24
+        },
+        {
+            Key.Left, 0x25
+        },
+        {
+            Key.Up, 0x26
+        },
+        {
+            Key.Right, 0x27
+        },
+        {
+            Key.Down, 0x28
+        },
+        {
+            Key.Insert, 0x2D
+        },
+        {
+            Key.Delete, 0x2E
+        },
+        {
+            Key.D0, 0x30
+        },
+        {
+            Key.D1, 0x31
+        },
+        {
+            Key.D2, 0x32
+        },
+        {
+            Key.D3, 0x33
+        },
+        {
+            Key.D4, 0x34
+        },
+        {
+            Key.D5, 0x35
+        },
+        {
+            Key.D6, 0x36
+        },
+        {
+            Key.D7, 0x37
+        },
+        {
+            Key.D8, 0x38
+        },
+        {
+            Key.D9, 0x39
+        },
+        {
+            Key.A, 0x41
+        },
+        {
+            Key.B, 0x42
+        },
+        {
+            Key.C, 0x43
+        },
+        {
+            Key.D, 0x44
+        },
+        {
+            Key.E, 0x45
+        },
+        {
+            Key.F, 0x46
+        },
+        {
+            Key.G, 0x47
+        },
+        {
+            Key.H, 0x48
+        },
+        {
+            Key.I, 0x49
+        },
+        {
+            Key.J, 0x4A
+        },
+        {
+            Key.K, 0x4B
+        },
+        {
+            Key.L, 0x4C
+        },
+        {
+            Key.M, 0x4D
+        },
+        {
+            Key.N, 0x4E
+        },
+        {
+            Key.O, 0x4F
+        },
+        {
+            Key.P, 0x50
+        },
+        {
+            Key.Q, 0x51
+        },
+        {
+            Key.R, 0x52
+        },
+        {
+            Key.S, 0x53
+        },
+        {
+            Key.T, 0x54
+        },
+        {
+            Key.U, 0x55
+        },
+        {
+            Key.V, 0x56
+        },
+        {
+            Key.W, 0x57
+        },
+        {
+            Key.X, 0x58
+        },
+        {
+            Key.Y, 0x59
+        },
+        {
+            Key.Z, 0x5A
+        },
+        {
+            Key.LWin, 0x5B
+        },
+        {
+            Key.RWin, 0x5C
+        },
+        {
+            Key.NumPad0, 0x60
+        },
+        {
+            Key.NumPad1, 0x61
+        },
+        {
+            Key.NumPad2, 0x62
+        },
+        {
+            Key.NumPad3, 0x63
+        },
+        {
+            Key.NumPad4, 0x64
+        },
+        {
+            Key.NumPad5, 0x65
+        },
+        {
+            Key.NumPad6, 0x66
+        },
+        {
+            Key.NumPad7, 0x67
+        },
+        {
+            Key.NumPad8, 0x68
+        },
+        {
+            Key.NumPad9, 0x69
+        },
+        {
+            Key.Multiply, 0x6A
+        },
+        {
+            Key.Add, 0x6B
+        },
+        {
+            Key.Subtract, 0x6D
+        },
+        {
+            Key.Decimal, 0x6E
+        },
+        {
+            Key.Divide, 0x6F
+        },
+        {
+            Key.F1, 0x70
+        },
+        {
+            Key.F2, 0x71
+        },
+        {
+            Key.F3, 0x72
+        },
+        {
+            Key.F4, 0x73
+        },
+        {
+            Key.F5, 0x74
+        },
+        {
+            Key.F6, 0x75
+        },
+        {
+            Key.F7, 0x76
+        },
+        {
+            Key.F8, 0x77
+        },
+        {
+            Key.F9, 0x78
+        },
+        {
+            Key.F10, 0x79
+        },
+        {
+            Key.F11, 0x7A
+        },
+        {
+            Key.F12, 0x7B
+        },
+        {
+            Key.F13, 0x7C
+        },
+        {
+            Key.F14, 0x7D
+        },
+        {
+            Key.F15, 0x7E
+        },
+        {
+            Key.F16, 0x7F
+        },
+        {
+            Key.F17, 0x80
+        },
+        {
+            Key.F18, 0x81
+        },
+        {
+            Key.F19, 0x82
+        },
+        {
+            Key.F20, 0x83
+        },
+        {
+            Key.F21, 0x84
+        },
+        {
+            Key.F22, 0x85
+        },
+        {
+            Key.F23, 0x86
+        },
+        {
+            Key.F24, 0x87
+        },
+        {
+            Key.NumLock, 0x90
+        },
+        {
+            Key.Scroll, 0x91
+        },
+        {
+            Key.LeftShift, 0xA0
+        },
+        {
+            Key.RightShift, 0xA1
+        },
+        {
+            Key.LeftCtrl, 0xA2
+        },
+        {
+            Key.RightCtrl, 0xA3
+        },
+        {
+            Key.LeftAlt, 0xA4
+        },
+        {
+            Key.RightAlt, 0xA5
+        },
+        {
+            Key.OemSemicolon, 0xBA
+        },
+        {
+            Key.OemPlus, 0xBB
+        },
+        {
+            Key.OemComma, 0xBC
+        },
+        {
+            Key.OemMinus, 0xBD
+        },
+        {
+            Key.OemPeriod, 0xBE
+        },
+        {
+            Key.OemQuestion, 0xBF
+        },
+        {
+            Key.OemTilde, 0xC0
+        },
+        {
+            Key.OemOpenBrackets, 0xDB
+        },
+        {
+            Key.OemPipe, 0xDC
+        },
+        {
+            Key.OemCloseBrackets, 0xDD
+        },
+        {
+            Key.OemQuotes, 0xDE
+        },
+    };
+
+    private static readonly Dictionary<Key, int> AdbKeyMap = new()
+    {
+        {
+            Key.Back, 67
+        },
+        {
+            Key.Tab, 61
+        },
+        {
+            Key.Enter, 66
+        },
+        {
+            Key.Escape, 111
+        },
+        {
+            Key.Space, 62
+        },
+        {
+            Key.PageUp, 92
+        },
+        {
+            Key.PageDown, 93
+        },
+        {
+            Key.End, 123
+        },
+        {
+            Key.Home, 3
+        },
+        {
+            Key.Left, 21
+        },
+        {
+            Key.Up, 19
+        },
+        {
+            Key.Right, 22
+        },
+        {
+            Key.Down, 20
+        },
+        {
+            Key.Insert, 124
+        },
+        {
+            Key.Delete, 112
+        },
+        {
+            Key.D0, 7
+        },
+        {
+            Key.D1, 8
+        },
+        {
+            Key.D2, 9
+        },
+        {
+            Key.D3, 10
+        },
+        {
+            Key.D4, 11
+        },
+        {
+            Key.D5, 12
+        },
+        {
+            Key.D6, 13
+        },
+        {
+            Key.D7, 14
+        },
+        {
+            Key.D8, 15
+        },
+        {
+            Key.D9, 16
+        },
+        {
+            Key.A, 29
+        },
+        {
+            Key.B, 30
+        },
+        {
+            Key.C, 31
+        },
+        {
+            Key.D, 32
+        },
+        {
+            Key.E, 33
+        },
+        {
+            Key.F, 34
+        },
+        {
+            Key.G, 35
+        },
+        {
+            Key.H, 36
+        },
+        {
+            Key.I, 37
+        },
+        {
+            Key.J, 38
+        },
+        {
+            Key.K, 39
+        },
+        {
+            Key.L, 40
+        },
+        {
+            Key.M, 41
+        },
+        {
+            Key.N, 42
+        },
+        {
+            Key.O, 43
+        },
+        {
+            Key.P, 44
+        },
+        {
+            Key.Q, 45
+        },
+        {
+            Key.R, 46
+        },
+        {
+            Key.S, 47
+        },
+        {
+            Key.T, 48
+        },
+        {
+            Key.U, 49
+        },
+        {
+            Key.V, 50
+        },
+        {
+            Key.W, 51
+        },
+        {
+            Key.X, 52
+        },
+        {
+            Key.Y, 53
+        },
+        {
+            Key.Z, 54
+        },
+        {
+            Key.NumPad0, 144
+        },
+        {
+            Key.NumPad1, 145
+        },
+        {
+            Key.NumPad2, 146
+        },
+        {
+            Key.NumPad3, 147
+        },
+        {
+            Key.NumPad4, 148
+        },
+        {
+            Key.NumPad5, 149
+        },
+        {
+            Key.NumPad6, 150
+        },
+        {
+            Key.NumPad7, 151
+        },
+        {
+            Key.NumPad8, 152
+        },
+        {
+            Key.NumPad9, 153
+        },
+        {
+            Key.Multiply, 155
+        },
+        {
+            Key.Add, 157
+        },
+        {
+            Key.Subtract, 156
+        },
+        {
+            Key.Decimal, 158
+        },
+        {
+            Key.Divide, 154
+        },
+        {
+            Key.F1, 131
+        },
+        {
+            Key.F2, 132
+        },
+        {
+            Key.F3, 133
+        },
+        {
+            Key.F4, 134
+        },
+        {
+            Key.F5, 135
+        },
+        {
+            Key.F6, 136
+        },
+        {
+            Key.F7, 137
+        },
+        {
+            Key.F8, 138
+        },
+        {
+            Key.F9, 139
+        },
+        {
+            Key.F10, 140
+        },
+        {
+            Key.F11, 141
+        },
+        {
+            Key.F12, 142
+        },
+    };
+
+    [RelayCommand]
+    private void StartKeyCapture()
+    {
+        if (IsKeyCodeAdb)
+        {
+            return;
+        }
+
+        IsKeyCaptureActive = true;
+        KeyCaptureKey = LangKeys.HotKeyPressing.ToLocalization();
+        KeyCaptureCode = string.Empty;
+    }
+
+    [RelayCommand]
+    private void SetKeyCodeMode(string? mode)
+    {
+        IsKeyCodeAdb = string.Equals(mode, "Adb", StringComparison.OrdinalIgnoreCase);
+    }
+
+    partial void OnIsKeyCodeAdbChanged(bool value)
+    {
+        IsKeyCaptureActive = false;
+        if (value)
+        {
+            UpdateAdbKeyFromInput(AdbKeyInput);
+        }
+    }
+
+    partial void OnAdbKeyInputChanged(string value)
+    {
+        if (IsKeyCodeAdb)
+        {
+            UpdateAdbKeyFromInput(value);
+        }
+    }
+    
+    private void UpdateAdbKeyFromInput(string? value)
+    {
+        var trimmed = value?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            KeyCaptureKey = string.Empty;
+            KeyCaptureCode = string.Empty;
+            return;
+        }
+
+        KeyCaptureKey = trimmed;
+        KeyCaptureCode = AdbKeyDefinitions.TryGetValue(trimmed, out var code)
+            ? code.ToString()
+            : "-";
+    }
+    //     return candidates.FirstOrDefault(File.Exists);
+    // }
+
+    public void CaptureKey(Key key)
+    {
+        if (IsKeyCodeAdb)
+        {
+            return;
+        }
+
+        var keyName = key.ToString();
+        var hasValue = TryMapKeyToCode(key, out var code);
+        KeyCaptureKey = keyName;
+        KeyCaptureCode = hasValue ? code.ToString() : "-";
+        IsKeyCaptureActive = false;
+    }
+
+    private bool TryMapKeyToCode(Key key, out int code)
+    {
+        if (IsKeyCodeAdb)
+        {
+            code = default;
+            return false;
+        }
+
+        return Win32KeyMap.TryGetValue(key, out code);
+    }
 
     /// <summary>
     /// Live View 刷新率变化事件，参数为计算后的间隔（秒）
@@ -2568,35 +4991,51 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private Bitmap? _liveViewImage;
     private WriteableBitmap? _liveViewWriteableBitmap;
     private int _liveViewProcessing;
+
     [ObservableProperty] private double _liveViewFps;
     private DateTime _liveViewFpsWindowStart = DateTime.UtcNow;
     private int _liveViewFrameCount;
     private int _liveViewImageCount;
     private int _liveViewImageNewestCount;
-
     private static int _liveViewSemaphoreCurrentCount = 2;
     private const int LiveViewSemaphoreMaxCount = 5;
     private static int _liveViewSemaphoreFailCount = 0;
     private static readonly SemaphoreSlim _liveViewSemaphore = new(_liveViewSemaphoreCurrentCount, LiveViewSemaphoreMaxCount);
-
     private readonly WriteableBitmap?[] _liveViewImageCache = new WriteableBitmap?[LiveViewSemaphoreMaxCount];
     public double GetLiveViewRefreshInterval() => 1.0 / LiveViewRefreshRate;
     /// <summary>
     /// Live View 是否可见（已连接且有图像）
     /// </summary>
     public bool IsLiveViewVisible => EnableLiveView && IsConnected && LiveViewImage != null;
-
     partial void OnIsConnectedChanged(bool value)
     {
         OnPropertyChanged(nameof(IsLiveViewVisible));
     }
-
     partial void OnLiveViewImageChanged(Bitmap? value)
     {
         OnPropertyChanged(nameof(IsLiveViewVisible));
         if (!IsLiveViewPaused)
         {
             OnPropertyChanged(nameof(LiveViewDisplayImage));
+        }
+
+        if (value is { } bitmap)
+        {
+            var newSize = bitmap.Size;
+            if (_lastLiveViewSize is null || _lastLiveViewSize.Value != newSize)
+            {
+                _lastLiveViewSize = newSize;
+                ClearSelectionPreview();
+                HasSwipeArrow = false;
+                SwipeArrowGeometry = null;
+            }
+        }
+        else
+        {
+            _lastLiveViewSize = null;
+            ClearSelectionPreview();
+            HasSwipeArrow = false;
+            SwipeArrowGeometry = null;
         }
 
         if (IsColorPreviewActive)

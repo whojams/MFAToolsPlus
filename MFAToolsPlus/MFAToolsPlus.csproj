@@ -42,7 +42,6 @@
         <DebugSymbols>false</DebugSymbols>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" Exclude="Assets\**\*.axaml" />
     </ItemGroup>
 

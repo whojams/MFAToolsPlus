@@ -176,7 +176,7 @@ public static partial class Instances
         if (forceStop)
         {
             // 强制退出时，只做最基本的清理，避免卡住
-            RootView.BeforeClosed(true, false);
+            RootView.BeforeClosed(true);
             Environment.Exit(0);
             return;
         }

@@ -1549,6 +1549,21 @@
     <data name="LiveViewOcr" xml:space="preserve">
         <value>OCR</value>
     </data>
+    <data name="LiveViewKey" xml:space="preserve">
+        <value>Key</value>
+    </data>
+    <data name="KeyModeTitle" xml:space="preserve">
+        <value>Key Mode</value>
+    </data>
+    <data name="KeyCodeModeWin32" xml:space="preserve">
+        <value>Win32</value>
+    </data>
+    <data name="KeyCodeModeAdb" xml:space="preserve">
+        <value>ADB</value>
+    </data>
+    <data name="KeyCaptureButton" xml:space="preserve">
+        <value>Start Key Capture</value>
+    </data>
     <data name="LiveViewColorPickRoi" xml:space="preserve">
         <value>Color Pick ROI</value>
     </data>
@@ -1560,6 +1575,15 @@
     </data>
     <data name="LiveViewRestore" xml:space="preserve">
         <value>Restore</value>
+    </data>
+    <data name="KeyCaptureKeyLabel" xml:space="preserve">
+        <value>Key</value>
+    </data>
+    <data name="KeyInputWatermark" xml:space="preserve">
+        <value>Please enter key</value>
+    </data>
+    <data name="KeyCaptureCodeLabel" xml:space="preserve">
+        <value>Code</value>
     </data>
     <data name="LiveViewScreenshotRoi" xml:space="preserve">
         <value>Screenshot ROI</value>
@@ -1584,6 +1608,9 @@
     </data>
     <data name="LiveViewNoScreenshot" xml:space="preserve">
         <value>No screenshot available</value>
+    </data>
+    <data name="LiveViewNoHit" xml:space="preserve">
+        <value>No match</value>
     </data>
     <data name="LiveViewSelectOcrRegion" xml:space="preserve">
         <value>Please select an OCR region first</value>
@@ -1614,6 +1641,45 @@
     </data>
     <data name="Result" xml:space="preserve">
         <value>Result</value>
+    </data>
+    <data name="HitTest" xml:space="preserve">
+        <value>Hit Test</value>
+    </data>
+    <data name="OcrHitTest" xml:space="preserve">
+        <value>OCR Hit Test</value>
+    </data>
+    <data name="TemplateHitTest" xml:space="preserve">
+        <value>Template Hit Test</value>
+    </data>
+    <data name="ClickHitTest" xml:space="preserve">
+        <value>Click Hit Test</value>
+    </data>
+    <data name="SwipeHitTest" xml:space="preserve">
+        <value>Swipe Hit Test</value>
+    </data>
+    <data name="LiveViewSwipeDuration" xml:space="preserve">
+        <value>Duration(ms)</value>
+    </data>
+    <data name="MatchRoi" xml:space="preserve">
+        <value>Recognition ROI</value>
+    </data>
+    <data name="TargetText" xml:space="preserve">
+        <value>Target Text</value>
+    </data>
+    <data name="RecognitionThreshold" xml:space="preserve">
+        <value>Recognition Threshold</value>
+    </data>
+    <data name="OnlyRec" xml:space="preserve">
+        <value>Only Rec</value>
+    </data>
+    <data name="GreenMask" xml:space="preserve">
+        <value>Green Mask</value>
+    </data>
+    <data name="TemplateMethod" xml:space="preserve">
+        <value>Template Match Method</value>
+    </data>
+    <data name="TemplateSelect" xml:space="preserve">
+        <value>Select Template</value>
     </data>
 </root>
 

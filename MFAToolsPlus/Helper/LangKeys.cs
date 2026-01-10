@@ -520,10 +520,18 @@ public static class LangKeys
 	public static readonly string DragModeTooltip = "DragModeTooltip";
 	public static readonly string LiveViewSwipe = "LiveViewSwipe";
 	public static readonly string LiveViewOcr = "LiveViewOcr";
+	public static readonly string LiveViewKey = "LiveViewKey";
+	public static readonly string KeyModeTitle = "KeyModeTitle";
+	public static readonly string KeyCodeModeWin32 = "KeyCodeModeWin32";
+	public static readonly string KeyCodeModeAdb = "KeyCodeModeAdb";
+	public static readonly string KeyCaptureButton = "KeyCaptureButton";
 	public static readonly string LiveViewColorPickRoi = "LiveViewColorPickRoi";
 	public static readonly string LiveViewExpandedRoi = "LiveViewExpandedRoi";
 	public static readonly string LiveViewPreview = "LiveViewPreview";
 	public static readonly string LiveViewRestore = "LiveViewRestore";
+	public static readonly string KeyCaptureKeyLabel = "KeyCaptureKeyLabel";
+	public static readonly string KeyInputWatermark = "KeyInputWatermark";
+	public static readonly string KeyCaptureCodeLabel = "KeyCaptureCodeLabel";
 	public static readonly string LiveViewScreenshotRoi = "LiveViewScreenshotRoi";
 	public static readonly string LiveViewRelativePathPrefix = "LiveViewRelativePathPrefix";
 	public static readonly string LiveViewSwipeStart = "LiveViewSwipeStart";
@@ -532,6 +540,7 @@ public static class LangKeys
 	public static readonly string LiveViewOcrResult = "LiveViewOcrResult";
 	public static readonly string LiveViewRunOcr = "LiveViewRunOcr";
 	public static readonly string LiveViewNoScreenshot = "LiveViewNoScreenshot";
+	public static readonly string LiveViewNoHit = "LiveViewNoHit";
 	public static readonly string LiveViewSelectOcrRegion = "LiveViewSelectOcrRegion";
 	public static readonly string LiveViewRecognizerUnavailable = "LiveViewRecognizerUnavailable";
 	public static readonly string LiveViewSelectScreenshotRegion = "LiveViewSelectScreenshotRegion";
@@ -542,4 +551,17 @@ public static class LangKeys
 	public static readonly string ScreenshotBrushSize = "ScreenshotBrushSize";
 	public static readonly string ScreenshotRestore = "ScreenshotRestore";
 	public static readonly string Result = "Result";
+	public static readonly string HitTest = "HitTest";
+	public static readonly string OcrHitTest = "OcrHitTest";
+	public static readonly string TemplateHitTest = "TemplateHitTest";
+	public static readonly string ClickHitTest = "ClickHitTest";
+	public static readonly string SwipeHitTest = "SwipeHitTest";
+	public static readonly string LiveViewSwipeDuration = "LiveViewSwipeDuration";
+	public static readonly string MatchRoi = "MatchRoi";
+	public static readonly string TargetText = "TargetText";
+	public static readonly string RecognitionThreshold = "RecognitionThreshold";
+	public static readonly string OnlyRec = "OnlyRec";
+	public static readonly string GreenMask = "GreenMask";
+	public static readonly string TemplateMethod = "TemplateMethod";
+	public static readonly string TemplateSelect = "TemplateSelect";
 }

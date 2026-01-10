@@ -14,7 +14,9 @@
              xmlns:binding="clr-namespace:MaaFramework.Binding;assembly=MaaFramework.Binding"
              xmlns:converters="clr-namespace:MFAToolsPlus.Helper.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="MFAToolsPlus.Views.Pages.ToolsView">
+             x:Class="MFAToolsPlus.Views.Pages.ToolsView"
+             KeyDown="OnKeyCaptureKeyDown"
+             Focusable="True">
     <Design.DataContext>
         <pages:ToolsViewModel />
     </Design.DataContext>
@@ -463,7 +465,7 @@
             </Grid>
         </suki:GlassCard>
 
-        <Grid Grid.Row="1" Margin="15,5,15,15" ColumnDefinitions="*,Auto">
+        <Grid Grid.Row="1" Margin="15,5,15,15" ColumnDefinitions="*,Auto,Auto">
             <suki:GlassCard x:Name="LiveViewCard" IsAnimated="False" Grid.Column="0">
                 <suki:GroupBox>
                     <suki:GroupBox.Header>
@@ -530,6 +532,15 @@
                                              ex:IconElement.Height="18"
                                              ex:IconElement.Geometry="{StaticResource RecognitionTextGeometry}"
                                              GroupName="LiveToolMode" />
+                                <RadioButton Classes="Icon"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             IsChecked="{Binding IsKeyMode}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.LiveViewKey}}"
+                                             ex:IconElement.Width="18"
+                                             ex:IconElement.Height="18"
+                                             ex:IconElement.Geometry="{StaticResource KeyModeGeometry}"
+                                             GroupName="LiveToolMode" />
                             </StackPanel>
                         </Grid>
                     </suki:GroupBox.Header>
@@ -546,12 +557,12 @@
                                 <suki:SukiImageViewer x:Name="LiveViewViewer"
                                                       Source="{Binding LiveViewDisplayImage}"
                                                       MinScale="0.1"
-                                                      MaxScale="10"
+                                                      MaxScale="15"
                                                       Scale="{Binding LiveViewScale, Mode=TwoWay}"
                                                       Stretch="Uniform"
                                                       Background="Transparent"
                                                       IsDragEnabled="{Binding IsDragMode}"
-                                                      ShowZoomToolbar="{Binding IsLiveViewPaused}"
+                                                      ShowZoomToolbar="True"
                                                       UseCustomZoomToolbar="True"
                                                       ShowCheckerboardBackground="True"
                                                       SelectionRect="{Binding SelectionRect, Mode=TwoWay}"
@@ -568,6 +579,8 @@
                                                       HasBrushPreview="{Binding HasBrushPreview}"
                                                       BrushPreviewPoint="{Binding BrushPreviewPoint}"
                                                       BrushPreviewSize="{Binding BrushPreviewSize}"
+                                                      BrushPreviewStroke="{Binding BrushPreviewStroke}"
+                                                      BrushPreviewFill="{Binding BrushPreviewFill}"
                                                       PointerPressed="OnLiveViewPointerPressed"
                                                       PointerMoved="OnLiveViewPointerMoved"
                                                       PointerReleased="OnLiveViewPointerReleased" />
@@ -577,71 +590,76 @@
                         <Grid Grid.Row="1" x:Name="ControlBar" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0"
                               VerticalAlignment="Center">
 
-                            <Border Grid.Column="0" x:Name="TaskToggleBorder"
-                                    CornerRadius="999" Height="30"
-                                    ClipToBounds="True"
-                                    Margin="2,0,0,0"
-                                    Background="{DynamicResource SukiPrimaryColor}">
-                                <Grid>
-                                    <Border x:Name="TaskToggleShineLayer"
-                                            Width="{Binding Bounds.Width, ElementName=TaskToggleBorder}"
-                                            CornerRadius="999"
-                                            IsHitTestVisible="False"
-                                            HorizontalAlignment="Left">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                                                <GradientStop Color="Transparent" Offset="0.0" />
-                                                <GradientStop Color="Transparent" Offset="0.25" />
-                                                <GradientStop Color="#25FFFFFF" Offset="0.45" />
-                                                <GradientStop Color="#50FFFFFF" Offset="0.5" />
-                                                <GradientStop Color="#25FFFFFF" Offset="0.55" />
-                                                <GradientStop Color="Transparent" Offset="0.75" />
-                                                <GradientStop Color="Transparent" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                    </Border>
-                                    <Button Classes="Flat Rounded ActionButton"
-                                            Command="{Binding ToggleLiveViewPauseCommand}"
-                                            Padding="0,0"
-                                            CornerRadius="999"
-                                            Background="Transparent"
-                                            Foreground="White">
-                                        <Grid Margin="12 2">
-                                            <WrapPanel
-                                                IsVisible="{Binding IsLiveViewPaused}">
-                                                <Path Data="{StaticResource PlayGeometry}"
-                                                      Fill="White"
-                                                      Width="12"
-                                                      Height="12"
-                                                      Stretch="Uniform"
-                                                      VerticalAlignment="Center"
-                                                      HorizontalAlignment="Center" />
-                                                <TextBlock Margin="6 0 0 0" FontSize="12"
-                                                           Text="{markup:I18n {x:Static helper:LangKeys.StartTask}}" />
-                                            </WrapPanel>
-                                            <WrapPanel
-                                                IsVisible="{Binding !IsLiveViewPaused}">
-                                                <Path Data="{StaticResource StopGeometry}"
-                                                      Fill="White"
-                                                      Width="12"
-                                                      Height="12"
-                                                      Stretch="Uniform"
-                                                      VerticalAlignment="Center"
-                                                      HorizontalAlignment="Center" />
-                                                <TextBlock Margin="6 0 0 0" FontSize="12"
-                                                           Text="{markup:I18n {x:Static helper:LangKeys.StopTask}}" />
-                                            </WrapPanel>
-                                        </Grid>
-                                    </Button>
-                                </Grid>
-                            </Border>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Border x:Name="TaskToggleBorder"
+                                        CornerRadius="999" Height="30"
+                                        ClipToBounds="True"
+                                        Margin="2,0,0,0"
+                                        Background="{DynamicResource SukiPrimaryColor}">
+                                    <Grid>
+                                        <Border x:Name="TaskToggleShineLayer"
+                                                Width="{Binding Bounds.Width, ElementName=TaskToggleBorder}"
+                                                CornerRadius="999"
+                                                IsHitTestVisible="False"
+                                                HorizontalAlignment="Left">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                                    <GradientStop Color="Transparent" Offset="0.0" />
+                                                    <GradientStop Color="Transparent" Offset="0.25" />
+                                                    <GradientStop Color="#25FFFFFF" Offset="0.45" />
+                                                    <GradientStop Color="#50FFFFFF" Offset="0.5" />
+                                                    <GradientStop Color="#25FFFFFF" Offset="0.55" />
+                                                    <GradientStop Color="Transparent" Offset="0.75" />
+                                                    <GradientStop Color="Transparent" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                        </Border>
+                                        <Button Classes="Flat Rounded ActionButton"
+                                                Command="{Binding ToggleLiveViewPauseCommand}"
+                                                Padding="0,0"
+                                                CornerRadius="999"
+                                                Background="Transparent"
+                                                Foreground="White">
+                                            <Grid Margin="12 2">
+                                                <WrapPanel
+                                                    IsVisible="{Binding IsLiveViewPaused}">
+                                                    <Path Data="{StaticResource PlayGeometry}"
+                                                          Fill="White"
+                                                          Width="12"
+                                                          Height="12"
+                                                          Stretch="Uniform"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center" />
+                                                    <TextBlock Margin="6 0 0 0" FontSize="12"
+                                                               Text="{markup:I18n {x:Static helper:LangKeys.StartTask}}" />
+                                                </WrapPanel>
+                                                <WrapPanel
+                                                    IsVisible="{Binding !IsLiveViewPaused}">
+                                                    <Path Data="{StaticResource StopGeometry}"
+                                                          Fill="White"
+                                                          Width="12"
+                                                          Height="12"
+                                                          Stretch="Uniform"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center" />
+                                                    <TextBlock Margin="6 0 0 0" FontSize="12"
+                                                               Text="{markup:I18n {x:Static helper:LangKeys.StopTask}}" />
+                                                </WrapPanel>
+                                            </Grid>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                                <TextBlock VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           IsVisible="{Binding HasBrushPreview}"
+                                           Text="{Binding BrushPreviewRectText}" />
+                            </StackPanel>
                             <StackPanel Grid.Column="1"
                                         Orientation="Vertical"
                                         Spacing="4"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center"
-                                            IsVisible="{Binding IsLiveViewPaused}">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                     <Button Classes="BasicTight ActionButton" Width="24" Height="24"
                                             Command="{Binding ZoomOutCommand, ElementName=LiveViewViewer}">
                                         <Path Data="{DynamicResource ReduceGeometry}"
@@ -665,26 +683,14 @@
                                            Foreground="{DynamicResource SukiLowText}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
-                                           IsVisible="{calcBinding:Binding 'IsDragMode and IsLiveViewPaused'}"
+                                           IsVisible="{Binding IsDragMode}"
                                            Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintDragModePaused}}" />
                                 <TextBlock FontSize="11"
                                            Foreground="{DynamicResource SukiLowText}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
-                                           IsVisible="{calcBinding:Binding 'IsDragMode and !IsLiveViewPaused'}"
-                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintDragModeRunning}}" />
-                                <TextBlock FontSize="11"
-                                           Foreground="{DynamicResource SukiLowText}"
-                                           HorizontalAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           IsVisible="{calcBinding:Binding '!IsDragMode and IsLiveViewPaused'}"
+                                           IsVisible="{calcBinding:Binding '!IsDragMode'}"
                                            Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintCtrlModePaused}}" />
-                                <TextBlock FontSize="11"
-                                           Foreground="{DynamicResource SukiLowText}"
-                                           HorizontalAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           IsVisible="{calcBinding:Binding '!IsDragMode and !IsLiveViewPaused'}"
-                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewHintCtrlModeRunning}}" />
                             </StackPanel>
 
                             <StackPanel Grid.Column="2"
@@ -952,6 +958,10 @@
                                 <TextBlock Text="ΔH:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
                                 <TextBox Text="{Binding OffsetH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
                             </Grid>
+                            <ToggleButton Classes="Flat ActionButton"
+                                          IsChecked="{Binding IsClickTestPanelVisible, Mode=TwoWay}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
+                            </ToggleButton>
                         </StackPanel>
                         <StackPanel
                             IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.ColorPick'}"
@@ -981,17 +991,26 @@
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearColorPickCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
-                                <TextBox Text="{Binding ColorPickX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBox Text="{Binding ColorPickX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
-                                <TextBox Text="{Binding ColorPickY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBox Text="{Binding ColorPickY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
                                 <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
-                                <TextBox Text="{Binding ColorPickW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBox Text="{Binding ColorPickW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
                                 <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
-                                <TextBox Text="{Binding ColorPickH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                                <TextBox Text="{Binding ColorPickH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
                             </Grid>
 
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
@@ -1166,7 +1185,7 @@
                                         Minimum="1"
                                         Maximum="20"
                                         Value="{Binding ScreenshotBrushSize, Mode=TwoWay}" />
-                                <TextBlock FontSize="11"
+                                <TextBlock FontSize="14" VerticalAlignment="Center"
                                            Foreground="{DynamicResource SukiLowText}"
                                            Text="{Binding ScreenshotBrushSize}" />
                             </StackPanel>
@@ -1196,18 +1215,27 @@
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearScreenshotCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
                             </StackPanel>
 
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
-                                <TextBox Text="{Binding ScreenshotX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBox Text="{Binding ScreenshotX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
-                                <TextBox Text="{Binding ScreenshotY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBox Text="{Binding ScreenshotY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
                                 <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
-                                <TextBox Text="{Binding ScreenshotW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBox Text="{Binding ScreenshotW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
                                 <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
-                                <TextBox Text="{Binding ScreenshotH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                                <TextBox Text="{Binding ScreenshotH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
                             </Grid>
 
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
@@ -1262,6 +1290,10 @@
                             </StackPanel>
                             <TextBox Text="{Binding ScreenshotRelativeResult}"
                                      IsReadOnly="True" />
+                            <ToggleButton Classes="Flat ActionButton"
+                                          IsChecked="{Binding IsScreenshotTestPanelVisible, Mode=TwoWay}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
+                            </ToggleButton>
                         </StackPanel>
 
                         <StackPanel IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Swipe'}"
@@ -1282,12 +1314,21 @@
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteSwipeStartCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
-                                <TextBox Text="{Binding SwipeStartX}" IsReadOnly="True" Grid.Column="1" />
+                                <TextBox Text="{Binding SwipeStartX, Mode=TwoWay}" Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
-                                <TextBox Text="{Binding SwipeStartY}" IsReadOnly="True" Grid.Column="3" />
+                                <TextBox Text="{Binding SwipeStartY, Mode=TwoWay}" Grid.Column="3" />
                             </Grid>
 
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
@@ -1306,13 +1347,35 @@
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteSwipeEndCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearSwipeCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
-                                <TextBox Text="{Binding SwipeEndX}" IsReadOnly="True" Grid.Column="1" />
+                                <TextBox Text="{Binding SwipeEndX, Mode=TwoWay}" Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
-                                <TextBox Text="{Binding SwipeEndY}" IsReadOnly="True" Grid.Column="3" />
+                                <TextBox Text="{Binding SwipeEndY, Mode=TwoWay}" Grid.Column="3" />
                             </Grid>
+                            <ToggleButton Classes="Flat ActionButton"
+                                          IsChecked="{Binding IsSwipeTestPanelVisible, Mode=TwoWay}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
+                            </ToggleButton>
                         </StackPanel>
 
                         <StackPanel IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Ocr'}"
@@ -1342,17 +1405,26 @@
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearOcrCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
-                                <TextBox Text="{Binding OcrX}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" />
+                                <TextBox Text="{Binding OcrX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
-                                <TextBox Text="{Binding OcrY}" IsReadOnly="True" Grid.Row="0" Grid.Column="3" />
+                                <TextBox Text="{Binding OcrY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
                                 <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
-                                <TextBox Text="{Binding OcrW}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" />
+                                <TextBox Text="{Binding OcrW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
                                 <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
-                                <TextBox Text="{Binding OcrH}" IsReadOnly="True" Grid.Row="1" Grid.Column="3" />
+                                <TextBox Text="{Binding OcrH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
                             </Grid>
 
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
@@ -1407,7 +1479,391 @@
                             </StackPanel>
                             <TextBox Text="{Binding OcrResult}"
                                      IsReadOnly="True" />
+                            <ToggleButton Classes="Flat ActionButton"
+                                          IsChecked="{Binding IsOcrTestPanelVisible, Mode=TwoWay}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
+                            </ToggleButton>
                         </StackPanel>
+                        <StackPanel IsVisible="{calcBinding:Binding 'ActiveToolMode == pages:LiveViewToolMode.Key'}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.KeyModeTitle}}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <RadioButton GroupName="KeyCodeMode"
+                                             IsChecked="{calcBinding:Binding '!IsKeyCodeAdb'}"
+                                             Command="{Binding SetKeyCodeModeCommand}"
+                                             CommandParameter="Win32">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.KeyCodeModeWin32}}" />
+                                </RadioButton>
+                                <RadioButton GroupName="KeyCodeMode"
+                                             IsChecked="{Binding IsKeyCodeAdb}"
+                                             Command="{Binding SetKeyCodeModeCommand}"
+                                             CommandParameter="Adb">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.KeyCodeModeAdb}}" />
+                                </RadioButton>
+                            </StackPanel>
+                            <Button Classes="Flat ActionButton"
+                                    IsVisible="{Binding !IsKeyCodeAdb}"
+                                    Click="OnKeyCaptureButtonClick"
+                                    Command="{Binding StartKeyCaptureCommand}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureButton}}" />
+                            </Button>
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureKeyLabel}}" />
+                            <AutoCompleteBox IsVisible="{Binding IsKeyCodeAdb}"
+                                             ItemsSource="{Binding AdbKeyOptions}"
+                                        Watermark="{markup:I18n {x:Static helper:LangKeys.KeyInputWatermark}}"     Text="{Binding AdbKeyInput, Mode=TwoWay}"
+                                             FilterMode="Contains" />
+                            <TextBox IsVisible="{Binding !IsKeyCodeAdb}"
+                                     Text="{Binding KeyCaptureKey}"
+                                     IsReadOnly="True" />
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureCodeLabel}}" />
+                            <TextBox Text="{Binding KeyCaptureCode}" IsReadOnly="True" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </suki:GlassCard>
+
+            <suki:GlassCard Grid.Column="2"
+                            Margin="10,0,0,0"
+                            IsAnimated="False"
+                            IsVisible="{Binding IsTestPanelVisible}">
+                <ScrollViewer Margin="12" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="10">
+                        <StackPanel IsVisible="{Binding IsOcrTestPanelVisible}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.OcrHitTest}}" />
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.MatchRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteOcrMatchRectCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearOcrMatchRectCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding OcrMatchRoiX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding OcrMatchRoiY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding OcrMatchRoiW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding OcrMatchRoiH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.TargetText}}" />
+                            <TextBox Text="{Binding OcrMatchTargetText, Mode=TwoWay}" />
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.RecognitionThreshold}}" />
+                            <TextBox Text="{Binding OcrMatchThreshold, Mode=TwoWay}" />
+                            <DockPanel>
+                                <ToggleSwitch Classes="Switch"
+                                              DockPanel.Dock="Right"
+                                              IsChecked="{Binding OcrMatchOnlyRec, Mode=TwoWay}" />
+                                <TextBlock FontSize="12"
+                                           FontWeight="SemiBold" VerticalAlignment="Center"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.OnlyRec}}" />
+                            </DockPanel>
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding RunOcrHitTestCommand}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
+                            </Button>
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding IsScreenshotTestPanelVisible}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.TemplateHitTest}}" />
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.MatchRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteTemplateMatchRectCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearTemplateMatchRectCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding TemplateMatchRoiX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding TemplateMatchRoiY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding TemplateMatchRoiW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding TemplateMatchRoiH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding SelectTemplateImageCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock VerticalAlignment="Center"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.TemplateSelect}}" />
+                                    <Image Width="32" Height="32"
+                                           IsVisible="{calcBinding:Binding 'TemplateMatchImage != null'}"
+                                           Source="{Binding TemplateMatchImage}" />
+                                </StackPanel>
+                            </Button>
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.RecognitionThreshold}}" />
+                            <TextBox Text="{Binding TemplateMatchThreshold, Mode=TwoWay}" />
+                            <DockPanel>
+                                <ToggleSwitch Classes="Switch"
+                                              DockPanel.Dock="Right"
+                                              IsChecked="{Binding TemplateMatchGreenMask, Mode=TwoWay}" />
+                                <TextBlock FontSize="12"
+                                           FontWeight="SemiBold" VerticalAlignment="Center"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.GreenMask}}" />
+                            </DockPanel>
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.TemplateMethod}}" />
+                            <ComboBox ItemsSource="{Binding TemplateMatchMethodOptions}"
+                                      SelectedItem="{Binding TemplateMatchMethod, Mode=TwoWay}" />
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding RunTemplateMatchTestCommand}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{Binding IsClickTestPanelVisible}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.ClickHitTest}}" />
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.TargetTitle}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteClickTestTargetCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteTarget}}"
+                                        Command="{Binding ClearClickTestTargetCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ClickTestTargetX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ClickTestTargetY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ClickTestTargetW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ClickTestTargetH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="LimeGreen" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.OffsetTitle}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteClickTestOffsetCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearClickTestOffsetCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="ΔX:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ClickTestOffsetX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="ΔY:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ClickTestOffsetY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="ΔW:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ClickTestOffsetW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="ΔH:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ClickTestOffsetH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding RunClickHitTestCommand}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{Binding IsSwipeTestPanelVisible}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.SwipeHitTest}}" />
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipeStart}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteSwipeTestStartCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearSwipeTestStartCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
+                                <TextBox Text="{Binding SwipeTestStartX, Mode=TwoWay}" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
+                                <TextBox Text="{Binding SwipeTestStartY, Mode=TwoWay}" Grid.Column="3" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipeEnd}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteSwipeTestEndCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearSwipeTestEndCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
+                                <TextBox Text="{Binding SwipeTestEndX, Mode=TwoWay}" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
+                                <TextBox Text="{Binding SwipeTestEndY, Mode=TwoWay}" Grid.Column="3" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="LimeGreen" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipeDuration}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteSwipeTestDurationCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearSwipeTestDurationCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <TextBox Text="{Binding SwipeTestDuration, Mode=TwoWay}" />
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding RunSwipeHitTestCommand}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
+                            </Button>
+                        </StackPanel>
+
                     </StackPanel>
                 </ScrollViewer>
             </suki:GlassCard>

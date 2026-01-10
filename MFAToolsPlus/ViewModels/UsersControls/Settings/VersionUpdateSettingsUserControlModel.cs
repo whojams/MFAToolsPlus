@@ -166,10 +166,10 @@ public partial class VersionUpdateSettingsUserControlModel : ViewModelBase
         {
             Name = "GitHub"
         },
-        new(LangKeys.MirrorChyan),
+        // new(LangKeys.MirrorChyan),
     ];
 
-    [ObservableProperty] private int _downloadSourceIndex = ConfigurationManager.Current.GetValue(ConfigurationKeys.DownloadSourceIndex, 1);
+    [ObservableProperty] private int _downloadSourceIndex = ConfigurationManager.Current.GetValue(ConfigurationKeys.DownloadSourceIndex, 0);
 
     partial void OnDownloadSourceIndexChanged(int value)
     {

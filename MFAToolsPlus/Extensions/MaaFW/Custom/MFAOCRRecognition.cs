@@ -19,10 +19,9 @@ public class MFAOCRRecognition : IMaaCustomRecognition
     public bool Analyze(in IMaaContext context, in AnalyzeArgs args, in AnalyzeResults results)
     {
         using var image = new MaaImageBuffer();
-        Console.WriteLine("TaskDetail:" + args.TaskDetail);
         image.TrySetEncodedData(RecognitionHelper.BitmapToBytes(Bitmap));
         var pipeline = RecognitionHelper.BuildAppendOcrPayload(args.Roi.X, args.Roi.Y, args.Roi.Width, args.Roi.Height);
-        Console.WriteLine(pipeline);
+
         var detail = context.RunRecognition(
             "AppendOCR",
             image,pipeline);

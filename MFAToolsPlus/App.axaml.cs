@@ -48,6 +48,7 @@ public partial class App : Application
         LoggerHelper.InitializeLogger();
         AvaloniaXamlLoader.Load(this);
         LanguageHelper.Initialize();
+        GlobalHotkeyService.Initialize();
         ConfigurationManager.Initialize();
         _memoryCracker = new AvaloniaMemoryCracker();
         _memoryCracker.Cracker();
@@ -112,11 +113,19 @@ public partial class App : Application
     {
         // ConfigurationManager.Current.SetValue(ConfigurationKeys.TaskItems, Instances.TaskQueueViewModel.TaskItemViewModels.ToList().Select(model => model.InterfaceItem));
 
-        // MaaProcessor.Instance.SetTasker();
-        // GlobalHotkeyService.Shutdown();
-        //
-        // // 强制清理所有应用资源（包括字体）
-        // ForceCleanupAllResources();
+        MaaProcessor.Instance.Close();
+        GlobalHotkeyService.Shutdown();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            foreach (var window in desktop.Windows.ToList())
+            {
+                if (window.IsVisible)
+                {
+                    window.Close();
+                }
+            }
+        }
 
         // 释放内存优化器
         _memoryCracker?.Dispose();

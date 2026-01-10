@@ -84,6 +84,7 @@
                                 <Canvas IsHitTestVisible="False"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
+                                        UseLayoutRounding="False"
                                         Width="{Binding Width, ElementName=PART_Image}"
                                         Height="{Binding Height, ElementName=PART_Image}"
                                         Panel.ZIndex="1">
@@ -103,9 +104,8 @@
                                           StrokeThickness="2"
                                           Fill="Transparent" />
                                     <Rectangle IsVisible="{TemplateBinding HasBrushPreview}"
-                                               Stroke="{TemplateBinding BrushPreviewStroke}"
-                                               Fill="{TemplateBinding BrushPreviewFill}"
-                                               StrokeThickness="0">
+                                               StrokeThickness="0"
+                                               Fill="{TemplateBinding BrushPreviewFill}">
                                         <Canvas.Left>
                                             <Binding Path="BrushPreviewRect.X"
                                                      RelativeSource="{RelativeSource TemplatedParent}" />
@@ -123,9 +123,71 @@
                                                      RelativeSource="{RelativeSource TemplatedParent}" />
                                         </Rectangle.Height>
                                     </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding HasBrushPreview}"
+                                               Stroke="{TemplateBinding BrushPreviewStroke}"
+                                               Fill="Transparent"
+                                               StrokeThickness="1">
+                                        <Canvas.Left>
+                                            <Binding Path="BrushPreviewRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="BrushPreviewRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="BrushPreviewRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="BrushPreviewRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding IsSelectionSinglePixel}"
+                                               StrokeThickness="0"
+                                               Fill="{TemplateBinding SelectionStroke}">
+                                        <Canvas.Left>
+                                            <Binding Path="SelectionRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="SelectionRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="SelectionRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="SelectionRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
                                     <Rectangle IsVisible="{TemplateBinding HasSelection}"
                                                Stroke="{TemplateBinding SelectionStroke}"
                                                Fill="{TemplateBinding SelectionFill}"
+                                               StrokeThickness="0">
+                                        <Canvas.Left>
+                                            <Binding Path="SelectionRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="SelectionRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="SelectionRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="SelectionRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding HasSelection}"
+                                               Stroke="{TemplateBinding SelectionStroke}"
+                                               Fill="Transparent"
                                                StrokeThickness="1">
                                         <Canvas.Left>
                                             <Binding Path="SelectionRect.X"
@@ -144,9 +206,50 @@
                                                      RelativeSource="{RelativeSource TemplatedParent}" />
                                         </Rectangle.Height>
                                     </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding IsSecondarySelectionSinglePixel}"
+                                               StrokeThickness="0"
+                                               Fill="{TemplateBinding SecondarySelectionStroke}">
+                                        <Canvas.Left>
+                                            <Binding Path="SecondarySelectionRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="SecondarySelectionRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="SecondarySelectionRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="SecondarySelectionRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
                                     <Rectangle IsVisible="{TemplateBinding HasSecondarySelection}"
                                                Stroke="{TemplateBinding SecondarySelectionStroke}"
                                                Fill="{TemplateBinding SecondarySelectionFill}"
+                                               StrokeThickness="0">
+                                        <Canvas.Left>
+                                            <Binding Path="SecondarySelectionRect.X"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="SecondarySelectionRect.Y"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Canvas.Top>
+                                        <Rectangle.Width>
+                                            <Binding Path="SecondarySelectionRect.Width"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Width>
+                                        <Rectangle.Height>
+                                            <Binding Path="SecondarySelectionRect.Height"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </Rectangle.Height>
+                                    </Rectangle>
+                                    <Rectangle IsVisible="{TemplateBinding HasSecondarySelection}"
+                                               Stroke="{TemplateBinding SecondarySelectionStroke}"
+                                               Fill="Transparent"
                                                StrokeThickness="1">
                                         <Canvas.Left>
                                             <Binding Path="SecondarySelectionRect.X"

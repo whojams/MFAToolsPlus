@@ -91,10 +91,8 @@ public static class MFAExtensions
 
         try
         {
-
             encodedDataStream.Seek(0, SeekOrigin.Begin);
             return new Bitmap(encodedDataStream);
-
         }
         catch (Exception ex)
         {

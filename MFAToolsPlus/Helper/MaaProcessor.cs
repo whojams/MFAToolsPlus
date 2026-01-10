@@ -89,6 +89,12 @@ public class MaaProcessor
     private static bool _isClosed = false;
     public static bool IsClosed => _isClosed;
 
+    public void Close()
+    {
+        _isClosed = true;
+        SetTasker();
+    }
+
     private int _screencapFailedCount;
     private readonly Lock _screencapLogLock = new();
     private const int ActionFailedLimit = 1;
@@ -382,7 +388,7 @@ public class MaaProcessor
                 tasker.Controller.Callback -= HandleControllerCallBack;
             };
             tasker.Controller.Callback += HandleControllerCallBack;
-
+            tasker.Global.SetOption_DebugMode(true);
             tasker.Resource.Register(new MFAOCRRecognition());
             var linkStatus = tasker.Controller?.LinkStart().Wait();
             if (linkStatus != MaaJobStatus.Succeeded)

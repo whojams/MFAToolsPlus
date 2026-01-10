@@ -37,20 +37,36 @@ public partial class RootView : SukiWindow
             });
         };
     }
-
+    
+    protected override void OnClosed(EventArgs e)
+    {
+        BeforeClosed();
+        base.OnClosed(e);
+    }
+    
     public void BeforeClosed()
     {
-        BeforeClosed(false, true);
+        BeforeClosed(false);
     }
 
-    public void BeforeClosed(bool noLog, bool stopTask)
+    public void BeforeClosed(bool noLog)
     {
-        MaaProcessor.Instance.SetTasker();
+        if (!GlobalHotkeyService.IsStopped)
+        {
+            MaaProcessor.Instance.Close();
+            if (!noLog)
+                LoggerHelper.Info("MFA Closed!");
+            MaaProcessor.Instance.SetTasker();
+
+
+            if (!noLog)
+                LoggerHelper.DisposeLogger();
+            GlobalHotkeyService.Shutdown();
+        }
     }
 
     public void LoadUI()
     {
-
         foreach (var rfile in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.backupMFA", SearchOption.AllDirectories))
         {
             try

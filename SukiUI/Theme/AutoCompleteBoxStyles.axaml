@@ -20,6 +20,7 @@
         <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
         <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
         <Setter Property="Padding" Value="6" />
+        <Setter Property="MaxDropDownHeight" Value="240" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel>
@@ -44,6 +45,7 @@
                            MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
                            MaxHeight="{TemplateBinding MaxDropDownHeight}"
                            IsLightDismissEnabled="True"
+                           PlacementMode="Bottom"
                            PlacementTarget="{TemplateBinding}">
                         <LayoutTransformControl Name="PART_LayoutTransform" RenderTransformOrigin="50%, 0%"
                                                 Opacity="0">

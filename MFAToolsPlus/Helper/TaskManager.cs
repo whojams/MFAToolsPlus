@@ -14,7 +14,7 @@ public static class TaskManager
     /// <param name="prompt">日志提示</param>
     /// <param name="catchException">是否捕获异常</param>
     public static void RunTask(
-        Action action,
+        Action? action,
         string name = nameof(Action),
         string prompt = ">>> ",
         bool catchException = true,
@@ -27,7 +27,11 @@ public static class TaskManager
         {
             try
             {
-                action.Invoke();
+                Task.Run(() =>
+                {
+
+                    action?.Invoke();
+                });
             }
             catch (Exception e)
             {

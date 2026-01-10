@@ -242,7 +242,7 @@ public static class VersionChecker
             return;
         }
         MaaProcessor.Instance.SetTasker();
-        DispatcherHelper.PostOnMainThread(() => Instances.RootView.BeforeClosed(true, true));
+        DispatcherHelper.PostOnMainThread(() => Instances.RootView.BeforeClosed(true));
         var tempPath = Path.Combine(AppContext.BaseDirectory, "temp_res");
         Directory.CreateDirectory(tempPath);
         string fileExtension = GetFileExtensionFromUrl(downloadUrl);

@@ -1,8 +1,12 @@
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using MaaFramework.Binding;
 using MaaFramework.Binding.Buffers;
+using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Extensions.MaaFW.Custom;
 using Newtonsoft.Json;
+using SukiUI.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -115,14 +119,249 @@ public static class RecognitionHelper
         return string.Empty;
     }
 
-    public static void RunOcr()
+    public static void RunClickTest(MaaTasker tasker, int x, int y, int w, int h, int offset_x = 0, int offset_y = 0, int offset_w = 0, int offset_h = 0)
     {
-        
+        var payload = new
+        {
+            action = "Click",
+            target = new[]
+            {
+                x,
+                y,
+                w,
+                h
+            },
+            target_offset = new[]
+            {
+                offset_x,
+                offset_y,
+                offset_w,
+                offset_h
+            }
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+        TaskManager.RunTask(() =>
+        {
+            using var rect = new MaaRectBuffer();
+            var job = tasker.AppendAction("Click", pipeline, rect, "{}");
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
+                return;
+            }
+        }, "Click Test");
+    }
+    
+    public static void RunSwipeTest(MaaTasker tasker, int sx, int sy, int ex, int ey, int time = 200)
+    {
+        var payload = new
+        {
+            action = "Swipe",
+            begin = new[]
+            {
+               sx,
+                sy
+            },
+            end = new[]
+            {
+                ex,
+                ey
+            },
+            duration = time
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+        TaskManager.RunTask(() =>
+        {
+            using var rect = new MaaRectBuffer();
+            var job = tasker.AppendAction("Swipe", pipeline, rect, "{}");
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
+                return;
+            }
+        }, "Swipe Test");
+    }
+    
+    public static void RunOcrMatch(MaaTasker tasker, int x, int y, int w, int h, string text, double recognition_threshold = 0.3, bool rec = false)
+    {
+        var payload = new
+        {
+            recognition = "OCR",
+            expected = text,
+            threshold = recognition_threshold,
+            only_rec = rec,
+            roi = new[]
+            {
+                x,
+                y,
+                w,
+                h
+            }
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+        var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
+        if (tempBitmap == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
+            return;
+        }
+        TaskManager.RunTask(() =>
+        {
+            var job = tasker.AppendRecognition("OCR", pipeline, BitmapToMaaImageBuffer(tempBitmap));
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
+                return;
+            }
+
+            tasker.GetTaskDetail(job.Id, out var enter, out var nodeIdList, out var _);
+            tasker.GetNodeDetail(nodeIdList[0], out var nodeName, out var recognitionId, out var actionId, out var actionCompleted);
+            var imageListBuffer = new MaaImageListBuffer();
+
+            using var hitBox = new MaaRectBuffer();
+            tasker.GetRecognitionDetail(recognitionId, out string node,
+                out var algorithm,
+                out var hit,
+                hitBox,
+                out var detailJson,
+                null, imageListBuffer);
+
+            if (imageListBuffer.IsEmpty)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
+                return;
+            }
+
+            DispatcherHelper.PostOnMainThread(() =>
+            {
+                var imageBrowser = new SukiImageBrowser();
+                imageBrowser.SetImage(imageListBuffer[0].ToBitmap());
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    imageBrowser.Show(desktop.MainWindow);
+                }
+                else
+                {
+                    imageBrowser.Show();
+                }
+                imageListBuffer.Dispose();
+            });
+        }, "OcrMatch");
+    }
+
+    public static void RunTemplateMatch(MaaTasker tasker, int x, int y, int w, int h, Bitmap? bitmap, bool mask = false, double recognition_threshold = 0.7, int method_nodes = 5)
+    {
+        if (bitmap == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
+            return;
+        }
+        var templateDir = Path.Combine(AppContext.BaseDirectory, "resource", "base", "image");
+        Directory.CreateDirectory(templateDir);
+        bitmap.Save(Path.Combine(templateDir, "template.png"));
+
+        var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
+        if (tempBitmap == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
+            return;
+        }
+
+        var payload = new
+        {
+            recognition = "TemplateMatch",
+            template = "template.png",
+            threshold = recognition_threshold,
+            green_mask = mask,
+            method = method_nodes,
+            roi = new[]
+            {
+                x,
+                y,
+                w,
+                h
+            }
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+
+
+        TaskManager.RunTask(() =>
+        {
+            using var buffer = new MaaImageBuffer();
+
+            buffer.TrySetEncodedData(BitmapToBytes(tempBitmap));
+
+            var job = tasker.AppendRecognition("TemplateMatch", pipeline, buffer);
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+                return;
+
+            tasker.GetTaskDetail(job.Id, out var enter, out var nodeIdList, out var _);
+            tasker.GetNodeDetail(nodeIdList[0], out var nodeName, out var recognitionId, out var actionId, out var actionCompleted);
+
+            var imageListBuffer = new MaaImageListBuffer();
+
+            using var hitBox = new MaaRectBuffer();
+            tasker.GetRecognitionDetail(recognitionId, out string node,
+                out var algorithm,
+                out var hit,
+                hitBox,
+                out var detailJson,
+                null, imageListBuffer);
+            if (imageListBuffer.IsEmpty)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
+                return;
+            }
+            DispatcherHelper.PostOnMainThread(() =>
+            {
+                var imageBrowser = new SukiImageBrowser();
+                imageBrowser.SetImage(imageListBuffer[0].ToBitmap());
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    imageBrowser.Show(desktop.MainWindow);
+                }
+                else
+                {
+                    imageBrowser.Show();
+                }
+                imageListBuffer.Dispose();
+            });
+        }, "TemplateMatch");
     }
     public static byte[] BitmapToBytes(Bitmap bitmap)
     {
         using var ms = new MemoryStream();
         bitmap.Save(ms);
         return ms.ToArray();
+    }
+
+    public static IMaaImageBuffer BitmapToMaaImageBuffer(Bitmap bitmap)
+    {
+        using var ms = new MemoryStream();
+        bitmap.Save(ms);
+        var bytes = ms.ToArray();
+        var buffer = new MaaImageBuffer();
+        buffer.TrySetEncodedData(bytes);
+        return buffer;
     }
 }

@@ -1540,6 +1540,21 @@
     <data name="LiveViewOcr" xml:space="preserve">
         <value>文字辨識</value>
     </data>
+    <data name="LiveViewKey" xml:space="preserve">
+        <value>按鍵</value>
+    </data>
+    <data name="KeyModeTitle" xml:space="preserve">
+        <value>按鍵模式</value>
+    </data>
+    <data name="KeyCodeModeWin32" xml:space="preserve">
+        <value>Win32</value>
+    </data>
+    <data name="KeyCodeModeAdb" xml:space="preserve">
+        <value>ADB</value>
+    </data>
+    <data name="KeyCaptureButton" xml:space="preserve">
+        <value>開始捕獲按鍵</value>
+    </data>
     <data name="LiveViewColorPickRoi" xml:space="preserve">
         <value>取色ROI</value>
     </data>
@@ -1551,6 +1566,12 @@
     </data>
     <data name="LiveViewRestore" xml:space="preserve">
         <value>還原</value>
+    </data>
+    <data name="KeyCaptureKeyLabel" xml:space="preserve">
+        <value>按鍵</value>
+    </data>
+    <data name="KeyCaptureCodeLabel" xml:space="preserve">
+        <value>編號</value>
     </data>
     <data name="LiveViewScreenshotRoi" xml:space="preserve">
         <value>截圖ROI</value>
@@ -1575,6 +1596,9 @@
     </data>
     <data name="LiveViewNoScreenshot" xml:space="preserve">
         <value>沒有可用截圖</value>
+    </data>
+    <data name="LiveViewNoHit" xml:space="preserve">
+        <value>未命中</value>
     </data>
     <data name="LiveViewSelectOcrRegion" xml:space="preserve">
         <value>請先選擇OCR區域</value>
@@ -1605,5 +1629,47 @@
     </data>
     <data name="Result" xml:space="preserve">
         <value>結果</value>
+    </data>
+    <data name="HitTest" xml:space="preserve">
+        <value>命中測試</value>
+    </data>
+    <data name="OcrHitTest" xml:space="preserve">
+        <value>OCR 命中測試</value>
+    </data>
+    <data name="TemplateHitTest" xml:space="preserve">
+        <value>模板命中測試</value>
+    </data>
+    <data name="ClickHitTest" xml:space="preserve">
+        <value>點擊命中測試</value>
+    </data>
+    <data name="SwipeHitTest" xml:space="preserve">
+        <value>滑動命中測試</value>
+    </data>
+    <data name="LiveViewSwipeDuration" xml:space="preserve">
+        <value>持續時間</value>
+    </data>
+    <data name="MatchRoi" xml:space="preserve">
+        <value>識別 ROI</value>
+    </data>
+    <data name="TargetText" xml:space="preserve">
+        <value>目標文字</value>
+    </data>
+    <data name="RecognitionThreshold" xml:space="preserve">
+        <value>識別閾值</value>
+    </data>
+    <data name="OnlyRec" xml:space="preserve">
+        <value>僅識別</value>
+    </data>
+    <data name="GreenMask" xml:space="preserve">
+        <value>綠色蒙板</value>
+    </data>
+    <data name="TemplateMethod" xml:space="preserve">
+        <value>模板匹配算法</value>
+    </data>
+    <data name="TemplateSelect" xml:space="preserve">
+        <value>選擇模板</value>
+    </data>
+    <data name="KeyInputWatermark" xml:space="preserve">
+        <value>請輸入按鍵</value>
     </data>
 </root>

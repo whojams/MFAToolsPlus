@@ -124,6 +124,17 @@ public class SukiImageViewer : TemplatedControl
         set => SetValue(SelectionRectProperty, value);
     }
 
+    public static readonly DirectProperty<SukiImageViewer, bool> IsSelectionSinglePixelProperty =
+        AvaloniaProperty.RegisterDirect<SukiImageViewer, bool>(
+            nameof(IsSelectionSinglePixel),
+            o => o.IsSelectionSinglePixel);
+
+    public bool IsSelectionSinglePixel
+    {
+        get;
+        private set => SetAndRaise(IsSelectionSinglePixelProperty, ref field, value);
+    }
+
     public static readonly StyledProperty<bool> HasBrushPreviewProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
         nameof(HasBrushPreview));
 
@@ -243,6 +254,17 @@ public class SukiImageViewer : TemplatedControl
         set => SetValue(SecondarySelectionRectProperty, value);
     }
 
+    public static readonly DirectProperty<SukiImageViewer, bool> IsSecondarySelectionSinglePixelProperty =
+        AvaloniaProperty.RegisterDirect<SukiImageViewer, bool>(
+            nameof(IsSecondarySelectionSinglePixel),
+            o => o.IsSecondarySelectionSinglePixel);
+
+    public bool IsSecondarySelectionSinglePixel
+    {
+        get;
+        private set => SetAndRaise(IsSecondarySelectionSinglePixelProperty, ref field, value);
+    }
+
     public static readonly StyledProperty<bool> HasSecondarySelectionProperty = AvaloniaProperty.Register<SukiImageViewer, bool>(
         nameof(HasSecondarySelection));
 
@@ -323,7 +345,7 @@ public class SukiImageViewer : TemplatedControl
     }
 
     public static readonly StyledProperty<double> LargeChangeProperty = AvaloniaProperty.Register<SukiImageViewer, double>(
-        nameof(LargeChange), defaultValue: 10);
+        nameof(LargeChange), defaultValue: 20);
 
     public double LargeChange
     {
@@ -370,6 +392,7 @@ public class SukiImageViewer : TemplatedControl
         MinScaleProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnMinScaleChanged(e));
         MaxScaleProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnMaxScaleChanged(e));
         SelectionRectProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnSelectionRectChanged(e));
+        SecondarySelectionRectProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnSecondarySelectionRectChanged(e));
         BoundsProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnBoundsChanged(e));
         BitmapInterpolationModeProperty.Changed.AddClassHandler<SukiImageViewer>((o, e) => o.OnBitmapInterpolationModeChanged(e));
         BrushPreviewPointProperty.Changed.AddClassHandler<SukiImageViewer>((o, _) => o.UpdateBrushPreviewRect());
@@ -422,7 +445,6 @@ public class SukiImageViewer : TemplatedControl
             AdornerLayer.SetAdorner(this, c);
         }
     }
-
     private void OnSelectionRectChanged(AvaloniaPropertyChangedEventArgs args)
     {
         var rect = args.GetNewValue<Rect>();
@@ -432,11 +454,19 @@ public class SukiImageViewer : TemplatedControl
         {
             SelectionRects.Add(rect);
             HasSelection = true;
+            IsSelectionSinglePixel = rect.Width <= 1 && rect.Height <= 1;
         }
         else
         {
             HasSelection = false;
+            IsSelectionSinglePixel = false;
         }
+    }
+
+    private void OnSecondarySelectionRectChanged(AvaloniaPropertyChangedEventArgs args)
+    {
+        var rect = args.GetNewValue<Rect>();
+        IsSecondarySelectionSinglePixel = rect.Width > 0 && rect.Height > 0 && rect.Width <= 1 && rect.Height <= 1;
     }
 
     private void OnSourceChanged(AvaloniaPropertyChangedEventArgs args)

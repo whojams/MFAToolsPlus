@@ -91,6 +91,22 @@ public partial class ToolsView : UserControl
         StopLiveViewLoop();
     }
 
+    private void OnKeyCaptureButtonClick(object? sender, RoutedEventArgs e)
+    {
+        Focus();
+    }
+
+    private void OnKeyCaptureKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not ToolsViewModel vm || !vm.IsKeyCaptureActive)
+        {
+            return;
+        }
+
+        vm.CaptureKey(e.Key);
+        e.Handled = true;
+    }
+
     private void OnLiveViewPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is not ToolsViewModel vm || vm.ActiveToolMode == LiveViewToolMode.None)
@@ -98,7 +114,7 @@ public partial class ToolsView : UserControl
             return;
         }
 
-        if (!vm.IsLiveViewPaused || vm.LiveViewDisplayImage == null)
+        if (vm.LiveViewDisplayImage == null)
         {
             return;
         }
@@ -109,12 +125,13 @@ public partial class ToolsView : UserControl
         if (vm.ActiveToolMode == LiveViewToolMode.Screenshot && vm.IsScreenshotBrushMode)
         {
             _lastBrushPoint = _selectionStart;
-            vm.UpdateScreenshotBrushPreview(_selectionStart);
+            vm.UpdatePointerPreview(_selectionStart);
             vm.StartScreenshotBrush(_selectionStart);
         }
         else if (vm.ActiveToolMode == LiveViewToolMode.Swipe)
         {
             vm.SetSwipeStart(_selectionStart);
+            vm.UpdateSelection(default, false);
         }
         else
         {
@@ -132,22 +149,44 @@ public partial class ToolsView : UserControl
             return;
         }
 
+        var point = e.GetCurrentPoint(LiveViewViewer);
+        if (!point.Properties.IsLeftButtonPressed)
+        {
+            _isSelecting = false;
+        }
+
         var current = GetImagePoint(e.GetPosition(LiveViewViewer), vm);
+        if (!vm.IsDragMode)
+        {
+            vm.UpdatePointerPreview(current);
+        }
+
         if (vm.ActiveToolMode == LiveViewToolMode.Screenshot && vm.IsScreenshotBrushMode)
         {
-            vm.UpdateScreenshotBrushPreview(current);
             if (_isSelecting)
             {
                 vm.UpdateScreenshotBrush(current, _lastBrushPoint);
                 _lastBrushPoint = current;
             }
 
+            LiveViewViewer.InvalidateVisual();
             e.Handled = true;
             return;
         }
 
         if (!_isSelecting)
         {
+            return;
+        }
+
+        if (vm.ActiveToolMode == LiveViewToolMode.Swipe)
+        {
+            if (_isSelecting)
+            {
+                vm.SetSwipeEnd(current);
+            }
+
+            e.Handled = true;
             return;
         }
 
@@ -170,8 +209,9 @@ public partial class ToolsView : UserControl
 
         if (vm.ActiveToolMode == LiveViewToolMode.Screenshot && vm.IsScreenshotBrushMode)
         {
-            vm.UpdateScreenshotBrushPreview(end);
+            vm.UpdatePointerPreview(end);
             vm.UpdateScreenshotBrush(end, _lastBrushPoint);
+            LiveViewViewer.InvalidateVisual();
             e.Handled = true;
             return;
         }
@@ -184,7 +224,7 @@ public partial class ToolsView : UserControl
         }
 
         var rect = NormalizeRect(_selectionStart, end);
-        var hasSelection = rect.Width > 2 && rect.Height > 2;
+        var hasSelection = rect.Width >= 1 && rect.Height >= 1;
         vm.UpdateSelection(rect, hasSelection);
 
         if (hasSelection)
@@ -212,8 +252,10 @@ public partial class ToolsView : UserControl
     {
         var x = Math.Min(start.X, end.X);
         var y = Math.Min(start.Y, end.Y);
-        var w = Math.Abs(end.X - start.X);
-        var h = Math.Abs(end.Y - start.Y);
+        var w = Math.Abs(end.X - start.X) + 1;
+        var h = Math.Abs(end.Y - start.Y) + 1;
+        w = Math.Max(1, w);
+        h = Math.Max(1, h);
         return new Rect(x, y, w, h);
     }
 
@@ -231,6 +273,11 @@ public partial class ToolsView : UserControl
         var imageWidth = imageSize.Width;
         var imageHeight = imageSize.Height;
 
+        if (imageWidth <= 0 || imageHeight <= 0)
+        {
+            return viewerPoint;
+        }
+
         var displayWidth = imageWidth * scale;
         var displayHeight = imageHeight * scale;
 
@@ -240,8 +287,8 @@ public partial class ToolsView : UserControl
         var x = (viewerPoint.X - offsetX) / scale;
         var y = (viewerPoint.Y - offsetY) / scale;
 
-        x = Math.Clamp(x, 0, imageWidth);
-        y = Math.Clamp(y, 0, imageHeight);
+        x = Math.Clamp(x, 0, Math.Max(0, imageWidth - 1));
+        y = Math.Clamp(y, 0, Math.Max(0, imageHeight - 1));
 
         return new Point(Math.Round(x), Math.Round(y));
     }

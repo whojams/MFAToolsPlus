@@ -6,5 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SukiUI.Controls.SukiImageBrowser" WindowStartupLocation="CenterScreen"
         Title="{DynamicResource STRING_IMAGE_VIEWER}">
-    <suki:SukiImageViewer ShowZoomToolbar="False" x:Name="ImageViewer"></suki:SukiImageViewer>
+    <suki:SukiImageViewer x:Name="ImageViewer"
+                          ShowZoomToolbar="True"
+                          IsDragEnabled="True" />
 </suki:SukiWindow>
