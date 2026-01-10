@@ -1645,6 +1645,12 @@
     <data name="SwipeHitTest" xml:space="preserve">
         <value>滑動命中測試</value>
     </data>
+    <data name="KeyHitTest" xml:space="preserve">
+        <value>按鍵命中測試</value>
+    </data>
+    <data name="LiveViewSelectKey" xml:space="preserve">
+        <value>請先選擇按鍵</value>
+    </data>
     <data name="LiveViewSwipeDuration" xml:space="preserve">
         <value>持續時間</value>
     </data>

@@ -1657,6 +1657,12 @@
     <data name="SwipeHitTest" xml:space="preserve">
         <value>Swipe Hit Test</value>
     </data>
+    <data name="KeyHitTest" xml:space="preserve">
+        <value>Key Hit Test</value>
+    </data>
+    <data name="LiveViewSelectKey" xml:space="preserve">
+        <value>Please select a key first</value>
+    </data>
     <data name="LiveViewSwipeDuration" xml:space="preserve">
         <value>Duration(ms)</value>
     </data>
