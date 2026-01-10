@@ -34,6 +34,7 @@
         <entry key="SukiUI/Controls/PropertyGrid/PropertyGridWindow.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/SukiImageBrowser.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/SukiImageViewer.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Theme/AutoCompleteBoxStyles.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Theme/Button.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Theme/Index.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Theme/MenuItem.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
