@@ -80,6 +80,12 @@
 
 
     <ItemGroup>
+      <Content Include="..\.github\ISSUE_TEMPLATE\cn-bug-report.yaml">
+        <Link>.github\ISSUE_TEMPLATE\cn-bug-report.yaml</Link>
+      </Content>
+      <Content Include="..\.github\workflows\Release.yml">
+        <Link>.github\workflows\Release.yml</Link>
+      </Content>
       <Content Include="..\docs\images\mfa-logo_512x512.png">
         <Link>docs\images\mfa-logo_512x512.png</Link>
       </Content>
