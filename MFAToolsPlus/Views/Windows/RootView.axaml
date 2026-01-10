@@ -128,6 +128,9 @@
             <TextBlock VerticalAlignment="Center"
                        FontSize="13" Text="{markup:I18n {x:Static helper:LangKeys.AppTitle}}" IsHitTestVisible="False"
                        FontWeight="Bold" />
+            <TextBlock VerticalAlignment="Center" Margin="5 0 0 0" 
+                       Foreground="{DynamicResource SukiLowText}" IsHitTestVisible="False"
+                       FontSize="13" Text="{x:Static vm:RootViewModel.Version}" />
         </StackPanel>
     </suki:SukiWindow.NonClientAreaContent>
     <suki:SukiWindow.Hosts>

@@ -53,7 +53,8 @@ public enum TestPanelMode
     Ocr,
     Screenshot,
     Click,
-    Swipe
+    Swipe,
+    Key
 }
 
 public enum LiveViewRoiSelectionType
@@ -720,6 +721,7 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private bool _isScreenshotTestPanelVisible;
     [ObservableProperty] private bool _isClickTestPanelVisible;
     [ObservableProperty] private bool _isSwipeTestPanelVisible;
+    [ObservableProperty] private bool _isKeyTestPanelVisible;
     [ObservableProperty] private bool _isDragMode = true;
     [ObservableProperty] private bool _isRoiMode;
     [ObservableProperty] private bool _isColorPickMode;
@@ -2370,13 +2372,15 @@ public partial class ToolsViewModel : ViewModelBase
         if (value != LiveViewToolMode.Ocr
             && value != LiveViewToolMode.Screenshot
             && value != LiveViewToolMode.Roi
-            && value != LiveViewToolMode.Swipe)
+            && value != LiveViewToolMode.Swipe
+            && value != LiveViewToolMode.Key)
         {
             _suppressTestPanelSync = true;
             IsOcrTestPanelVisible = false;
             IsScreenshotTestPanelVisible = false;
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2555,6 +2559,7 @@ public partial class ToolsViewModel : ViewModelBase
         IsScreenshotTestPanelVisible = false;
         IsClickTestPanelVisible = false;
         IsSwipeTestPanelVisible = false;
+        IsKeyTestPanelVisible = false;
         _suppressTestPanelSync = false;
         ActiveTestPanelMode = TestPanelMode.None;
     }
@@ -2572,12 +2577,13 @@ public partial class ToolsViewModel : ViewModelBase
             IsScreenshotTestPanelVisible = false;
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Ocr;
             SyncOcrMatchDefaults(true);
         }
-        else if (!IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        else if (!IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2597,12 +2603,13 @@ public partial class ToolsViewModel : ViewModelBase
             IsOcrTestPanelVisible = false;
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Screenshot;
             SyncTemplateMatchDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2622,12 +2629,13 @@ public partial class ToolsViewModel : ViewModelBase
             IsOcrTestPanelVisible = false;
             IsScreenshotTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Click;
             SyncClickTestDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsSwipeTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2647,18 +2655,44 @@ public partial class ToolsViewModel : ViewModelBase
             IsOcrTestPanelVisible = false;
             IsScreenshotTestPanelVisible = false;
             IsClickTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Swipe;
             SyncSwipeTestDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
         }
     }
 
+    partial void OnIsKeyTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+    
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsScreenshotTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.Key;
+        }
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+    
     partial void OnIsScreenshotBrushModeChanged(bool value)
     {
         UpdateBrushPreviewAvailability();
@@ -3701,6 +3735,30 @@ public partial class ToolsViewModel : ViewModelBase
             (int)Math.Round(end.X),
             (int)Math.Round(end.Y),
             duration);
+    }
+
+    [RelayCommand]
+    private async Task RunKeyHitTest()
+    {
+        IsKeyTestPanelVisible = true;
+
+        if (!int.TryParse(KeyCaptureCode, out var keyCode))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectKey.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        if (IsLiveViewPaused)
+            IsLiveViewPaused = false;
+
+        RecognitionHelper.RunKeyClickTest(tasker, keyCode);
     }
 
     [RelayCommand]

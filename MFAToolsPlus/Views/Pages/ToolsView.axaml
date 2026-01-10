@@ -1523,7 +1523,11 @@
                             <TextBlock FontSize="11"
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureCodeLabel}}" />
-                            <TextBox Text="{Binding KeyCaptureCode}" IsReadOnly="True" />
+                            <TextBox Text="{Binding KeyCaptureCode}" />
+                            <ToggleButton Classes="Flat ActionButton"
+                                          IsChecked="{Binding IsKeyTestPanelVisible, Mode=TwoWay}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
+                            </ToggleButton>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -1860,6 +1864,18 @@
                             <TextBox Text="{Binding SwipeTestDuration, Mode=TwoWay}" />
                             <Button Classes="Flat ActionButton"
                                     Command="{Binding RunSwipeHitTestCommand}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{Binding IsKeyTestPanelVisible}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.KeyHitTest}}" />
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding RunKeyHitTestCommand}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>
                         </StackPanel>

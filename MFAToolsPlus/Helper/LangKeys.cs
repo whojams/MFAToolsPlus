@@ -556,6 +556,8 @@ public static class LangKeys
 	public static readonly string TemplateHitTest = "TemplateHitTest";
 	public static readonly string ClickHitTest = "ClickHitTest";
 	public static readonly string SwipeHitTest = "SwipeHitTest";
+	public static readonly string KeyHitTest = "KeyHitTest";
+	public static readonly string LiveViewSelectKey = "LiveViewSelectKey";
 	public static readonly string LiveViewSwipeDuration = "LiveViewSwipeDuration";
 	public static readonly string MatchRoi = "MatchRoi";
 	public static readonly string TargetText = "TargetText";

@@ -156,7 +156,7 @@ public static class RecognitionHelper
             }
         }, "Click Test");
     }
-    
+
     public static void RunSwipeTest(MaaTasker tasker, int sx, int sy, int ex, int ey, int time = 200)
     {
         var payload = new
@@ -164,7 +164,7 @@ public static class RecognitionHelper
             action = "Swipe",
             begin = new[]
             {
-               sx,
+                sx,
                 sy
             },
             end = new[]
@@ -191,7 +191,32 @@ public static class RecognitionHelper
             }
         }, "Swipe Test");
     }
-    
+
+    public static void RunKeyClickTest(MaaTasker tasker, int input_key)
+    {
+        var payload = new
+        {
+            action = "ClickKey",
+            key = input_key
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+        TaskManager.RunTask(() =>
+        {
+            using var rect = new MaaRectBuffer();
+            var job = tasker.AppendAction("ClickKey", pipeline, rect, "{}");
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
+                return;
+            }
+        }, "KeyClick Test");
+    }
+
     public static void RunOcrMatch(MaaTasker tasker, int x, int y, int w, int h, string text, double recognition_threshold = 0.3, bool rec = false)
     {
         var payload = new
