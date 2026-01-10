@@ -43,6 +43,6 @@ public static class UrlUtilities
             }
         }
 #pragma warning disable CS0067 //从不使用事件
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
     }
 }

@@ -23,7 +23,7 @@ public class ViewModelBase : ObservableObject
     
     protected void HandleStringPropertyChanged<T>(string configKey, T newValue, Action<T>? action = null)
     {
-        ConfigurationManager.Current.SetValue(configKey, newValue.ToString());
+        ConfigurationManager.Current.SetValue(configKey, newValue?.ToString());
         action?.Invoke(newValue);
     }
     

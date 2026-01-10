@@ -308,7 +308,7 @@ public class UniversalExtractor
                 int processedEntries = 0;
                 while (reader.MoveToNextEntry())
                 {
-                    if (!reader.Entry.IsDirectory)
+                    if (!reader.Entry.IsDirectory && reader?.Entry?.Key != null)
                     {
                         // 构建目标文件路径
                         string entryName = reader.Entry.Key;
@@ -366,7 +366,7 @@ public class UniversalExtractor
                 int processedEntries = 0;
                 while (reader.MoveToNextEntry())
                 {
-                    if (!reader.Entry.IsDirectory)
+                    if (!reader.Entry.IsDirectory && reader.Entry.Key != null)
                     {
                         // 构建目标文件路径
                         string entryName = reader.Entry.Key;

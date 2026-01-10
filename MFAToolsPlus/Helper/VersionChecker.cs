@@ -32,7 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace MFAToolsPlus.Helper;
-
+#pragma warning restore CS4014
 public static class VersionChecker
 {
     public enum VersionType
@@ -148,7 +148,7 @@ public static class VersionChecker
             LoggerHelper.Error(ex);
         }
     }
-    public async static Task UpdateMFA(bool isGithub = true, bool closeDialog = false, bool noDialog = false, Action action = null, string currentVersion = "")
+    public async static Task UpdateMFA(bool isGithub = true, bool closeDialog = false, bool noDialog = false, Action? action = null, string currentVersion = "")
     {
         Instances.RootViewModel.SetUpdating(true);
         ProgressBar? progress = null;

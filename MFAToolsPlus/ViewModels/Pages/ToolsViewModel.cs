@@ -30,6 +30,8 @@ using System.Threading.Tasks;
 
 namespace MFAToolsPlus.ViewModels.Pages;
 
+#pragma warning disable CS0618
+
 public enum LiveViewToolMode
 {
     None,
@@ -2947,7 +2949,7 @@ public partial class ToolsViewModel : ViewModelBase
         {
             return false;
         }
-
+     
         var text = await clipboard.GetTextAsync();
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -5722,7 +5724,7 @@ public partial class ToolsViewModel : ViewModelBase
 
     [ObservableProperty] private Bitmap? _liveViewImage;
     private WriteableBitmap? _liveViewWriteableBitmap;
-    private int _liveViewProcessing;
+
 
     [ObservableProperty] private double _liveViewFps;
     private DateTime _liveViewFpsWindowStart = DateTime.UtcNow;

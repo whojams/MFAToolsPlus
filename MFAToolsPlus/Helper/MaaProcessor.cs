@@ -281,7 +281,7 @@ public class MaaProcessor
         {
             return (null, false, false);
         }
-        MaaResource maaResource = null;
+        MaaResource? maaResource = null;
         try
         {
             maaResource = await TaskManager.RunTaskAsync(() =>
@@ -321,7 +321,7 @@ public class MaaProcessor
         }
 
         // 初始化控制器部分同理
-        MaaController controller = null;
+        MaaController? controller = null;
         try
         {
             controller = await TaskManager.RunTaskAsync(() =>

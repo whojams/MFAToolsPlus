@@ -30,6 +30,7 @@
         <entry key="MFAToolsPlus/Views/Windows/RootView.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/Experimental/DesktopEnvironment/SukiDesktopEnvironment.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/GroupBox.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Controls/InfoBadge.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/PropertyGrid/PropertyGridDialog.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/PropertyGrid/PropertyGridWindow.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Controls/SukiImageBrowser.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />

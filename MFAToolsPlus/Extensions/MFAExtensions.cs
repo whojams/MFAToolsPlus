@@ -113,14 +113,9 @@ public static class MFAExtensions
     {
         if (element != device.Captured)
             return;
-        device.Capture((IInputElement) null);
+        device.Capture(null);
     }
-
-    public static T PeekOrDefault<T>(this ImmutableStack<T> stack)
-    {
-        return !stack.IsEmpty ? stack.Peek() : default (T);
-    }
-
+    
     public static IDisposable Subscribe<T>(this IObservable<T> observable, Action<T> action)
     {
         return observable.Subscribe((IObserver<T>) new AnonymousObserver<T>((Action<T>) action));

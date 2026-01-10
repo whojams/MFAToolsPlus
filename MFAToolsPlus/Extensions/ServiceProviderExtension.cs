@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace MFAToolsPlus.Extensions;
-
+#pragma warning restore CS8618
 public class ServiceProviderExtension : MarkupExtension
 {
     public Type ServiceType { get; set; }

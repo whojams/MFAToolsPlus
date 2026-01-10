@@ -23,7 +23,7 @@ public partial class GuiSettingsUserControl : UserControl
     private void Delete(object? sender, RoutedEventArgs e)
     {
         var menuItem = sender as MenuItem;
-        if (menuItem.DataContext is ThemeItem themeItemViewModel && DataContext is GuiSettingsUserControlModel vm)
+        if (menuItem?.DataContext is ThemeItem themeItemViewModel && DataContext is GuiSettingsUserControlModel vm)
         {
             if (vm.CurrentColorTheme != themeItemViewModel.Theme && !themeItemViewModel.IsSelected)
             {

@@ -5,7 +5,7 @@ using Avalonia.Interactivity;
 using System;
 
 namespace MFAToolsPlus.Extensions;
-
+#pragma warning disable CS8622
 public static class ComboBoxExtensions
 {
     public static readonly AttachedProperty<bool> DisableNavigationOnLostFocusProperty =

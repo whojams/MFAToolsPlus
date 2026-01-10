@@ -17,7 +17,7 @@ public partial class VersionUpdateSettingsUserControl : UserControl
         DataContext = Instances.VersionUpdateSettingsUserControlModel;
         InitializeComponent();
     }
-
+#pragma warning  disable CS8602
     private void CopyVersion(object? sender, PointerPressedEventArgs e)
     {
         if (sender is TextBlock textBlock)

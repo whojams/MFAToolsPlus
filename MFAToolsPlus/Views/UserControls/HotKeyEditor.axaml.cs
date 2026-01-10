@@ -57,7 +57,7 @@ public class HotKeyEditor : TemplatedControl
         focusManager?.ClearFocus();
     }
 
-    private void OnPressed(object sender, EventArgs e)
+    private void OnPressed(object? sender, EventArgs e)
     {
         GlobalHotkeyService.Unregister(HotKey.Gesture);
         HotKey = MFAHotKey.PRESSING;

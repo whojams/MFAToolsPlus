@@ -30,7 +30,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MFAToolsPlus;
-
+#pragma warning restore CS8618
 public partial class App : Application
 {
     /// <summary>
@@ -109,7 +109,7 @@ public partial class App : Application
         services.AddSingleton<ISukiToastManager, SukiToastManager>();
         services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
     }
-    private void OnShutdownRequested(object sender, ShutdownRequestedEventArgs e)
+    private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
     {
         // ConfigurationManager.Current.SetValue(ConfigurationKeys.TaskItems, Instances.TaskQueueViewModel.TaskItemViewModels.ToList().Select(model => model.InterfaceItem));
 
@@ -136,7 +136,7 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         Dispatcher.UIThread.UnhandledException -= OnDispatcherUnhandledException;
     }
-    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    private void OnDispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)
     {
         try
         {
@@ -159,7 +159,7 @@ public partial class App : Application
         }
     }
 
-    void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    void CurrentDomain_UnhandledException(object? sender, UnhandledExceptionEventArgs e)
     {
         try
         {
@@ -193,7 +193,7 @@ public partial class App : Application
         }
     }
 
-    void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+    void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         try
         {

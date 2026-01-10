@@ -61,7 +61,7 @@ public partial class ErrorView : SukiWindow
         }
 
         ExceptionMessage = errorStr.ToString();
-        ExceptionDetails = exception.ToString();
+        ExceptionDetails = exception?.ToString();
         _shouldExit = shouldExit;
     }
     // 显示异常窗口

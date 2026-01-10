@@ -17,7 +17,7 @@ public static class GlobalConfiguration
     public static string ConfigPath => _configPath;
     public static bool HasFileAccessError { get; private set; }
     public static string? LastFileAccessErrorMessage { get; private set; }
-
+#pragma warning disable CS8620
     private static IConfigurationRoot LoadConfiguration()
     {
         try

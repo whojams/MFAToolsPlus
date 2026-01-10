@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <NoWarn>NU1701;NU1510;CS8767;CS8601:</NoWarn>
+        <NoWarn>NU1701;NU1510;CS8767;CS8601;CS8601;CS8620;CS8604;CS8602;CS8622;CS4014;CS8618;CS0067;CS0414</NoWarn>
     </PropertyGroup>
     
     <PropertyGroup>
