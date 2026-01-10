@@ -24,3 +24,8 @@ _基于 [Avalonia UI](https://github.com/AvaloniaUI/Avalonia)
 
 <!-- prettier-ignore-end -->
 
+## 📸 界面预览
+
+<p align="center">
+  <img alt="preview" src="./docs/images/preview.png" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+</p>
