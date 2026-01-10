@@ -14,7 +14,7 @@ _✨ MFA 工具箱 ✨_
 **🚀 新一代跨平台自动化框架图形界面**
 
 _基于 [Avalonia UI](https://github.com/AvaloniaUI/Avalonia)
-构建的 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 通用 GUI 解决方案_
+构建的 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 新一代开发辅助工具_
 
 [![License](https://img.shields.io/github/license/SweetSmellFox/MFAToolsPlus?style=flat-square&color=4a90d9)](./LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-%E2%89%A5%2010-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
