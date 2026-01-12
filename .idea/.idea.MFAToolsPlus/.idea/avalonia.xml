@@ -41,6 +41,7 @@
         <entry key="SukiUI/Theme/MenuItem.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Theme/NumericUpDown.xaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="SukiUI/Theme/RadioButtonStyles.xaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="SukiUI/Theme/TextStyles.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
       </map>
     </option>
   </component>

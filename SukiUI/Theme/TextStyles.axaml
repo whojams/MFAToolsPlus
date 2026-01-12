@@ -1,7 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
         <FontFamily x:Key="DefaultFontFamily">
-            avares://SukiUI/CustomFont#Alibaba PuHuiTi 3.0,
             <!-- Windows 原生高兼容字体（UI适配优先） -->
             Microsoft YaHei UI, Microsoft JhengHei UI, Segoe UI, 
             <!-- macOS/iOS 原生字体 -->

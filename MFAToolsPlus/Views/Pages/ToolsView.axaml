@@ -1513,7 +1513,8 @@
                             </Button>
                             <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="DodgerBlue" Padding="8 5">
                                 <TextBlock FontSize="11"
-                                           Foreground="{DynamicResource SukiLowText}"
+                                           FontWeight="Bold"
+                                           Foreground="White"
                                            Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureKeyLabel}}" />
                             </Border>
                             <AutoCompleteBox IsVisible="{Binding IsKeyCodeAdb}"
@@ -1524,8 +1525,8 @@
                                      Text="{Binding KeyCaptureKey}"
                                      IsReadOnly="True" />
                             <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="Orange" Padding="8 5">
-                                <TextBlock FontSize="11"
-                                           Foreground="{DynamicResource SukiLowText}"
+                                <TextBlock FontSize="11" FontWeight="Bold"
+                                           Foreground="White"
                                            Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureCodeLabel}}" />
                             </Border>
                             <TextBox Text="{Binding KeyCaptureCode}" />

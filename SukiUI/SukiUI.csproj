@@ -64,11 +64,6 @@
     <ItemGroup>
         <AvaloniaResource Include="Roboto-Regular.ttf"/>
         <AvaloniaResource Include="Roboto-Medium.ttf"/>
-        <AvaloniaResource Include="CustomFont\AlibabaPuHuiTi-Bold.ttf"/>
-        <AvaloniaResource Include="CustomFont\AlibabaPuHuiTi-Light.ttf"/>
-        <AvaloniaResource Include="CustomFont\AlibabaPuHuiTi-Medium.ttf"/>
-        <AvaloniaResource Include="CustomFont\AlibabaPuHuiTi-Regular.ttf"/>
-        <AvaloniaResource Include="CustomFont\AlibabaPuHuiTi-SemiBold.ttf"/>
     </ItemGroup>
 
     <ItemGroup>
