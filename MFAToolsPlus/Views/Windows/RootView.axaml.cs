@@ -1,12 +1,10 @@
+using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Notifications;
 using MFAToolsPlus.Configuration;
 using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Extensions.MaaFW;
 using MFAToolsPlus.Helper;
-using MFAToolsPlus.Helper.Other;
 using SukiUI.Controls;
-using SukiUI.Dialogs;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -38,6 +36,13 @@ public partial class RootView : SukiWindow
         };
     }
     
+    public void ShowWindow()
+    {
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+    }
+    
     protected override void OnClosed(EventArgs e)
     {
         BeforeClosed();
@@ -57,7 +62,7 @@ public partial class RootView : SukiWindow
             if (!noLog)
                 LoggerHelper.Info("MFA Closed!");
             MaaProcessor.Instance.SetTasker();
-
+            TrayIconManager.DisposeTrayIcon(Application.Current);
 
             if (!noLog)
                 LoggerHelper.DisposeLogger();

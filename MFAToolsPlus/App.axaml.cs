@@ -50,6 +50,7 @@ public partial class App : Application
         LanguageHelper.Initialize();
         GlobalHotkeyService.Initialize();
         ConfigurationManager.Initialize();
+
         _memoryCracker = new AvaloniaMemoryCracker();
         _memoryCracker.Cracker();
         
@@ -78,6 +79,8 @@ public partial class App : Application
             var window = views.CreateView<RootViewModel>(Services) as Window;
 
             desktop.MainWindow = window;
+            
+            TrayIconManager.InitializeTrayIcon(this, Instances.RootView, Instances.RootViewModel);
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -115,7 +118,8 @@ public partial class App : Application
 
         MaaProcessor.Instance.Close();
         GlobalHotkeyService.Shutdown();
-
+        TrayIconManager.DisposeTrayIcon(this);
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             foreach (var window in desktop.Windows.ToList())
