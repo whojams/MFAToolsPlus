@@ -68,9 +68,9 @@ public enum LiveViewRoiSelectionType
 
 public partial class ToolsViewModel : ViewModelBase
 {
+    [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private ObservableCollection<object> _devices = [];
     [ObservableProperty] private object? _currentDevice;
-
     [ObservableProperty] private MaaControllerTypes _currentController =
         ConfigurationManager.Current.GetValue(ConfigurationKeys.CurrentController, MaaControllerTypes.Adb, MaaControllerTypes.None, new UniversalEnumConverter<MaaControllerTypes>());
 
@@ -2676,7 +2676,7 @@ public partial class ToolsViewModel : ViewModelBase
         {
             return;
         }
-    
+
         if (value)
         {
             _suppressTestPanelSync = true;
@@ -2694,7 +2694,7 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveTestPanelMode = TestPanelMode.None;
         }
     }
-    
+
     partial void OnIsScreenshotBrushModeChanged(bool value)
     {
         UpdateBrushPreviewAvailability();
@@ -2949,7 +2949,7 @@ public partial class ToolsViewModel : ViewModelBase
         {
             return false;
         }
-     
+
         var text = await clipboard.GetTextAsync();
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -3546,16 +3546,19 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private async Task RunOcr()
     {
+        IsRunning = true;
         var sourceBitmap = LiveViewImage ?? LiveViewDisplayImage;
         if (sourceBitmap is not Bitmap bitmap)
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
+            IsRunning = false;
             return;
         }
 
         if (!TryParseRect(OcrX, OcrY, OcrW, OcrH, out var rect))
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectOcrRegion.ToLocalization());
+            IsRunning = false;
             return;
         }
 
@@ -3563,6 +3566,7 @@ public partial class ToolsViewModel : ViewModelBase
         if (tasker == null)
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            IsRunning = false;
             return;
         }
 
@@ -3576,7 +3580,7 @@ public partial class ToolsViewModel : ViewModelBase
                 Math.Max(1, (int)Math.Round(rect.Width)),
                 Math.Max(1, (int)Math.Round(rect.Height)));
             DispatcherHelper.PostOnMainThread(() => OcrResult = result);
-
+            IsRunning = false;
         }, "OCR");
     }
 
@@ -3743,8 +3747,17 @@ public partial class ToolsViewModel : ViewModelBase
     private async Task RunKeyHitTest()
     {
         IsKeyTestPanelVisible = true;
-
-        if (!int.TryParse(KeyCaptureCode, out var keyCode))
+        var list = new List<int>();
+        var keys = KeyCaptureCode.Split(",");
+        foreach (var key in keys)
+        {
+            if (int.TryParse(key, out var keyCode))
+            {
+                list.Add(keyCode);
+                
+            }
+        }
+        if (!keys.Any())
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectKey.ToLocalization());
             return;
@@ -3760,7 +3773,7 @@ public partial class ToolsViewModel : ViewModelBase
         if (IsLiveViewPaused)
             IsLiveViewPaused = false;
 
-        RecognitionHelper.RunKeyClickTest(tasker, keyCode);
+        RecognitionHelper.RunKeyClickTest(tasker, list);
     }
 
     [RelayCommand]

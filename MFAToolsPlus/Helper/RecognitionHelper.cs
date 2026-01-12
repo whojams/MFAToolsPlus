@@ -146,9 +146,11 @@ public static class RecognitionHelper
         });
         TaskManager.RunTask(() =>
         {
+            Instances.ToolsViewModel.IsRunning = true;
             using var rect = new MaaRectBuffer();
             var job = tasker.AppendAction("Click", pipeline, rect, "{}");
             var status = job.Wait();
+            Instances.ToolsViewModel.IsRunning = false;
             if (status != MaaJobStatus.Succeeded)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
@@ -181,9 +183,11 @@ public static class RecognitionHelper
         });
         TaskManager.RunTask(() =>
         {
+            Instances.ToolsViewModel.IsRunning = true;
             using var rect = new MaaRectBuffer();
             var job = tasker.AppendAction("Swipe", pipeline, rect, "{}");
             var status = job.Wait();
+            Instances.ToolsViewModel.IsRunning = false;
             if (status != MaaJobStatus.Succeeded)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
@@ -192,12 +196,12 @@ public static class RecognitionHelper
         }, "Swipe Test");
     }
 
-    public static void RunKeyClickTest(MaaTasker tasker, int input_key)
+    public static void RunKeyClickTest(MaaTasker tasker, List<int> keys)
     {
         var payload = new
         {
             action = "ClickKey",
-            key = input_key
+            key = keys
         };
         var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
         {
@@ -206,9 +210,11 @@ public static class RecognitionHelper
         });
         TaskManager.RunTask(() =>
         {
+            Instances.ToolsViewModel.IsRunning = true;
             using var rect = new MaaRectBuffer();
             var job = tasker.AppendAction("ClickKey", pipeline, rect, "{}");
             var status = job.Wait();
+            Instances.ToolsViewModel.IsRunning = false;
             if (status != MaaJobStatus.Succeeded)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
@@ -246,11 +252,13 @@ public static class RecognitionHelper
         }
         TaskManager.RunTask(() =>
         {
+            Instances.ToolsViewModel.IsRunning = true;
             var job = tasker.AppendRecognition("OCR", pipeline, BitmapToMaaImageBuffer(tempBitmap));
             var status = job.Wait();
             if (status != MaaJobStatus.Succeeded)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.TaskFailed.ToLocalization());
+                Instances.ToolsViewModel.IsRunning = false;
                 return;
             }
 
@@ -269,9 +277,10 @@ public static class RecognitionHelper
             if (imageListBuffer.IsEmpty)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
+                Instances.ToolsViewModel.IsRunning = false;
                 return;
             }
-
+            Instances.ToolsViewModel.IsRunning = false;
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
@@ -331,6 +340,7 @@ public static class RecognitionHelper
 
         TaskManager.RunTask(() =>
         {
+            Instances.ToolsViewModel.IsRunning = true;
             using var buffer = new MaaImageBuffer();
 
             buffer.TrySetEncodedData(BitmapToBytes(tempBitmap));
@@ -338,8 +348,10 @@ public static class RecognitionHelper
             var job = tasker.AppendRecognition("TemplateMatch", pipeline, buffer);
             var status = job.Wait();
             if (status != MaaJobStatus.Succeeded)
+            {
+                Instances.ToolsViewModel.IsRunning = false;
                 return;
-
+            }
             tasker.GetTaskDetail(job.Id, out var enter, out var nodeIdList, out var _);
             tasker.GetNodeDetail(nodeIdList[0], out var nodeName, out var recognitionId, out var actionId, out var actionCompleted);
 
@@ -355,8 +367,10 @@ public static class RecognitionHelper
             if (imageListBuffer.IsEmpty)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
+                Instances.ToolsViewModel.IsRunning = false;
                 return;
             }
+            Instances.ToolsViewModel.IsRunning = false;
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();

@@ -1473,7 +1473,8 @@
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
                                 <Button Classes="BasicTight ActionButton"
-                                        Command="{Binding RunOcrCommand}">
+                                        Command="{Binding RunOcrCommand}"
+                                        IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                     <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRunOcr}}" />
                                 </Button>
                             </StackPanel>
@@ -1510,9 +1511,11 @@
                                     Command="{Binding StartKeyCaptureCommand}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureButton}}" />
                             </Button>
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureKeyLabel}}" />
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureKeyLabel}}" />
+                            </Border>
                             <AutoCompleteBox IsVisible="{Binding IsKeyCodeAdb}"
                                              ItemsSource="{Binding AdbKeyOptions}"
                                         Watermark="{markup:I18n {x:Static helper:LangKeys.KeyInputWatermark}}"     Text="{Binding AdbKeyInput, Mode=TwoWay}"
@@ -1520,9 +1523,11 @@
                             <TextBox IsVisible="{Binding !IsKeyCodeAdb}"
                                      Text="{Binding KeyCaptureKey}"
                                      IsReadOnly="True" />
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureCodeLabel}}" />
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="Orange" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           Foreground="{DynamicResource SukiLowText}"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureCodeLabel}}" />
+                            </Border>
                             <TextBox Text="{Binding KeyCaptureCode}" />
                             <ToggleButton Classes="Flat ActionButton"
                                           IsChecked="{Binding IsKeyTestPanelVisible, Mode=TwoWay}">
@@ -1599,7 +1604,8 @@
                                            Text="{markup:I18n {x:Static helper:LangKeys.OnlyRec}}" />
                             </DockPanel>
                             <Button Classes="Flat ActionButton"
-                                    Command="{Binding RunOcrHitTestCommand}">
+                                    Command="{Binding RunOcrHitTestCommand}"
+                                    IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>
                         </StackPanel>
@@ -1674,7 +1680,8 @@
                             <ComboBox ItemsSource="{Binding TemplateMatchMethodOptions}"
                                       SelectedItem="{Binding TemplateMatchMethod, Mode=TwoWay}" />
                             <Button Classes="Flat ActionButton"
-                                    Command="{Binding RunTemplateMatchTestCommand}">
+                                    Command="{Binding RunTemplateMatchTestCommand}"
+                                    IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>
                         </StackPanel>
@@ -1760,7 +1767,8 @@
                                 <TextBox Text="{Binding ClickTestOffsetH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
                             </Grid>
                             <Button Classes="Flat ActionButton"
-                                    Command="{Binding RunClickHitTestCommand}">
+                                    Command="{Binding RunClickHitTestCommand}"
+                                    IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>
                         </StackPanel>
@@ -1863,7 +1871,8 @@
                             </StackPanel>
                             <TextBox Text="{Binding SwipeTestDuration, Mode=TwoWay}" />
                             <Button Classes="Flat ActionButton"
-                                    Command="{Binding RunSwipeHitTestCommand}">
+                                    Command="{Binding RunSwipeHitTestCommand}"
+                                    IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>
                         </StackPanel>
@@ -1875,7 +1884,8 @@
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.KeyHitTest}}" />
                             <Button Classes="Flat ActionButton"
-                                    Command="{Binding RunKeyHitTestCommand}">
+                                    Command="{Binding RunKeyHitTestCommand}"
+                                    IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>
                         </StackPanel>

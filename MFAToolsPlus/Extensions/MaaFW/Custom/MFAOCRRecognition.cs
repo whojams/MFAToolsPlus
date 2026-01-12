@@ -18,6 +18,8 @@ public class MFAOCRRecognition : IMaaCustomRecognition
     public static string? Output { get; set; } = null;
     public bool Analyze(in IMaaContext context, in AnalyzeArgs args, in AnalyzeResults results)
     {
+        if (Bitmap == null)
+            return false;
         using var image = new MaaImageBuffer();
         image.TrySetEncodedData(RecognitionHelper.BitmapToBytes(Bitmap));
         var pipeline = RecognitionHelper.BuildAppendOcrPayload(args.Roi.X, args.Roi.Y, args.Roi.Width, args.Roi.Height);
