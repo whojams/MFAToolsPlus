@@ -1069,11 +1069,22 @@
                             </StackPanel>
 
                             <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 0'}" Spacing="6">
-                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
-                                        HorizontalAlignment="Left">
-                                    <TextBlock FontSize="11" FontWeight="Bold"
-                                               Foreground="White" Text="RGB Upper" />
-                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold"
+                                                   Foreground="White" Text="RGB Upper" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                            Command="{Binding CopyRgbUpperCommand}">
+                                        <Path Data="{StaticResource CopyGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
                                     <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding RgbUpperR, Mode=TwoWay}" />
@@ -1082,9 +1093,20 @@
                                     <TextBlock Grid.Column="4" Text="B:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="5" Text="{Binding RgbUpperB, Mode=TwoWay}" />
                                 </Grid>
-                                <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
-                                    <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="RGB Lower" />
-                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="RGB Lower" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                            Command="{Binding CopyRgbLowerCommand}">
+                                        <Path Data="{StaticResource CopyGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
                                     <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding RgbLowerR, Mode=TwoWay}" />
@@ -1096,10 +1118,21 @@
                             </StackPanel>
 
                             <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 1'}" Spacing="6">
-                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
-                                        HorizontalAlignment="Left">
-                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Upper" />
-                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Upper" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                            Command="{Binding CopyHsvUpperCommand}">
+                                        <Path Data="{StaticResource CopyGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
                                     <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding HsvUpperH, Mode=TwoWay}" />
@@ -1108,9 +1141,20 @@
                                     <TextBlock Grid.Column="4" Text="V:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="5" Text="{Binding HsvUpperV, Mode=TwoWay}" />
                                 </Grid>
-                                <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
-                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Lower" />
-                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Lower" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                            Command="{Binding CopyHsvLowerCommand}">
+                                        <Path Data="{StaticResource CopyGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
                                     <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding HsvLowerH, Mode=TwoWay}" />
@@ -1122,17 +1166,39 @@
                             </StackPanel>
 
                             <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 2'}" Spacing="6">
-                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
-                                        HorizontalAlignment="Left">
-                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Upper" />
-                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Upper" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                            Command="{Binding CopyGrayUpperCommand}">
+                                        <Path Data="{StaticResource CopyGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*">
                                     <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding GrayUpper, Mode=TwoWay}" />
                                 </Grid>
-                                <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
-                                    <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Lower" />
-                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Lower" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
+                                            Command="{Binding CopyGrayLowerCommand}">
+                                        <Path Data="{StaticResource CopyGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*">
                                     <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding GrayLower, Mode=TwoWay}" />
@@ -1519,11 +1585,14 @@
                             </Border>
                             <AutoCompleteBox IsVisible="{Binding IsKeyCodeAdb}"
                                              ItemsSource="{Binding AdbKeyOptions}"
-                                        Watermark="{markup:I18n {x:Static helper:LangKeys.KeyInputWatermark}}"     Text="{Binding AdbKeyInput, Mode=TwoWay}"
+                                             Watermark="{markup:I18n {x:Static helper:LangKeys.KeyInputWatermark}}"
+                                             Text="{Binding AdbKeyInput, Mode=TwoWay}"
                                              FilterMode="Contains" />
-                            <TextBox IsVisible="{Binding !IsKeyCodeAdb}"
-                                     Text="{Binding KeyCaptureKey}"
-                                     IsReadOnly="True" />
+                            <AutoCompleteBox IsVisible="{Binding !IsKeyCodeAdb}"
+                                             ItemsSource="{Binding Win32KeyOptions}"
+                                             Watermark="{markup:I18n {x:Static helper:LangKeys.KeyInputWatermark}}"
+                                             Text="{Binding Win32KeyInput, Mode=TwoWay}"
+                                             FilterMode="Contains" />
                             <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="Orange" Padding="8 5">
                                 <TextBlock FontSize="11" FontWeight="Bold"
                                            Foreground="White"
