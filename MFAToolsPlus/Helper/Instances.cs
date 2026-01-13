@@ -341,6 +341,8 @@ public static partial class Instances
     private static GuiSettingsUserControlModel _guiSettingsUserControlModel;
     private static PerformanceUserControl _performanceUserControl;
     private static PerformanceUserControlModel _performanceUserControlModel;
+    private static ToolSettingsUserControl _toolSettingsUserControl;
+    private static ToolSettingsUserControlModel _toolSettingsUserControlModel;
     private static GameSettingsUserControl _gameSettingsUserControl;
     private static GameSettingsUserControlModel _gameSettingsUserControlModel;
     private static VersionUpdateSettingsUserControl _versionUpdateSettingsUserControl;

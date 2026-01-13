@@ -100,6 +100,7 @@ public partial class App : Application
             .AddView<AdbEditorDialogView, AdbEditorDialogViewModel>(services)
             .AddView<PlayCoverEditorDialog, PlayCoverEditorDialogViewModel>(services)
             .AddView<ConnectSettingsUserControl, ConnectSettingsUserControlModel>(services)
+            .AddView<ToolSettingsUserControl, ToolSettingsUserControlModel>(services)
             .AddView<GameSettingsUserControl, GameSettingsUserControlModel>(services)
             .AddView<GuiSettingsUserControl, GuiSettingsUserControlModel>(services)
             .AddView<PerformanceUserControl, PerformanceUserControlModel>(services)

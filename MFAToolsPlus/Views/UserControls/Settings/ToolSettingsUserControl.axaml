@@ -1,0 +1,118 @@
+<UserControl
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
+    x:Class="MFAToolsPlus.Views.UserControls.Settings.ToolSettingsUserControl"
+    x:DataType="settings:ToolSettingsUserControlModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="clr-namespace:MFAToolsPlus.Helper"
+    xmlns:markup="https://codewf.com"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:settings="clr-namespace:MFAToolsPlus.ViewModels.UsersControls.Settings"
+    xmlns:suki="https://github.com/kikipoulet/SukiUI"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.DataContext>
+        <settings:ToolSettingsUserControlModel />
+    </Design.DataContext>
+    <StackPanel Spacing="15">
+        <suki:GlassCard Margin="0,15,0,0" Padding="25,10,25,10">
+            <StackPanel Spacing="10">
+                <DockPanel>
+                    <NumericUpDown
+                        DockPanel.Dock="Right"
+                        FormatString="0"
+                        HorizontalAlignment="Center"
+                        Increment="1"
+                        IsEnabled="{Binding Idle, Source={x:Static helper:Instances.RootViewModel}}"
+                        Maximum="500"
+                        Minimum="0"
+                        Value="{Binding ExpandX}"
+                        Width="215" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{markup:I18n {x:Static helper:LangKeys.RoiExpandX}}"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <NumericUpDown
+                        DockPanel.Dock="Right"
+                        FormatString="0"
+                        HorizontalAlignment="Center"
+                        Increment="1"
+                        IsEnabled="{Binding Idle, Source={x:Static helper:Instances.RootViewModel}}"
+                        Maximum="500"
+                        Minimum="0"
+                        Value="{Binding ExpandY}"
+                        Width="215" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{markup:I18n {x:Static helper:LangKeys.RoiExpandY}}"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <NumericUpDown
+                        DockPanel.Dock="Right"
+                        FormatString="0"
+                        HorizontalAlignment="Center"
+                        Increment="1"
+                        IsEnabled="{Binding Idle, Source={x:Static helper:Instances.RootViewModel}}"
+                        Maximum="500"
+                        Minimum="0"
+                        Value="{Binding ExpandW}"
+                        Width="215" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{markup:I18n {x:Static helper:LangKeys.RoiExpandW}}"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <NumericUpDown
+                        DockPanel.Dock="Right"
+                        FormatString="0"
+                        HorizontalAlignment="Center"
+                        Increment="1"
+                        IsEnabled="{Binding Idle, Source={x:Static helper:Instances.RootViewModel}}"
+                        Maximum="500"
+                        Minimum="0"
+                        Value="{Binding ExpandH}"
+                        Width="215" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{markup:I18n {x:Static helper:LangKeys.RoiExpandH}}"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </suki:GlassCard>
+
+        <suki:GlassCard Margin="0,15,0,0" Padding="25,10,25,10">
+            <DockPanel>
+                <ComboBox
+                    DockPanel.Dock="Right"
+                    ItemsSource="{Binding ClipboardCopyFormatOptions}"
+                    DisplayMemberBinding="{Binding Name}"
+                    SelectedValueBinding="{Binding Other}"
+                    SelectedValue="{Binding ClipboardCopyFormat}"
+                    Width="215" />
+                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock
+                        FontSize="16"
+                        FontWeight="SemiBold"
+                        Text="{markup:I18n {x:Static helper:LangKeys.ClipboardCopyFormat}}" />
+                </StackPanel>
+            </DockPanel>
+        </suki:GlassCard>
+    </StackPanel>
+</UserControl>

@@ -1694,5 +1694,32 @@
     <data name="TemplateSelect" xml:space="preserve">
         <value>选择模板</value>
     </data>
+    <data name="ToolSettings" xml:space="preserve">
+        <value>工具设置</value>
+    </data>
+    <data name="RoiExpandSettings" xml:space="preserve">
+        <value>ROI 扩展设置</value>
+    </data>
+    <data name="RoiExpandX" xml:space="preserve">
+        <value>X 扩展</value>
+    </data>
+    <data name="RoiExpandY" xml:space="preserve">
+        <value>Y 扩展</value>
+    </data>
+    <data name="RoiExpandW" xml:space="preserve">
+        <value>宽度扩展</value>
+    </data>
+    <data name="RoiExpandH" xml:space="preserve">
+        <value>高度扩展</value>
+    </data>
+    <data name="ClipboardCopyFormat" xml:space="preserve">
+        <value>剪贴板复制格式</value>
+    </data>
+    <data name="ClipboardCopyFormatValuesOnly" xml:space="preserve">
+        <value>仅复制值</value>
+    </data>
+    <data name="ClipboardCopyFormatFieldWithValues" xml:space="preserve">
+        <value>字段名 + 值</value>
+    </data>
 </root>
 

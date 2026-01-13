@@ -1678,4 +1678,31 @@
     <data name="KeyInputWatermark" xml:space="preserve">
         <value>請輸入按鍵</value>
     </data>
+    <data name="ToolSettings" xml:space="preserve">
+        <value>工具設定</value>
+    </data>
+    <data name="RoiExpandSettings" xml:space="preserve">
+        <value>ROI 擴展設定</value>
+    </data>
+    <data name="RoiExpandX" xml:space="preserve">
+        <value>X 擴展</value>
+    </data>
+    <data name="RoiExpandY" xml:space="preserve">
+        <value>Y 擴展</value>
+    </data>
+    <data name="RoiExpandW" xml:space="preserve">
+        <value>寬度擴展</value>
+    </data>
+    <data name="RoiExpandH" xml:space="preserve">
+        <value>高度擴展</value>
+    </data>
+    <data name="ClipboardCopyFormat" xml:space="preserve">
+        <value>剪貼簿複製格式</value>
+    </data>
+    <data name="ClipboardCopyFormatValuesOnly" xml:space="preserve">
+        <value>僅複製值</value>
+    </data>
+    <data name="ClipboardCopyFormatFieldWithValues" xml:space="preserve">
+        <value>欄位名 + 值</value>
+    </data>
 </root>

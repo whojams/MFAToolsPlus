@@ -66,6 +66,12 @@ public enum LiveViewRoiSelectionType
     TargetRoi
 }
 
+public enum ClipboardCopyFormat
+{
+    ValuesOnly,
+    FieldWithValues
+}
+
 public partial class ToolsViewModel : ViewModelBase
 {
     [ObservableProperty] private bool _isRunning;
@@ -887,10 +893,6 @@ public partial class ToolsViewModel : ViewModelBase
     private bool _suppressOcrSync;
     private bool _suppressTestPanelSync;
 
-    private readonly int _horizontalExpansion =
-        ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewHorizontalExpansion, 25);
-    private readonly int _verticalExpansion =
-        ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewVerticalExpansion, 25);
     [ObservableProperty] private bool _isColorPreviewActive;
     private Bitmap? _colorPreviewImage;
     private WriteableBitmap? _screenshotBrushImage;
@@ -2874,7 +2876,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyRoiToClipboard()
     {
-        CopyTextToClipboard(BuildRectClipboardText(RoiX, RoiY, RoiW, RoiH), "复制ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", RoiX, RoiY, RoiW, RoiH), "复制ROI到剪贴板");
     }
 
     [RelayCommand]
@@ -2890,7 +2892,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyOriginTargetToClipboard()
     {
-        CopyTextToClipboard(BuildRectClipboardText(OriginTargetX, OriginTargetY, OriginTargetW, OriginTargetH), "复制OriginTarget到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("target", OriginTargetX, OriginTargetY, OriginTargetW, OriginTargetH), "复制OriginTarget到剪贴板");
     }
 
     [RelayCommand]
@@ -2906,7 +2908,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyTargetToClipboard()
     {
-        CopyTextToClipboard(BuildRectClipboardText(TargetX, TargetY, TargetW, TargetH), "复制Target到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("target", TargetX, TargetY, TargetW, TargetH), "复制Target到剪贴板");
     }
 
     [RelayCommand]
@@ -2918,24 +2920,58 @@ public partial class ToolsViewModel : ViewModelBase
             RefreshSelectionRects();
         }
     }
-
+    
     [RelayCommand]
     private void CopyOffsetToClipboard()
     {
-        CopyTextToClipboard(BuildRectClipboardText(OffsetX, OffsetY, OffsetW, OffsetH), "复制Offset到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("offset", OffsetX, OffsetY, OffsetW, OffsetH), "复制Offset到剪贴板");
     }
 
-    private static string BuildRectClipboardText(string xText, string yText, string wText, string hText)
+    private string BuildRectClipboardText(string label, string xText, string yText, string wText, string hText)
     {
         if (double.TryParse(xText, out var x)
             && double.TryParse(yText, out var y)
             && double.TryParse(wText, out var w)
             && double.TryParse(hText, out var h))
         {
-            return $"[{(int)Math.Round(x)}, {(int)Math.Round(y)}, {(int)Math.Round(w)}, {(int)Math.Round(h)}]";
+            return FormatClipboardValue(label,
+                $"[{(int)Math.Round(x)}, {(int)Math.Round(y)}, {(int)Math.Round(w)}, {(int)Math.Round(h)}]");
         }
 
-        return "[0, 0, 0, 0]";
+        return FormatClipboardValue(label, "[0, 0, 0, 0]");
+    }
+
+    private string FormatClipboardValue(string label, string value)
+    {
+        var modeValue = ConfigurationManager.Current.GetValue(ConfigurationKeys.ClipboardCopyFormat, ClipboardCopyFormat.ValuesOnly.ToString());
+        if (!Enum.TryParse<ClipboardCopyFormat>(modeValue, true, out var mode))
+        {
+            mode = ClipboardCopyFormat.ValuesOnly;
+        }
+
+        return mode == ClipboardCopyFormat.FieldWithValues
+            ? $"{label}: {value}"
+            : value;
+    }
+
+    private int GetExpandX()
+    {
+        return ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewExpandX, 25);
+    }
+
+    private int GetExpandY()
+    {
+        return ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewExpandY, 25);
+    }
+
+    private int GetExpandW(int expandX)
+    {
+        return ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewExpandW, expandX * 2);
+    }
+
+    private int GetExpandH(int expandY)
+    {
+        return ConfigurationManager.Current.GetValue(ConfigurationKeys.LiveViewExpandH, expandY * 2);
     }
 
     private void CopyTextToClipboard(string text, string taskName)
@@ -3279,7 +3315,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyColorPickRect()
     {
-        CopyTextToClipboard(BuildRectClipboardText(ColorPickX, ColorPickY, ColorPickW, ColorPickH), "复制取色ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", ColorPickX, ColorPickY, ColorPickW, ColorPickH), "复制取色ROI到剪贴板");
     }
 
     [RelayCommand]
@@ -3294,43 +3330,43 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyColorPickExpandedRect()
     {
-        CopyTextToClipboard(BuildRectClipboardText(ColorPickExpandedX, ColorPickExpandedY, ColorPickExpandedW, ColorPickExpandedH), "复制取色扩展ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", ColorPickExpandedX, ColorPickExpandedY, ColorPickExpandedW, ColorPickExpandedH), "复制取色扩展ROI到剪贴板");
     }
 
     [RelayCommand]
     private void CopyRgbUpper()
     {
-        CopyTextToClipboard(BuildColorTripletClipboardText(RgbUpperR, RgbUpperG, RgbUpperB), "复制RGB Upper到剪贴板");
+        CopyTextToClipboard(BuildColorTripletClipboardText("upper", RgbUpperR, RgbUpperG, RgbUpperB), "复制RGB Upper到剪贴板");
     }
 
     [RelayCommand]
     private void CopyRgbLower()
     {
-        CopyTextToClipboard(BuildColorTripletClipboardText(RgbLowerR, RgbLowerG, RgbLowerB), "复制RGB Lower到剪贴板");
+        CopyTextToClipboard(BuildColorTripletClipboardText("lower", RgbLowerR, RgbLowerG, RgbLowerB), "复制RGB Lower到剪贴板");
     }
 
     [RelayCommand]
     private void CopyHsvUpper()
     {
-        CopyTextToClipboard(BuildColorTripletClipboardText(HsvUpperH, HsvUpperS, HsvUpperV), "复制HSV Upper到剪贴板");
+        CopyTextToClipboard(BuildColorTripletClipboardText("upper", HsvUpperH, HsvUpperS, HsvUpperV), "复制HSV Upper到剪贴板");
     }
 
     [RelayCommand]
     private void CopyHsvLower()
     {
-        CopyTextToClipboard(BuildColorTripletClipboardText(HsvLowerH, HsvLowerS, HsvLowerV), "复制HSV Lower到剪贴板");
+        CopyTextToClipboard(BuildColorTripletClipboardText("lower", HsvLowerH, HsvLowerS, HsvLowerV), "复制HSV Lower到剪贴板");
     }
 
     [RelayCommand]
     private void CopyGrayUpper()
     {
-        CopyTextToClipboard(BuildGrayClipboardText(GrayUpper), "复制Gray Upper到剪贴板");
+        CopyTextToClipboard(BuildGrayClipboardText("upper", GrayUpper), "复制Gray Upper到剪贴板");
     }
 
     [RelayCommand]
     private void CopyGrayLower()
     {
-        CopyTextToClipboard(BuildGrayClipboardText(GrayLower), "复制Gray Lower到剪贴板");
+        CopyTextToClipboard(BuildGrayClipboardText("lower", GrayLower), "复制Gray Lower到剪贴板");
     }
 
     [RelayCommand]
@@ -3350,7 +3386,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyScreenshotRect()
     {
-        CopyTextToClipboard(BuildRectClipboardText(ScreenshotX, ScreenshotY, ScreenshotW, ScreenshotH), "复制截图ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", ScreenshotX, ScreenshotY, ScreenshotW, ScreenshotH), "复制截图ROI到剪贴板");
     }
 
     [RelayCommand]
@@ -3365,7 +3401,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyScreenshotExpandedRect()
     {
-        CopyTextToClipboard(BuildRectClipboardText(ScreenshotExpandedX, ScreenshotExpandedY, ScreenshotExpandedW, ScreenshotExpandedH), "复制截图扩展ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", ScreenshotExpandedX, ScreenshotExpandedY, ScreenshotExpandedW, ScreenshotExpandedH), "复制截图扩展ROI到剪贴板");
     }
 
     [RelayCommand]
@@ -3385,7 +3421,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyOcrRect()
     {
-        CopyTextToClipboard(BuildRectClipboardText(OcrX, OcrY, OcrW, OcrH), "复制OCR ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", OcrX, OcrY, OcrW, OcrH), "复制OCR ROI到剪贴板");
     }
 
     [RelayCommand]
@@ -3400,7 +3436,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyOcrExpandedRect()
     {
-        CopyTextToClipboard(BuildRectClipboardText(OcrExpandedX, OcrExpandedY, OcrExpandedW, OcrExpandedH), "复制OCR扩展ROI到剪贴板");
+        CopyTextToClipboard(BuildRectClipboardText("roi", OcrExpandedX, OcrExpandedY, OcrExpandedW, OcrExpandedH), "复制OCR扩展ROI到剪贴板");
     }
 
     [RelayCommand]
@@ -3991,26 +4027,26 @@ public partial class ToolsViewModel : ViewModelBase
         return "[0, 0]";
     }
 
-    private static string BuildColorTripletClipboardText(string first, string second, string third)
+    private string BuildColorTripletClipboardText(string label, string first, string second, string third)
     {
         if (int.TryParse(first, out var a)
             && int.TryParse(second, out var b)
             && int.TryParse(third, out var c))
         {
-            return $"[{a}, {b}, {c}]";
+            return FormatClipboardValue(label, $"[{a}, {b}, {c}]");
         }
 
-        return "[0, 0, 0]";
+        return FormatClipboardValue(label, "[0, 0, 0]");
     }
 
-    private static string BuildGrayClipboardText(string value)
+    private string BuildGrayClipboardText(string label, string value)
     {
         if (int.TryParse(value, out var gray))
         {
-            return $"[{gray}]";
+            return FormatClipboardValue(label, $"[{gray}]");
         }
 
-        return "[0]";
+        return FormatClipboardValue(label, "[0]");
     }
 
     private void UpdateRoiRectFromText()
@@ -4167,7 +4203,8 @@ public partial class ToolsViewModel : ViewModelBase
         _suppressOcrSync = false;
         UpdateOcrExpandedRect();
     }
-
+    
+    
     private void UpdateColorPickExpandedRect()
     {
         _colorPickExpandedRect = BuildExpandedRect(_colorPickRect);
@@ -4397,17 +4434,34 @@ public partial class ToolsViewModel : ViewModelBase
         var width = bitmap.Size.Width;
         var height = bitmap.Size.Height;
 
-        var x = Math.Max(0, rect.X - _horizontalExpansion);
-        var y = Math.Max(0, rect.Y - _verticalExpansion);
-        var right = Math.Min(width, rect.X + rect.Width + _horizontalExpansion);
-        var bottom = Math.Min(height, rect.Y + rect.Height + _verticalExpansion);
+        var expandX = GetExpandX();
+        var expandY = GetExpandY();
+        var expandW = GetExpandW(expandX);
+        var expandH = GetExpandH(expandY);
 
-        var expandedWidth = Math.Max(0, right - x);
-        var expandedHeight = Math.Max(0, bottom - y);
+        var x = Math.Max(0, rect.X - expandX);
+        var y = Math.Max(0, rect.Y - expandY);
+
+        var expandedWidth = rect.Width + expandW;
+        var expandedHeight = rect.Height + expandH;
+
+        var right = Math.Min(width, x + expandedWidth);
+        var bottom = Math.Min(height, y + expandedHeight);
+
+        expandedWidth = Math.Max(0, right - x);
+        expandedHeight = Math.Max(0, bottom - y);
 
         return expandedWidth > 0 && expandedHeight > 0
             ? new Rect(x, y, expandedWidth, expandedHeight)
             : default;
+    }
+
+    public void RefreshExpandedRects()
+    {
+        UpdateColorPickExpandedRect();
+        UpdateScreenshotExpandedRect();
+        UpdateOcrExpandedRect();
+        ApplySelectionPreview();
     }
 
     private void SetOriginTargetRect(Rect rect)
@@ -5152,232 +5206,676 @@ public partial class ToolsViewModel : ViewModelBase
     }
     private static readonly Dictionary<Key, string> Win32KeyNameMap = new()
     {
-        { Key.Back, "VK_BACK" },
-        { Key.Tab, "VK_TAB" },
-        { Key.Enter, "VK_RETURN" },
-        { Key.Escape, "VK_ESCAPE" },
-        { Key.Space, "VK_SPACE" },
-        { Key.PageUp, "VK_PRIOR" },
-        { Key.PageDown, "VK_NEXT" },
-        { Key.End, "VK_END" },
-        { Key.Home, "VK_HOME" },
-        { Key.Left, "VK_LEFT" },
-        { Key.Up, "VK_UP" },
-        { Key.Right, "VK_RIGHT" },
-        { Key.Down, "VK_DOWN" },
-        { Key.Insert, "VK_INSERT" },
-        { Key.Delete, "VK_DELETE" },
-        { Key.D0, "0" },
-        { Key.D1, "1" },
-        { Key.D2, "2" },
-        { Key.D3, "3" },
-        { Key.D4, "4" },
-        { Key.D5, "5" },
-        { Key.D6, "6" },
-        { Key.D7, "7" },
-        { Key.D8, "8" },
-        { Key.D9, "9" },
-        { Key.A, "A" },
-        { Key.B, "B" },
-        { Key.C, "C" },
-        { Key.D, "D" },
-        { Key.E, "E" },
-        { Key.F, "F" },
-        { Key.G, "G" },
-        { Key.H, "H" },
-        { Key.I, "I" },
-        { Key.J, "J" },
-        { Key.K, "K" },
-        { Key.L, "L" },
-        { Key.M, "M" },
-        { Key.N, "N" },
-        { Key.O, "O" },
-        { Key.P, "P" },
-        { Key.Q, "Q" },
-        { Key.R, "R" },
-        { Key.S, "S" },
-        { Key.T, "T" },
-        { Key.U, "U" },
-        { Key.V, "V" },
-        { Key.W, "W" },
-        { Key.X, "X" },
-        { Key.Y, "Y" },
-        { Key.Z, "Z" },
-        { Key.LWin, "VK_LWIN" },
-        { Key.RWin, "VK_RWIN" },
-        { Key.NumPad0, "VK_NUMPAD0" },
-        { Key.NumPad1, "VK_NUMPAD1" },
-        { Key.NumPad2, "VK_NUMPAD2" },
-        { Key.NumPad3, "VK_NUMPAD3" },
-        { Key.NumPad4, "VK_NUMPAD4" },
-        { Key.NumPad5, "VK_NUMPAD5" },
-        { Key.NumPad6, "VK_NUMPAD6" },
-        { Key.NumPad7, "VK_NUMPAD7" },
-        { Key.NumPad8, "VK_NUMPAD8" },
-        { Key.NumPad9, "VK_NUMPAD9" },
-        { Key.Multiply, "VK_MULTIPLY" },
-        { Key.Add, "VK_ADD" },
-        { Key.Subtract, "VK_SUBTRACT" },
-        { Key.Decimal, "VK_DECIMAL" },
-        { Key.Divide, "VK_DIVIDE" },
-        { Key.F1, "VK_F1" },
-        { Key.F2, "VK_F2" },
-        { Key.F3, "VK_F3" },
-        { Key.F4, "VK_F4" },
-        { Key.F5, "VK_F5" },
-        { Key.F6, "VK_F6" },
-        { Key.F7, "VK_F7" },
-        { Key.F8, "VK_F8" },
-        { Key.F9, "VK_F9" },
-        { Key.F10, "VK_F10" },
-        { Key.F11, "VK_F11" },
-        { Key.F12, "VK_F12" },
-        { Key.F13, "VK_F13" },
-        { Key.F14, "VK_F14" },
-        { Key.F15, "VK_F15" },
-        { Key.F16, "VK_F16" },
-        { Key.F17, "VK_F17" },
-        { Key.F18, "VK_F18" },
-        { Key.F19, "VK_F19" },
-        { Key.F20, "VK_F20" },
-        { Key.F21, "VK_F21" },
-        { Key.F22, "VK_F22" },
-        { Key.F23, "VK_F23" },
-        { Key.F24, "VK_F24" },
-        { Key.NumLock, "VK_NUMLOCK" },
-        { Key.Scroll, "VK_SCROLL" },
-        { Key.LeftShift, "VK_LSHIFT" },
-        { Key.RightShift, "VK_RSHIFT" },
-        { Key.LeftCtrl, "VK_LCONTROL" },
-        { Key.RightCtrl, "VK_RCONTROL" },
-        { Key.LeftAlt, "VK_LMENU" },
-        { Key.RightAlt, "VK_RMENU" },
-        { Key.OemSemicolon, "VK_OEM_1" },
-        { Key.OemPlus, "VK_OEM_PLUS" },
-        { Key.OemComma, "VK_OEM_COMMA" },
-        { Key.OemMinus, "VK_OEM_MINUS" },
-        { Key.OemPeriod, "VK_OEM_PERIOD" },
-        { Key.OemQuestion, "VK_OEM_2" },
-        { Key.OemTilde, "VK_OEM_3" },
-        { Key.OemOpenBrackets, "VK_OEM_4" },
-        { Key.OemPipe, "VK_OEM_5" },
-        { Key.OemCloseBrackets, "VK_OEM_6" },
-        { Key.OemQuotes, "VK_OEM_7" },
+        {
+            Key.Back, "VK_BACK"
+        },
+        {
+            Key.Tab, "VK_TAB"
+        },
+        {
+            Key.Enter, "VK_RETURN"
+        },
+        {
+            Key.Escape, "VK_ESCAPE"
+        },
+        {
+            Key.Space, "VK_SPACE"
+        },
+        {
+            Key.PageUp, "VK_PRIOR"
+        },
+        {
+            Key.PageDown, "VK_NEXT"
+        },
+        {
+            Key.End, "VK_END"
+        },
+        {
+            Key.Home, "VK_HOME"
+        },
+        {
+            Key.Left, "VK_LEFT"
+        },
+        {
+            Key.Up, "VK_UP"
+        },
+        {
+            Key.Right, "VK_RIGHT"
+        },
+        {
+            Key.Down, "VK_DOWN"
+        },
+        {
+            Key.Insert, "VK_INSERT"
+        },
+        {
+            Key.Delete, "VK_DELETE"
+        },
+        {
+            Key.D0, "0"
+        },
+        {
+            Key.D1, "1"
+        },
+        {
+            Key.D2, "2"
+        },
+        {
+            Key.D3, "3"
+        },
+        {
+            Key.D4, "4"
+        },
+        {
+            Key.D5, "5"
+        },
+        {
+            Key.D6, "6"
+        },
+        {
+            Key.D7, "7"
+        },
+        {
+            Key.D8, "8"
+        },
+        {
+            Key.D9, "9"
+        },
+        {
+            Key.A, "A"
+        },
+        {
+            Key.B, "B"
+        },
+        {
+            Key.C, "C"
+        },
+        {
+            Key.D, "D"
+        },
+        {
+            Key.E, "E"
+        },
+        {
+            Key.F, "F"
+        },
+        {
+            Key.G, "G"
+        },
+        {
+            Key.H, "H"
+        },
+        {
+            Key.I, "I"
+        },
+        {
+            Key.J, "J"
+        },
+        {
+            Key.K, "K"
+        },
+        {
+            Key.L, "L"
+        },
+        {
+            Key.M, "M"
+        },
+        {
+            Key.N, "N"
+        },
+        {
+            Key.O, "O"
+        },
+        {
+            Key.P, "P"
+        },
+        {
+            Key.Q, "Q"
+        },
+        {
+            Key.R, "R"
+        },
+        {
+            Key.S, "S"
+        },
+        {
+            Key.T, "T"
+        },
+        {
+            Key.U, "U"
+        },
+        {
+            Key.V, "V"
+        },
+        {
+            Key.W, "W"
+        },
+        {
+            Key.X, "X"
+        },
+        {
+            Key.Y, "Y"
+        },
+        {
+            Key.Z, "Z"
+        },
+        {
+            Key.LWin, "VK_LWIN"
+        },
+        {
+            Key.RWin, "VK_RWIN"
+        },
+        {
+            Key.NumPad0, "VK_NUMPAD0"
+        },
+        {
+            Key.NumPad1, "VK_NUMPAD1"
+        },
+        {
+            Key.NumPad2, "VK_NUMPAD2"
+        },
+        {
+            Key.NumPad3, "VK_NUMPAD3"
+        },
+        {
+            Key.NumPad4, "VK_NUMPAD4"
+        },
+        {
+            Key.NumPad5, "VK_NUMPAD5"
+        },
+        {
+            Key.NumPad6, "VK_NUMPAD6"
+        },
+        {
+            Key.NumPad7, "VK_NUMPAD7"
+        },
+        {
+            Key.NumPad8, "VK_NUMPAD8"
+        },
+        {
+            Key.NumPad9, "VK_NUMPAD9"
+        },
+        {
+            Key.Multiply, "VK_MULTIPLY"
+        },
+        {
+            Key.Add, "VK_ADD"
+        },
+        {
+            Key.Subtract, "VK_SUBTRACT"
+        },
+        {
+            Key.Decimal, "VK_DECIMAL"
+        },
+        {
+            Key.Divide, "VK_DIVIDE"
+        },
+        {
+            Key.F1, "VK_F1"
+        },
+        {
+            Key.F2, "VK_F2"
+        },
+        {
+            Key.F3, "VK_F3"
+        },
+        {
+            Key.F4, "VK_F4"
+        },
+        {
+            Key.F5, "VK_F5"
+        },
+        {
+            Key.F6, "VK_F6"
+        },
+        {
+            Key.F7, "VK_F7"
+        },
+        {
+            Key.F8, "VK_F8"
+        },
+        {
+            Key.F9, "VK_F9"
+        },
+        {
+            Key.F10, "VK_F10"
+        },
+        {
+            Key.F11, "VK_F11"
+        },
+        {
+            Key.F12, "VK_F12"
+        },
+        {
+            Key.F13, "VK_F13"
+        },
+        {
+            Key.F14, "VK_F14"
+        },
+        {
+            Key.F15, "VK_F15"
+        },
+        {
+            Key.F16, "VK_F16"
+        },
+        {
+            Key.F17, "VK_F17"
+        },
+        {
+            Key.F18, "VK_F18"
+        },
+        {
+            Key.F19, "VK_F19"
+        },
+        {
+            Key.F20, "VK_F20"
+        },
+        {
+            Key.F21, "VK_F21"
+        },
+        {
+            Key.F22, "VK_F22"
+        },
+        {
+            Key.F23, "VK_F23"
+        },
+        {
+            Key.F24, "VK_F24"
+        },
+        {
+            Key.NumLock, "VK_NUMLOCK"
+        },
+        {
+            Key.Scroll, "VK_SCROLL"
+        },
+        {
+            Key.LeftShift, "VK_LSHIFT"
+        },
+        {
+            Key.RightShift, "VK_RSHIFT"
+        },
+        {
+            Key.LeftCtrl, "VK_LCONTROL"
+        },
+        {
+            Key.RightCtrl, "VK_RCONTROL"
+        },
+        {
+            Key.LeftAlt, "VK_LMENU"
+        },
+        {
+            Key.RightAlt, "VK_RMENU"
+        },
+        {
+            Key.OemSemicolon, "VK_OEM_1"
+        },
+        {
+            Key.OemPlus, "VK_OEM_PLUS"
+        },
+        {
+            Key.OemComma, "VK_OEM_COMMA"
+        },
+        {
+            Key.OemMinus, "VK_OEM_MINUS"
+        },
+        {
+            Key.OemPeriod, "VK_OEM_PERIOD"
+        },
+        {
+            Key.OemQuestion, "VK_OEM_2"
+        },
+        {
+            Key.OemTilde, "VK_OEM_3"
+        },
+        {
+            Key.OemOpenBrackets, "VK_OEM_4"
+        },
+        {
+            Key.OemPipe, "VK_OEM_5"
+        },
+        {
+            Key.OemCloseBrackets, "VK_OEM_6"
+        },
+        {
+            Key.OemQuotes, "VK_OEM_7"
+        },
     };
 
     private static readonly Dictionary<string, int> Win32KeyDefinitions = new(StringComparer.Ordinal)
     {
-        { "VK_BACK", 0x08 },
-        { "VK_TAB", 0x09 },
-        { "VK_RETURN", 0x0D },
-        { "VK_ESCAPE", 0x1B },
-        { "VK_SPACE", 0x20 },
-        { "VK_PRIOR", 0x21 },
-        { "VK_NEXT", 0x22 },
-        { "VK_END", 0x23 },
-        { "VK_HOME", 0x24 },
-        { "VK_LEFT", 0x25 },
-        { "VK_UP", 0x26 },
-        { "VK_RIGHT", 0x27 },
-        { "VK_DOWN", 0x28 },
-        { "VK_INSERT", 0x2D },
-        { "VK_DELETE", 0x2E },
-        { "0", 0x30 },
-        { "1", 0x31 },
-        { "2", 0x32 },
-        { "3", 0x33 },
-        { "4", 0x34 },
-        { "5", 0x35 },
-        { "6", 0x36 },
-        { "7", 0x37 },
-        { "8", 0x38 },
-        { "9", 0x39 },
-        { "A", 0x41 },
-        { "B", 0x42 },
-        { "C", 0x43 },
-        { "D", 0x44 },
-        { "E", 0x45 },
-        { "F", 0x46 },
-        { "G", 0x47 },
-        { "H", 0x48 },
-        { "I", 0x49 },
-        { "J", 0x4A },
-        { "K", 0x4B },
-        { "L", 0x4C },
-        { "M", 0x4D },
-        { "N", 0x4E },
-        { "O", 0x4F },
-        { "P", 0x50 },
-        { "Q", 0x51 },
-        { "R", 0x52 },
-        { "S", 0x53 },
-        { "T", 0x54 },
-        { "U", 0x55 },
-        { "V", 0x56 },
-        { "W", 0x57 },
-        { "X", 0x58 },
-        { "Y", 0x59 },
-        { "Z", 0x5A },
-        { "VK_LWIN", 0x5B },
-        { "VK_RWIN", 0x5C },
-        { "VK_NUMPAD0", 0x60 },
-        { "VK_NUMPAD1", 0x61 },
-        { "VK_NUMPAD2", 0x62 },
-        { "VK_NUMPAD3", 0x63 },
-        { "VK_NUMPAD4", 0x64 },
-        { "VK_NUMPAD5", 0x65 },
-        { "VK_NUMPAD6", 0x66 },
-        { "VK_NUMPAD7", 0x67 },
-        { "VK_NUMPAD8", 0x68 },
-        { "VK_NUMPAD9", 0x69 },
-        { "VK_MULTIPLY", 0x6A },
-        { "VK_ADD", 0x6B },
-        { "VK_SUBTRACT", 0x6D },
-        { "VK_DECIMAL", 0x6E },
-        { "VK_DIVIDE", 0x6F },
-        { "VK_F1", 0x70 },
-        { "VK_F2", 0x71 },
-        { "VK_F3", 0x72 },
-        { "VK_F4", 0x73 },
-        { "VK_F5", 0x74 },
-        { "VK_F6", 0x75 },
-        { "VK_F7", 0x76 },
-        { "VK_F8", 0x77 },
-        { "VK_F9", 0x78 },
-        { "VK_F10", 0x79 },
-        { "VK_F11", 0x7A },
-        { "VK_F12", 0x7B },
-        { "VK_F13", 0x7C },
-        { "VK_F14", 0x7D },
-        { "VK_F15", 0x7E },
-        { "VK_F16", 0x7F },
-        { "VK_F17", 0x80 },
-        { "VK_F18", 0x81 },
-        { "VK_F19", 0x82 },
-        { "VK_F20", 0x83 },
-        { "VK_F21", 0x84 },
-        { "VK_F22", 0x85 },
-        { "VK_F23", 0x86 },
-        { "VK_F24", 0x87 },
-        { "VK_NUMLOCK", 0x90 },
-        { "VK_SCROLL", 0x91 },
-        { "VK_LSHIFT", 0xA0 },
-        { "VK_RSHIFT", 0xA1 },
-        { "VK_LCONTROL", 0xA2 },
-        { "VK_RCONTROL", 0xA3 },
-        { "VK_LMENU", 0xA4 },
-        { "VK_RMENU", 0xA5 },
-        { "VK_OEM_1", 0xBA },
-        { "VK_OEM_PLUS", 0xBB },
-        { "VK_OEM_COMMA", 0xBC },
-        { "VK_OEM_MINUS", 0xBD },
-        { "VK_OEM_PERIOD", 0xBE },
-        { "VK_OEM_2", 0xBF },
-        { "VK_OEM_3", 0xC0 },
-        { "VK_OEM_4", 0xDB },
-        { "VK_OEM_5", 0xDC },
-        { "VK_OEM_6", 0xDD },
-        { "VK_OEM_7", 0xDE },
+        {
+            "VK_BACK", 0x08
+        },
+        {
+            "VK_TAB", 0x09
+        },
+        {
+            "VK_RETURN", 0x0D
+        },
+        {
+            "VK_ESCAPE", 0x1B
+        },
+        {
+            "VK_SPACE", 0x20
+        },
+        {
+            "VK_PRIOR", 0x21
+        },
+        {
+            "VK_NEXT", 0x22
+        },
+        {
+            "VK_END", 0x23
+        },
+        {
+            "VK_HOME", 0x24
+        },
+        {
+            "VK_LEFT", 0x25
+        },
+        {
+            "VK_UP", 0x26
+        },
+        {
+            "VK_RIGHT", 0x27
+        },
+        {
+            "VK_DOWN", 0x28
+        },
+        {
+            "VK_INSERT", 0x2D
+        },
+        {
+            "VK_DELETE", 0x2E
+        },
+        {
+            "0", 0x30
+        },
+        {
+            "1", 0x31
+        },
+        {
+            "2", 0x32
+        },
+        {
+            "3", 0x33
+        },
+        {
+            "4", 0x34
+        },
+        {
+            "5", 0x35
+        },
+        {
+            "6", 0x36
+        },
+        {
+            "7", 0x37
+        },
+        {
+            "8", 0x38
+        },
+        {
+            "9", 0x39
+        },
+        {
+            "A", 0x41
+        },
+        {
+            "B", 0x42
+        },
+        {
+            "C", 0x43
+        },
+        {
+            "D", 0x44
+        },
+        {
+            "E", 0x45
+        },
+        {
+            "F", 0x46
+        },
+        {
+            "G", 0x47
+        },
+        {
+            "H", 0x48
+        },
+        {
+            "I", 0x49
+        },
+        {
+            "J", 0x4A
+        },
+        {
+            "K", 0x4B
+        },
+        {
+            "L", 0x4C
+        },
+        {
+            "M", 0x4D
+        },
+        {
+            "N", 0x4E
+        },
+        {
+            "O", 0x4F
+        },
+        {
+            "P", 0x50
+        },
+        {
+            "Q", 0x51
+        },
+        {
+            "R", 0x52
+        },
+        {
+            "S", 0x53
+        },
+        {
+            "T", 0x54
+        },
+        {
+            "U", 0x55
+        },
+        {
+            "V", 0x56
+        },
+        {
+            "W", 0x57
+        },
+        {
+            "X", 0x58
+        },
+        {
+            "Y", 0x59
+        },
+        {
+            "Z", 0x5A
+        },
+        {
+            "VK_LWIN", 0x5B
+        },
+        {
+            "VK_RWIN", 0x5C
+        },
+        {
+            "VK_NUMPAD0", 0x60
+        },
+        {
+            "VK_NUMPAD1", 0x61
+        },
+        {
+            "VK_NUMPAD2", 0x62
+        },
+        {
+            "VK_NUMPAD3", 0x63
+        },
+        {
+            "VK_NUMPAD4", 0x64
+        },
+        {
+            "VK_NUMPAD5", 0x65
+        },
+        {
+            "VK_NUMPAD6", 0x66
+        },
+        {
+            "VK_NUMPAD7", 0x67
+        },
+        {
+            "VK_NUMPAD8", 0x68
+        },
+        {
+            "VK_NUMPAD9", 0x69
+        },
+        {
+            "VK_MULTIPLY", 0x6A
+        },
+        {
+            "VK_ADD", 0x6B
+        },
+        {
+            "VK_SUBTRACT", 0x6D
+        },
+        {
+            "VK_DECIMAL", 0x6E
+        },
+        {
+            "VK_DIVIDE", 0x6F
+        },
+        {
+            "VK_F1", 0x70
+        },
+        {
+            "VK_F2", 0x71
+        },
+        {
+            "VK_F3", 0x72
+        },
+        {
+            "VK_F4", 0x73
+        },
+        {
+            "VK_F5", 0x74
+        },
+        {
+            "VK_F6", 0x75
+        },
+        {
+            "VK_F7", 0x76
+        },
+        {
+            "VK_F8", 0x77
+        },
+        {
+            "VK_F9", 0x78
+        },
+        {
+            "VK_F10", 0x79
+        },
+        {
+            "VK_F11", 0x7A
+        },
+        {
+            "VK_F12", 0x7B
+        },
+        {
+            "VK_F13", 0x7C
+        },
+        {
+            "VK_F14", 0x7D
+        },
+        {
+            "VK_F15", 0x7E
+        },
+        {
+            "VK_F16", 0x7F
+        },
+        {
+            "VK_F17", 0x80
+        },
+        {
+            "VK_F18", 0x81
+        },
+        {
+            "VK_F19", 0x82
+        },
+        {
+            "VK_F20", 0x83
+        },
+        {
+            "VK_F21", 0x84
+        },
+        {
+            "VK_F22", 0x85
+        },
+        {
+            "VK_F23", 0x86
+        },
+        {
+            "VK_F24", 0x87
+        },
+        {
+            "VK_NUMLOCK", 0x90
+        },
+        {
+            "VK_SCROLL", 0x91
+        },
+        {
+            "VK_LSHIFT", 0xA0
+        },
+        {
+            "VK_RSHIFT", 0xA1
+        },
+        {
+            "VK_LCONTROL", 0xA2
+        },
+        {
+            "VK_RCONTROL", 0xA3
+        },
+        {
+            "VK_LMENU", 0xA4
+        },
+        {
+            "VK_RMENU", 0xA5
+        },
+        {
+            "VK_OEM_1", 0xBA
+        },
+        {
+            "VK_OEM_PLUS", 0xBB
+        },
+        {
+            "VK_OEM_COMMA", 0xBC
+        },
+        {
+            "VK_OEM_MINUS", 0xBD
+        },
+        {
+            "VK_OEM_PERIOD", 0xBE
+        },
+        {
+            "VK_OEM_2", 0xBF
+        },
+        {
+            "VK_OEM_3", 0xC0
+        },
+        {
+            "VK_OEM_4", 0xDB
+        },
+        {
+            "VK_OEM_5", 0xDC
+        },
+        {
+            "VK_OEM_6", 0xDD
+        },
+        {
+            "VK_OEM_7", 0xDE
+        },
     };
 
     private static readonly string[] Win32KeyOptionList =

@@ -33,6 +33,9 @@
             <suki:SettingsLayout Name="SettingsLayout" ScrollAnimationSpeed="3" MinWidthWhetherStackSummaryShow="700" StackSummaryWidth="220">
                 <suki:SettingsLayout.Items>
                     <suki:SettingsLayoutItem
+                        Content="{extensions:ServiceProvider ServiceType={x:Type settings:ToolSettingsUserControl}}"
+                        Header="{markup:I18n {x:Static helper:LangKeys.ToolSettings}}" />
+                    <suki:SettingsLayoutItem
                         Content="{extensions:ServiceProvider ServiceType={x:Type settings:PerformanceUserControl}}"
                         Header="{markup:I18n {x:Static helper:LangKeys.PerformanceSettings}}" />
                     <suki:SettingsLayoutItem

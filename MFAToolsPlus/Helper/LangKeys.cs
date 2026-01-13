@@ -561,6 +561,15 @@ public static class LangKeys
 	public static readonly string LiveViewSwipeDuration = "LiveViewSwipeDuration";
 	public static readonly string MatchRoi = "MatchRoi";
 	public static readonly string TargetText = "TargetText";
+	public static readonly string ToolSettings = "ToolSettings";
+	public static readonly string RoiExpandSettings = "RoiExpandSettings";
+	public static readonly string RoiExpandX = "RoiExpandX";
+	public static readonly string RoiExpandY = "RoiExpandY";
+	public static readonly string RoiExpandW = "RoiExpandW";
+	public static readonly string RoiExpandH = "RoiExpandH";
+	public static readonly string ClipboardCopyFormat = "ClipboardCopyFormat";
+	public static readonly string ClipboardCopyFormatValuesOnly = "ClipboardCopyFormatValuesOnly";
+	public static readonly string ClipboardCopyFormatFieldWithValues = "ClipboardCopyFormatFieldWithValues";
 	public static readonly string RecognitionThreshold = "RecognitionThreshold";
 	public static readonly string OnlyRec = "OnlyRec";
 	public static readonly string GreenMask = "GreenMask";

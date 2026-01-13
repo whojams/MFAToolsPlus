@@ -169,6 +169,11 @@ public static class ConfigurationKeys
     public const string LiveViewRefreshRate = "UI.LiveView.RefreshRate";
     public const string LiveViewHorizontalExpansion = "UI.LiveView.HorizontalExpansion";
     public const string LiveViewVerticalExpansion = "UI.LiveView.VerticalExpansion";
+    public const string LiveViewExpandX = "UI.LiveView.ExpandX";
+    public const string LiveViewExpandY = "UI.LiveView.ExpandY";
+    public const string LiveViewExpandW = "UI.LiveView.ExpandW";
+    public const string LiveViewExpandH = "UI.LiveView.ExpandH";
+    public const string ClipboardCopyFormat = "UI.Tools.ClipboardCopyFormat";
     public const string LiveViewScreenshotRelativePath = "UI.LiveView.ScreenshotRelativePath";
     public const string MainWindowWidth = "UI.MainWindow.Width";
     public const string MainWindowHeight = "UI.MainWindow.Height";

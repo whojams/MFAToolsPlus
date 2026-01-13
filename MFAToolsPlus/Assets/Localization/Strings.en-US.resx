@@ -1687,5 +1687,32 @@
     <data name="TemplateSelect" xml:space="preserve">
         <value>Select Template</value>
     </data>
+    <data name="ToolSettings" xml:space="preserve">
+        <value>Tool Settings</value>
+    </data>
+    <data name="RoiExpandSettings" xml:space="preserve">
+        <value>ROI Expand Settings</value>
+    </data>
+    <data name="RoiExpandX" xml:space="preserve">
+        <value>Expand X</value>
+    </data>
+    <data name="RoiExpandY" xml:space="preserve">
+        <value>Expand Y</value>
+    </data>
+    <data name="RoiExpandW" xml:space="preserve">
+        <value>Expand Width</value>
+    </data>
+    <data name="RoiExpandH" xml:space="preserve">
+        <value>Expand Height</value>
+    </data>
+    <data name="ClipboardCopyFormat" xml:space="preserve">
+        <value>Clipboard Copy Format</value>
+    </data>
+    <data name="ClipboardCopyFormatValuesOnly" xml:space="preserve">
+        <value>Values Only</value>
+    </data>
+    <data name="ClipboardCopyFormatFieldWithValues" xml:space="preserve">
+        <value>Field + Values</value>
+    </data>
 </root>
 
