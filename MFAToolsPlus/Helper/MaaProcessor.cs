@@ -149,6 +149,7 @@ public class MaaProcessor
             MaaControllerTypes.Adb => LangKeys.Emulator,
             MaaControllerTypes.Win32 => LangKeys.Window,
             MaaControllerTypes.PlayCover => "TabPlayCover",
+            MaaControllerTypes.Dbg => "TabDbg",
             _ => LangKeys.Window
         };
 
@@ -245,6 +246,7 @@ public class MaaProcessor
             MaaControllerTypes.Adb => LangKeys.Emulator,
             MaaControllerTypes.Win32 => LangKeys.Window,
             MaaControllerTypes.PlayCover => "TabPlayCover",
+            MaaControllerTypes.Dbg => "TabDbg",
             _ => LangKeys.Window
         };
         ToastHelper.Warn(LangKeys.Warning_CannotConnect.ToLocalizationFormatted(true, targetKey));
@@ -385,13 +387,16 @@ public class MaaProcessor
             }
             tasker.Releasing += (_, _) =>
             {
-                tasker.Controller.Callback -= HandleControllerCallBack;
+                if (tasker.Controller != null)
+                    tasker.Controller.Callback -= HandleControllerCallBack;
             };
-            tasker.Controller.Callback += HandleControllerCallBack;
+            if (tasker.Controller != null)
+                tasker.Controller.Callback += HandleControllerCallBack;
             tasker.Global.SetOption_DebugMode(true);
             tasker.Resource.Register(new MFAOCRRecognition());
+
             var linkStatus = tasker.Controller?.LinkStart().Wait();
-            if (linkStatus != MaaJobStatus.Succeeded)
+            if (linkStatus != MaaJobStatus.Succeeded && Instances.ToolsViewModel.CurrentController != MaaControllerTypes.Dbg)
             {
                 tasker.Dispose();
                 return (null, InvalidResource, ShouldRetry);
@@ -437,7 +442,7 @@ public class MaaProcessor
         LoggerHelper.Error(e.ToString());
     }
 
-    private MaaController InitializeController(MaaControllerTypes controllerType)
+    private MaaController? InitializeController(MaaControllerTypes controllerType)
     {
         ConnectToMAA();
 
@@ -466,7 +471,7 @@ public class MaaProcessor
                 return new MaaPlayCoverController(Config.PlayCover.PlayCoverAddress, Config.PlayCover.UUID);
 
             case MaaControllerTypes.Win32:
-            default:
+
                 LoggerHelper.Info($"Name: {Config.DesktopWindow.Name}");
                 LoggerHelper.Info($"HWnd: {Config.DesktopWindow.HWnd}");
                 LoggerHelper.Info($"ScreenCap: {Config.DesktopWindow.ScreenCap}");
@@ -480,6 +485,9 @@ public class MaaProcessor
                     Config.DesktopWindow.ScreenCap, Config.DesktopWindow.Mouse, Config.DesktopWindow.KeyBoard,
                     Config.DesktopWindow.Link,
                     Config.DesktopWindow.Check);
+            case MaaControllerTypes.Dbg:
+            default:
+                return null;
         }
     }
     public void ConnectToMAA()

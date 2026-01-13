@@ -924,6 +924,9 @@
     <data name="TabPlayCover" xml:space="preserve">
         <value>PlayCover</value>
     </data>
+    <data name="TabDbg" xml:space="preserve">
+        <value>除錯</value>
+    </data>
     <data name="Task" xml:space="preserve">
         <value>任務</value>
     </data>

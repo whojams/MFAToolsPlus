@@ -7,6 +7,7 @@ public enum MaaControllerTypes
     Win32 = 1,
     Adb = 2,
     PlayCover = 4,
+    Dbg = 8,
 }
 
 public static class MaaControllerHelper
@@ -20,6 +21,7 @@ public static class MaaControllerHelper
                 MaaControllerTypes.Win32 => "TabWin32",
                 MaaControllerTypes.Adb => "TabADB",
                 MaaControllerTypes.PlayCover => "TabPlayCover",
+                MaaControllerTypes.Dbg => "TabDbg",
                 _ => "TabADB"
             };
         }
@@ -30,6 +32,7 @@ public static class MaaControllerHelper
                 MaaControllerTypes.Win32 => "win32",
                 MaaControllerTypes.Adb => "adb",
                 MaaControllerTypes.PlayCover => "playcover",
+                MaaControllerTypes.Dbg => "dbg",
                 _ => "adb"
             };
         }
@@ -45,6 +48,8 @@ public static class MaaControllerHelper
             return MaaControllerTypes.Win32;
         if (type.Contains("adb", StringComparison.OrdinalIgnoreCase))
             return MaaControllerTypes.Adb;
+        if (type.Contains("dbg", StringComparison.OrdinalIgnoreCase))
+            return MaaControllerTypes.Dbg;
         return defaultValue;
     }
     

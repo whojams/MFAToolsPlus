@@ -134,6 +134,7 @@ public partial class ToolsViewModel : ViewModelBase
                     _lastExecutionTime = now;
             }
         }
+        SetConnected(false);
         if (value is DesktopWindowInfo window)
         {
             if (!igoreToast) ToastHelper.Info(LangKeys.WindowSelectionMessage.ToLocalizationFormatted(false, ""), window.Name);
@@ -206,6 +207,15 @@ public partial class ToolsViewModel : ViewModelBase
         };
         adbController.InitializeDisplayName();
         List<MaaInterface.MaaResourceController> controllers = [adbController];
+
+        // var dbgController = new MaaInterface.MaaResourceController
+        // {
+        //     Name = "Dbg",
+        //     Type = MaaControllerTypes.Dbg.ToJsonKey()
+        // };
+        // dbgController.InitializeDisplayName();
+        // controllers.Add(dbgController);
+
         if (OperatingSystem.IsWindows())
         {
             var win32Controller = new MaaInterface.MaaResourceController
@@ -258,7 +268,9 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private async Task Reconnect()
     {
-        if (CurrentController != MaaControllerTypes.PlayCover && CurrentDevice == null)
+        if (CurrentController != MaaControllerTypes.PlayCover
+            && CurrentController != MaaControllerTypes.Dbg
+            && CurrentDevice == null)
         {
             ToastHelper.Warn(LangKeys.CannotStart.ToLocalization(), "DeviceNotSelected".ToLocalization());
             LoggerHelper.Warning(LangKeys.CannotStart.ToLocalization());
@@ -297,7 +309,8 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void Refresh()
     {
-        if (CurrentController == MaaControllerTypes.PlayCover)
+        if (CurrentController == MaaControllerTypes.PlayCover
+            || CurrentController == MaaControllerTypes.Dbg)
         {
             SetConnected(false);
             return;
@@ -311,7 +324,8 @@ public partial class ToolsViewModel : ViewModelBase
     }
     public void AutoDetectDevice(CancellationToken token = default)
     {
-        if (CurrentController == MaaControllerTypes.PlayCover)
+        if (CurrentController == MaaControllerTypes.PlayCover
+            || CurrentController == MaaControllerTypes.Dbg)
         {
             DispatcherHelper.RunOnMainThread(() =>
             {
@@ -457,7 +471,8 @@ public partial class ToolsViewModel : ViewModelBase
 
     public void TryReadAdbDeviceFromConfig(bool inTask = true, bool refresh = false)
     {
-        if (CurrentController == MaaControllerTypes.PlayCover)
+        if (CurrentController == MaaControllerTypes.PlayCover
+            || CurrentController == MaaControllerTypes.Dbg)
         {
             SetConnected(false);
             return;
@@ -540,7 +555,8 @@ public partial class ToolsViewModel : ViewModelBase
 
     private void HandleControllerSettings(MaaControllerTypes controllerType)
     {
-        if (controllerType == MaaControllerTypes.PlayCover)
+        if (controllerType == MaaControllerTypes.PlayCover
+            || controllerType == MaaControllerTypes.Dbg)
             return;
 
         MaaInterface.MaaResourceController? controller = null;
@@ -709,6 +725,7 @@ public partial class ToolsViewModel : ViewModelBase
             MaaControllerTypes.Adb => LangKeys.Emulator,
             MaaControllerTypes.Win32 => LangKeys.Window,
             MaaControllerTypes.PlayCover => LangKeys.TabPlayCover,
+            MaaControllerTypes.Dbg => "TabDbg",
             _ => LangKeys.Window
         };
         ToastHelper.Warn(string.Format(
