@@ -307,7 +307,10 @@ public static class RecognitionHelper
         }
         var templateDir = Path.Combine(AppContext.BaseDirectory, "resource", "base", "image");
         Directory.CreateDirectory(templateDir);
-        bitmap.Save(Path.Combine(templateDir, "template.png"));
+        var fileDir = Path.Combine(templateDir, "template.png");
+        if (File.Exists(fileDir))
+            File.Delete(fileDir);
+        bitmap.Save(fileDir);
 
         var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
         if (tempBitmap == null)

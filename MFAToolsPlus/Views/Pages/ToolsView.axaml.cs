@@ -62,6 +62,11 @@ public partial class ToolsView : UserControl
         {
             if (MaaProcessor.IsClosed)
                 return;
+            if (Instances.ToolsViewModel.IsLiveViewPaused)
+            {
+                return;
+            }
+
             if (Instances.ToolsViewModel.EnableLiveView && Instances.ToolsViewModel.IsConnected)
             {
                 MaaProcessor.Instance.PostScreencap();

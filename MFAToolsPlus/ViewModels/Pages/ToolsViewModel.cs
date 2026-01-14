@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -3010,7 +3011,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await clipboard.GetTextAsync();
+        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
@@ -3054,7 +3055,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await clipboard.GetTextAsync();
+        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
@@ -3085,7 +3086,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await clipboard.GetTextAsync();
+        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
@@ -6776,12 +6777,6 @@ public partial class ToolsViewModel : ViewModelBase
     /// </summary>
     public async Task UpdateLiveViewImageAsync(MaaImageBuffer? buffer)
     {
-        if (IsLiveViewPaused)
-        {
-            buffer?.Dispose();
-            return;
-        }
-
         if (!await _liveViewSemaphore.WaitAsync(0))
         {
             if (++_liveViewSemaphoreFailCount < 3)
@@ -6827,7 +6822,12 @@ public partial class ToolsViewModel : ViewModelBase
                 return;
             }
 
-            if (width <= 0 || height <= 0)
+            if (rawData == IntPtr.Zero || width <= 0 || height <= 0)
+            {
+                return;
+            }
+
+            if (buffer.Channels is not (3 or 4))
             {
                 return;
             }
@@ -6858,6 +6858,10 @@ public partial class ToolsViewModel : ViewModelBase
                     LiveViewFps = frameCount / totalSeconds;
                 });
             }
+        }
+        catch (Exception ex)
+        {
+            LoggerHelper.Warning($"LiveView update failed: {ex.Message}");
         }
         finally
         {
