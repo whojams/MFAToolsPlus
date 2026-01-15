@@ -16,7 +16,7 @@ public partial class RootViewModel : ViewModelBase
     
     [ObservableProperty] private bool _idle = true;
     
-    public static string Version => "v1.1.1";
+    public static string Version => "v1.0.0";
 
     public void SetUpdating(bool isUpdating)
     {

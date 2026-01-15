@@ -13,7 +13,7 @@ namespace MFAToolsPlus.Extensions.MaaFW.Custom;
 
 public class MFAOCRRecognition : IMaaCustomRecognition
 {
-    public string Name { get; set; } = "MFAOCRRecognition";
+    public string Name { get; set; } = nameof(MFAOCRRecognition);
     public static Bitmap? Bitmap { get; set; } = null;
     public static string? Output { get; set; } = null;
     public bool Analyze(in IMaaContext context, in AnalyzeArgs args, in AnalyzeResults results)

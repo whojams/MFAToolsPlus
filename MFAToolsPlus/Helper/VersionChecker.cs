@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using MaaFramework.Binding.Interop.Native;
 using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Helper.Other;
@@ -158,7 +159,7 @@ public static class VersionChecker
         {
             progress = new ProgressBar
             {
-                Value = 0,
+                Value = 0, Margin = new Thickness(0,5),
                 ShowProgressText = true
             };
             StackPanel stackPanel = new();
@@ -518,7 +519,7 @@ public static class VersionChecker
         {
             progress = new ProgressBar
             {
-                Value = 0,
+                Value = 0, Margin = new Thickness(0,5),
                 ShowProgressText = true
             };
             textBlock = new TextBlock

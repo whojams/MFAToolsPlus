@@ -305,12 +305,6 @@ public static class RecognitionHelper
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
             return;
         }
-        var templateDir = Path.Combine(AppContext.BaseDirectory, "resource", "base", "image");
-        Directory.CreateDirectory(templateDir);
-        var fileDir = Path.Combine(templateDir, "template.png");
-        if (File.Exists(fileDir))
-            File.Delete(fileDir);
-        bitmap.Save(fileDir);
 
         var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
         if (tempBitmap == null)
@@ -345,9 +339,10 @@ public static class RecognitionHelper
         {
             Instances.ToolsViewModel.IsRunning = true;
             using var buffer = new MaaImageBuffer();
-
             buffer.TrySetEncodedData(BitmapToBytes(tempBitmap));
-
+            using var template = new MaaImageBuffer();
+            template.TrySetEncodedData(BitmapToBytes(bitmap));
+            tasker.Resource.OverrideImage("template.png", template);
             var job = tasker.AppendRecognition("TemplateMatch", pipeline, buffer);
             var status = job.Wait();
             if (status != MaaJobStatus.Succeeded)

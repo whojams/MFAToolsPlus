@@ -927,9 +927,6 @@
     <data name="TabDbg" xml:space="preserve">
         <value>Debug</value>
     </data>
-    <data name="TabDbg" xml:space="preserve">
-        <value>Debug</value>
-    </data>
     <data name="Task" xml:space="preserve">
         <value>Tasks</value>
     </data>
