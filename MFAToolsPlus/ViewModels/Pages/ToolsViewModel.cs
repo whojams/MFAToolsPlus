@@ -2968,7 +2968,7 @@ public partial class ToolsViewModel : ViewModelBase
         }
 
         return mode == ClipboardCopyFormat.FieldWithValues
-            ? $"{label}: {value}"
+            ? $"\"{label}\": {value}"
             : value;
     }
 
@@ -3011,7 +3011,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
+        var text = await clipboard.TryGetTextAsync();
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
@@ -3055,7 +3055,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
+        var text = await clipboard.TryGetTextAsync();
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
@@ -3086,7 +3086,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
+        var text = await clipboard.TryGetTextAsync();
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
@@ -3115,7 +3115,7 @@ public partial class ToolsViewModel : ViewModelBase
             return false;
         }
 
-        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
+        var text = await clipboard.TryGetTextAsync();
         if (string.IsNullOrWhiteSpace(text))
         {
             return false;
