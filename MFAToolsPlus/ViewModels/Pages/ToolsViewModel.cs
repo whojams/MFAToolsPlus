@@ -3107,6 +3107,37 @@ public partial class ToolsViewModel : ViewModelBase
         return true;
     }
 
+    private async Task<bool> TryGetClipboardTripletAsync(Action<int, int, int> applyAction)
+    {
+        var clipboard = Instances.RootView?.Clipboard;
+        if (clipboard == null)
+        {
+            return false;
+        }
+
+        var text = await ClipboardExtensions.TryGetTextAsync(clipboard);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        var matches = Regex.Matches(text, @"-?\d+");
+        if (matches.Count < 3)
+        {
+            return false;
+        }
+
+        if (!int.TryParse(matches[0].Value, out var first)
+            || !int.TryParse(matches[1].Value, out var second)
+            || !int.TryParse(matches[2].Value, out var third))
+        {
+            return false;
+        }
+
+        applyAction(first, second, third);
+        return true;
+    }
+
     [RelayCommand]
     private void SetDragMode()
     {
@@ -3358,9 +3389,67 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task PasteRgbUpper()
+    {
+        if (await TryGetClipboardTripletAsync((first, second, third) =>
+            {
+                RgbUpperR = first.ToString();
+                RgbUpperG = second.ToString();
+                RgbUpperB = third.ToString();
+            }))
+        {
+            if (IsColorPreviewActive)
+            {
+                ApplyColorFilter();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearRgbUpper()
+    {
+        RgbUpperR = "0";
+        RgbUpperG = "0";
+        RgbUpperB = "0";
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
+    }
+
+    [RelayCommand]
     private void CopyRgbLower()
     {
         CopyTextToClipboard(BuildColorTripletClipboardText("lower", RgbLowerR, RgbLowerG, RgbLowerB), "复制RGB Lower到剪贴板");
+    }
+
+    [RelayCommand]
+    private async Task PasteRgbLower()
+    {
+        if (await TryGetClipboardTripletAsync((first, second, third) =>
+            {
+                RgbLowerR = first.ToString();
+                RgbLowerG = second.ToString();
+                RgbLowerB = third.ToString();
+            }))
+        {
+            if (IsColorPreviewActive)
+            {
+                ApplyColorFilter();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearRgbLower()
+    {
+        RgbLowerR = "0";
+        RgbLowerG = "0";
+        RgbLowerB = "0";
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
     }
 
     [RelayCommand]
@@ -3370,9 +3459,67 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task PasteHsvUpper()
+    {
+        if (await TryGetClipboardTripletAsync((first, second, third) =>
+            {
+                HsvUpperH = first.ToString();
+                HsvUpperS = second.ToString();
+                HsvUpperV = third.ToString();
+            }))
+        {
+            if (IsColorPreviewActive)
+            {
+                ApplyColorFilter();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearHsvUpper()
+    {
+        HsvUpperH = "0";
+        HsvUpperS = "0";
+        HsvUpperV = "0";
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
+    }
+
+    [RelayCommand]
     private void CopyHsvLower()
     {
         CopyTextToClipboard(BuildColorTripletClipboardText("lower", HsvLowerH, HsvLowerS, HsvLowerV), "复制HSV Lower到剪贴板");
+    }
+
+    [RelayCommand]
+    private async Task PasteHsvLower()
+    {
+        if (await TryGetClipboardTripletAsync((first, second, third) =>
+            {
+                HsvLowerH = first.ToString();
+                HsvLowerS = second.ToString();
+                HsvLowerV = third.ToString();
+            }))
+        {
+            if (IsColorPreviewActive)
+            {
+                ApplyColorFilter();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearHsvLower()
+    {
+        HsvLowerH = "0";
+        HsvLowerS = "0";
+        HsvLowerV = "0";
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
     }
 
     [RelayCommand]
@@ -3382,9 +3529,59 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task PasteGrayUpper()
+    {
+        if (await TryGetClipboardNumberAsync(value =>
+            {
+                GrayUpper = ((int)Math.Round(value)).ToString();
+            }))
+        {
+            if (IsColorPreviewActive)
+            {
+                ApplyColorFilter();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearGrayUpper()
+    {
+        GrayUpper = "0";
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
+    }
+
+    [RelayCommand]
     private void CopyGrayLower()
     {
         CopyTextToClipboard(BuildGrayClipboardText("lower", GrayLower), "复制Gray Lower到剪贴板");
+    }
+
+    [RelayCommand]
+    private async Task PasteGrayLower()
+    {
+        if (await TryGetClipboardNumberAsync(value =>
+            {
+                GrayLower = ((int)Math.Round(value)).ToString();
+            }))
+        {
+            if (IsColorPreviewActive)
+            {
+                ApplyColorFilter();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearGrayLower()
+    {
+        GrayLower = "0";
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
     }
 
     [RelayCommand]
