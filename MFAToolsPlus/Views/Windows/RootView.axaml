@@ -19,7 +19,7 @@
                  BackgroundImage="{Binding BackgroundImage, Source={x:Static helper:Instances.GuiSettingsUserControlModel}}"
                  BackgroundImageOpacity="{Binding BackgroundImageOpacity, Source={x:Static helper:Instances.GuiSettingsUserControlModel}}"
                  IsVisible="{Binding IsWindowVisible}"
-                 MinHeight="360"
+                 MinHeight="360" CanPin="True"
                  MinWidth="700"
                  d:DesignHeight="450"
                  d:DesignWidth="800" ShowTitle="False">
