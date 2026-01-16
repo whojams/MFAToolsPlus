@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using MaaFramework.Binding;
 using MFAToolsPlus.Helper;
 using MFAToolsPlus.ViewModels.Pages;
 using System;
@@ -69,7 +70,13 @@ public partial class ToolsView : UserControl
 
             if (Instances.ToolsViewModel.EnableLiveView && Instances.ToolsViewModel.IsConnected)
             {
-                MaaProcessor.Instance.PostScreencap();
+                var status = MaaProcessor.Instance.PostScreencap();
+                if (status != MaaJobStatus.Succeeded)
+                {
+                    if (status == MaaJobStatus.Invalid)
+                        Instances.ToolsViewModel.SetConnected(false);
+                    return;
+                }
                 var buffer = MaaProcessor.Instance.GetLiveViewBuffer();
                 _ = Instances.ToolsViewModel.UpdateLiveViewImageAsync(buffer);
             }

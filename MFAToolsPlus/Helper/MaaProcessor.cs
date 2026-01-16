@@ -83,7 +83,6 @@ public class MaaProcessor
             MaaTasker.Dispose();
         }
         MaaTasker = maaTasker;
-        ResetActionFailedCount();
     }
 
     private static bool _isClosed = false;
@@ -98,33 +97,33 @@ public class MaaProcessor
     private int _screencapFailedCount;
     private readonly Lock _screencapLogLock = new();
     private const int ActionFailedLimit = 1;
-    private void ResetActionFailedCount()
-    {
-        _screencapFailedCount = 0;
-    }
+    // private void ResetActionFailedCount()
+    // {
+    //     _screencapFailedCount = 0;
+    // }
 
-    private bool HandleScreencapFailure()
-    {
-        if (Instances.ToolsViewModel.IsConnected && ++_screencapFailedCount <= ActionFailedLimit)
-        {
-            return false;
-        }
+    // private bool HandleScreencapFailure()
+    // {
+    //     if (Instances.ToolsViewModel.IsConnected && ++_screencapFailedCount <= ActionFailedLimit)
+    //     {
+    //         return false;
+    //     }
+    //
+    //     _screencapFailedCount = 0;
+    //     Instances.ToolsViewModel.SetConnected(false);
+    //
+    //     SetTasker();
+    //     return true;
+    // }
 
-        _screencapFailedCount = 0;
-        Instances.ToolsViewModel.SetConnected(false);
-
-        SetTasker();
-        return true;
-    }
-
-    public void HandleControllerCallBack(object? sender, MaaCallbackEventArgs args)
-    {
-        var message = args.Message;
-        if (message == MaaMsg.Controller.Action.Failed)
-        {
-            HandleScreencapFailure();
-        }
-    }
+    // public void HandleControllerCallBack(object? sender, MaaCallbackEventArgs args)
+    // {
+    //     var message = args.Message;
+    //     if (message == MaaMsg.Controller.Action.Failed)
+    //     {
+    //         HandleScreencapFailure();
+    //     }
+    // }
 
     public async Task TestConnecting()
     {
@@ -385,13 +384,7 @@ public class MaaProcessor
             {
                 LoggerHelper.Error(e);
             }
-            tasker.Releasing += (_, _) =>
-            {
-                if (tasker.Controller != null)
-                    tasker.Controller.Callback -= HandleControllerCallBack;
-            };
-            if (tasker.Controller != null)
-                tasker.Controller.Callback += HandleControllerCallBack;
+   
             tasker.Global.SetOption_DebugMode(true);
             tasker.Resource.Register(new MFAOCRRecognition());
 
@@ -584,20 +577,21 @@ public class MaaProcessor
         return Instances.ConnectSettingsUserControlModel.Win32ControlKeyboardType;
     }
 
-    public void PostScreencap()
+    public MaaJobStatus PostScreencap()
     {
         var controller = GetScreenshotController();
 
         if (controller == null || !controller.IsConnected)
-            return;
+            return MaaJobStatus.Invalid;
 
         try
         {
-            controller.Screencap().Wait();
+            return controller.Screencap().Wait();
         }
         catch (Exception ex)
         {
             LoggerHelper.Warning($"PostScreencap failed: {ex.Message}");
+            return MaaJobStatus.Invalid;
         }
     }
 
