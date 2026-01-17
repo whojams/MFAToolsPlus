@@ -94,9 +94,9 @@ public class MaaProcessor
         SetTasker();
     }
 
-    private int _screencapFailedCount;
-    private readonly Lock _screencapLogLock = new();
-    private const int ActionFailedLimit = 1;
+    // private int _screencapFailedCount;
+    // private readonly Lock _screencapLogLock = new();
+    // private const int ActionFailedLimit = 1;
     // private void ResetActionFailedCount()
     // {
     //     _screencapFailedCount = 0;

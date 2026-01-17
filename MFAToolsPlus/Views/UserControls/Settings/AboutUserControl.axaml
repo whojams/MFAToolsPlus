@@ -28,7 +28,11 @@
                         DockPanel.Dock="Right"
                         Height="40"
                         HorizontalAlignment="Center"
-                        Margin="0,0,4,0" />
+                        Margin="0,0,4,0"
+                        extensions:BubbleExtensions.EnableBubble="True"
+                        extensions:BubbleExtensions.BubbleContent="已清理"
+                        extensions:BubbleExtensions.BubbleRise="28"
+                        extensions:BubbleExtensions.BubbleDuration="1.0" />
                 <StackPanel HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Orientation="Horizontal">

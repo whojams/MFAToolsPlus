@@ -1,0 +1,31 @@
+<Styles xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style Selector="Border.BubbleFlyout">
+        <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SukiControlBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="BoxShadow" Value="{DynamicResource SukiPopupShadow}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="MinWidth" Value="24" />
+    </Style>
+
+    <Style Selector="Border.BubbleFlyout TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="Border.BubbleFlyout Path">
+        <Setter Property="Fill" Value="{DynamicResource SukiText}" />
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="Stretch" Value="Uniform" />
+    </Style>
+
+    <Style Selector="Border.BubbleFlyout Image">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="Stretch" Value="Uniform" />
+    </Style>
+</Styles>

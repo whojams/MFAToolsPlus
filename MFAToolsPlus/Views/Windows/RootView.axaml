@@ -162,5 +162,8 @@
                                        PageContent="{extensions:ServiceProvider ServiceType={x:Type pages:SettingsView}}" />
             </suki:SukiSideMenu.FooterMenuItems>
         </suki:SukiSideMenu>
+        <Canvas x:Name="BubbleLayer"
+                IsHitTestVisible="False"
+                Panel.ZIndex="99" />
     </Grid>
 </suki:SukiWindow>

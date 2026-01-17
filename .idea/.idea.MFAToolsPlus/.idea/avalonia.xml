@@ -4,6 +4,7 @@
     <option name="projectPerEditor">
       <map>
         <entry key="MFAToolsPlus/App.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
+        <entry key="MFAToolsPlus/Assets/Style/BubbleStyles.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="MFAToolsPlus/Assets/Style/Geometry.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="MFAToolsPlus/Assets/Theme/DarkTheme.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />
         <entry key="MFAToolsPlus/Assets/Theme/LightTheme.axaml" value="MFAToolsPlus/MFAToolsPlus.csproj" />

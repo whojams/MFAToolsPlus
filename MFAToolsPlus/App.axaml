@@ -5,35 +5,32 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-             <Application.Resources>
-                 <ResourceDictionary>
-                     <ResourceDictionary.MergedDictionaries>
-                         <ResourceInclude Source="avares://MFAToolsPlus/Assets/Style/Geometry.axaml" />
-                         
-                      
-                     </ResourceDictionary.MergedDictionaries>
-                     <ResourceDictionary.ThemeDictionaries>
-                         <ResourceDictionary x:Key="Light">
-                             <ResourceDictionary.MergedDictionaries>
-                                 <ResourceInclude Source="avares://MFAToolsPlus/Assets/Theme/LightTheme.axaml" />
-                             </ResourceDictionary.MergedDictionaries>
-                         </ResourceDictionary>
-                         <ResourceDictionary x:Key="Dark">
-                             <ResourceDictionary.MergedDictionaries>
-                                 <ResourceInclude Source="avares://MFAToolsPlus/Assets/Theme/DarkTheme.axaml" />
-                             </ResourceDictionary.MergedDictionaries>
-                         </ResourceDictionary>
-                     </ResourceDictionary.ThemeDictionaries>
-                 </ResourceDictionary>
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://MFAToolsPlus/Assets/Style/Geometry.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceInclude Source="avares://MFAToolsPlus/Assets/Theme/LightTheme.axaml" />
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceInclude Source="avares://MFAToolsPlus/Assets/Theme/DarkTheme.axaml" />
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
 
-             </Application.Resources>
-             <Application.Styles>
-                 <StyleInclude Source="avares://MFAToolsPlus/Views/UserControls/HotKeyEditor.axaml" />
-             </Application.Styles>
+    </Application.Resources>
     <Application.Styles>
         <FluentTheme />
         <styling:FluentAvaloniaTheme />
         <suki:SukiTheme ThemeColor="Blue" />
+        <StyleInclude Source="avares://MFAToolsPlus/Views/UserControls/HotKeyEditor.axaml" />
+        <StyleInclude Source="avares://MFAToolsPlus/Assets/Style/BubbleStyles.axaml" />
     </Application.Styles>
 </Application>
