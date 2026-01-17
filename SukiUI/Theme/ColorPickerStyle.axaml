@@ -1,10 +1,10 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:suki="https://github.com/kikipoulet/SukiUI">
-    <Design.PreviewWith>
-        <ColorPreviewer Width="200" Height="60" Margin="20"></ColorPreviewer>
-    </Design.PreviewWith>
-<PlacementMode x:Key="ColorPickerFlyoutPlacement">Top</PlacementMode>
+                    xmlns:controls="using:Avalonia.Controls"
+                    xmlns:primitives="using:Avalonia.Controls.Primitives"
+                    xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                    xmlns:converters="clr-namespace:Avalonia.Controls.Converters;assembly=Avalonia.Controls.ColorPicker">
+  <PlacementMode x:Key="ColorPickerFlyoutPlacement">Top</PlacementMode>
 
   <ControlTheme x:Key="{x:Type ColorPicker}"
                 TargetType="ColorPicker">
@@ -29,7 +29,7 @@
       </Template>
     </Setter>
     <Setter Property="Palette">
-      <FluentColorPalette />
+      <controls:FluentColorPalette />
     </Setter>
     <Setter Property="Template">
       <ControlTemplate TargetType="{x:Type ColorPicker}">
@@ -115,7 +115,7 @@
                         <ColumnDefinition Width="Auto"
                                           MinWidth="32" />
                       </Grid.ColumnDefinitions>
-                      <ColorSlider x:Name="ColorSpectrumThirdComponentSlider"
+                      <primitives:ColorSlider x:Name="ColorSpectrumThirdComponentSlider"
                                               AutomationProperties.Name="Third Component"
                                               Grid.Column="0"
                                               IsAlphaVisible="False"
@@ -128,7 +128,7 @@
                                               VerticalAlignment="Stretch"
                                               Margin="0,0,12,0"
                                               IsVisible="{TemplateBinding IsColorSpectrumSliderVisible}" />
-                      <ColorSpectrum x:Name="ColorSpectrum"
+                      <primitives:ColorSpectrum x:Name="ColorSpectrum"
                                                 Grid.Column="1"
                                                 Components="{TemplateBinding ColorSpectrumComponents}"
                                                 HsvColor="{Binding HsvColor, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
@@ -141,7 +141,7 @@
                                                 Shape="{TemplateBinding ColorSpectrumShape}"
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch" />
-                      <ColorSlider x:Name="ColorSpectrumAlphaSlider"
+                      <primitives:ColorSlider x:Name="ColorSpectrumAlphaSlider"
                                               AutomationProperties.Name="Alpha Component"
                                               Grid.Column="2"
                                               Orientation="Vertical"
@@ -152,13 +152,13 @@
                                               VerticalAlignment="Stretch"
                                               Margin="12,0,0,0"
                                               IsEnabled="{TemplateBinding IsAlphaEnabled}">
-                        <ColorSlider.IsVisible>
+                        <primitives:ColorSlider.IsVisible>
                           <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding RelativeSource="{RelativeSource TemplatedParent}"
                                      Path="IsAlphaVisible" />
                           </MultiBinding>
-                        </ColorSlider.IsVisible>
-                      </ColorSlider>
+                        </primitives:ColorSlider.IsVisible>
+                      </primitives:ColorSlider>
                     </Grid>
                   </TabItem>
                   <!-- Palette Tab -->
@@ -233,7 +233,7 @@
                                        CornerRadius="0,0,0,0"
                                        BorderThickness="1,1,0,1"
                                        Height="{Binding ElementName=PART_HexTextBox, Path=Bounds.Height}"
-                                       IsChecked="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Rgba}, Mode=TwoWay}" />
+                                       IsChecked="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Rgba}, Mode=TwoWay}" />
                           <RadioButton x:Name="HsvRadioButton"
                                    
                                        Grid.Column="1"
@@ -241,7 +241,7 @@
                                        CornerRadius="0,0,0,0"
                                        BorderThickness="0,1,1,1"
                                        Height="{Binding ElementName=PART_HexTextBox, Path=Bounds.Height}"
-                                       IsChecked="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Hsva}, Mode=TwoWay}" />
+                                       IsChecked="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Hsva}, Mode=TwoWay}" />
                         </Grid>
                         <Grid x:Name="HexInputGrid"
                               Grid.Column="2"
@@ -292,11 +292,11 @@
                           <TextBlock Foreground="White"
                                      FontWeight="SemiBold"
                                      Text="R"
-                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Rgba}, Mode=OneWay}" />
+                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Rgba}, Mode=OneWay}" />
                           <TextBlock Foreground="White"
                                      FontWeight="SemiBold"
                                      Text="H"
-                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Hsva}, Mode=OneWay}" />
+                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Hsva}, Mode=OneWay}" />
                         </Panel>
                       </Border>
                       <NumericUpDown x:Name="Component1NumericUpDown"
@@ -314,7 +314,7 @@
                                      Maximum="{Binding Maximum, ElementName=Component1Slider}"
                                      Value="{Binding Value, ElementName=Component1Slider}"
                                      IsVisible="{TemplateBinding IsComponentTextInputVisible}" />
-                      <ColorSlider x:Name="Component1Slider"
+                      <primitives:ColorSlider x:Name="Component1Slider"
                                               Grid.Column="2"
                                               Grid.Row="2"
                                               Orientation="Horizontal"
@@ -343,11 +343,11 @@
                           <TextBlock Foreground="White"
                                      FontWeight="SemiBold"
                                      Text="G"
-                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Rgba}, Mode=OneWay}" />
+                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Rgba}, Mode=OneWay}" />
                           <TextBlock Foreground="White"
                                      FontWeight="SemiBold"
                                      Text="S"
-                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Hsva}, Mode=OneWay}" />
+                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Hsva}, Mode=OneWay}" />
                         </Panel>
                       </Border>
                       <NumericUpDown x:Name="Component2NumericUpDown"
@@ -365,7 +365,7 @@
                                      Maximum="{Binding Maximum, ElementName=Component2Slider}"
                                      Value="{Binding Value, ElementName=Component2Slider}"
                                      IsVisible="{TemplateBinding IsComponentTextInputVisible}" />
-                      <ColorSlider x:Name="Component2Slider"
+                      <primitives:ColorSlider x:Name="Component2Slider"
                                               Grid.Column="2"
                                               Grid.Row="3"
                                               Orientation="Horizontal"
@@ -394,11 +394,11 @@
                           <TextBlock Foreground="White"
                                      FontWeight="SemiBold"
                                      Text="B"
-                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Rgba}, Mode=OneWay}" />
+                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Rgba}, Mode=OneWay}" />
                           <TextBlock Foreground="White"
                                      FontWeight="SemiBold"
                                      Text="V"
-                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static ColorModel.Hsva}, Mode=OneWay}" />
+                                     IsVisible="{TemplateBinding ColorModel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static controls:ColorModel.Hsva}, Mode=OneWay}" />
                         </Panel>
                       </Border>
                       <NumericUpDown x:Name="Component3NumericUpDown"
@@ -416,7 +416,7 @@
                                      Maximum="{Binding Maximum, ElementName=Component3Slider}"
                                      Value="{Binding Value, ElementName=Component3Slider}"
                                      IsVisible="{TemplateBinding IsComponentTextInputVisible}" />
-                      <ColorSlider x:Name="Component3Slider"
+                      <primitives:ColorSlider x:Name="Component3Slider"
                                               Grid.Column="2"
                                               Grid.Row="4"
                                               Orientation="Horizontal"
@@ -479,7 +479,7 @@
                           </MultiBinding>
                         </NumericUpDown.IsVisible>
                       </NumericUpDown>
-                      <ColorSlider x:Name="AlphaComponentSlider"
+                      <primitives:ColorSlider x:Name="AlphaComponentSlider"
                                               Grid.Column="2"
                                               Grid.Row="5"
                                               Orientation="Horizontal"
@@ -492,21 +492,21 @@
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Center"
                                               IsEnabled="{TemplateBinding IsAlphaEnabled}">
-                        <ColorSlider.IsVisible>
+                        <primitives:ColorSlider.IsVisible>
                           <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding RelativeSource="{RelativeSource TemplatedParent}"
                                      Path="IsAlphaVisible" />
                             <Binding RelativeSource="{RelativeSource TemplatedParent}"
                                      Path="IsComponentSliderVisible" />
                           </MultiBinding>
-                        </ColorSlider.IsVisible>
-                      </ColorSlider>
+                        </primitives:ColorSlider.IsVisible>
+                      </primitives:ColorSlider>
                     </Grid>
                   </TabItem>
                 </TabControl>
                 <!-- Previewer -->
                 <!-- Note that the drop shadow is allowed to extend past the control bounds -->
-                <ColorPreviewer Grid.Row="1"
+                <primitives:ColorPreviewer Grid.Row="1"
                                            HsvColor="{Binding HsvColor, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                            IsAccentColorsVisible="{TemplateBinding IsAccentColorsVisible}"
                                            Margin="12,0,12,12"

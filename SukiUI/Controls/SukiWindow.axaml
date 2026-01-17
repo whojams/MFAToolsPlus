@@ -3,16 +3,22 @@
                     xmlns:icons="clr-namespace:SukiUI.Content"
                     xmlns:suki="clr-namespace:SukiUI.Controls">
     <Design.PreviewWith>
-        <suki:SukiWindow Title="SukiUI Window"
+        <suki:SukiWindow Title="SukiUI Window with long text to test the overflow of the Title, use TitleTextWrapping to define"
+                         TitleTextWrapping="Wrap"
+                         TitleBarControlSize="12"
                          Width="600"
                          Height="400"
                          CanFullScreen="True"
                          CanPin="True">
+            <suki:SukiWindow.LogoContent>
+                <PathIcon Data="{x:Static icons:Icons.CircleInformation}"
+                          Height="20"
+                          Width="20"
+                          Foreground="Goldenrod"/>
+            </suki:SukiWindow.LogoContent>
             <suki:GlassCard Margin="20">
                 <suki:GroupBox Header="SukiUI">
-                    <SelectableTextBlock
-                        Text="SukiUI makes your Avalonia applications more modern. The library offers a large number of animated controls and theme switches."
-                        TextWrapping="Wrap" />
+                    <SelectableTextBlock Text="SukiUI makes your Avalonia applications more modern. The library offers a large number of animated controls and theme switches." TextWrapping="Wrap" />
                 </suki:GroupBox>
             </suki:GlassCard>
         </suki:SukiWindow>
@@ -28,7 +34,7 @@
         <Setter Property="FlowDirection" Value="{DynamicResource FlowDirectionPrimary}" />
         <Setter Property="Template">
             <ControlTemplate>
-                <Panel Name="PART_Root">
+                <Panel Name="PART_Root" Margin="{TemplateBinding Margin}">
                     <suki:SukiMainHost BackgroundAnimationEnabled="{TemplateBinding BackgroundAnimationEnabled}"
                                        BackgroundForceSoftwareRendering="{TemplateBinding BackgroundForceSoftwareRendering}"
                                        BackgroundShaderCode="{TemplateBinding BackgroundShaderCode}"
@@ -45,7 +51,7 @@
                         <DockPanel LastChildFill="True">
                             <Panel ContextMenu="{TemplateBinding TitleBarContextMenu}" DockPanel.Dock="Top">
                                 <StackPanel>
-                                    <LayoutTransformControl Name="PART_LayoutTransform" RenderTransformOrigin="0%,0%">
+                                    <LayoutTransformControl Name="PART_TitleBar" RenderTransformOrigin="0%,0%">
                                         <Panel>
                                             <suki:GlassCard Name="PART_TitleBarBackground"
                                                             BorderThickness="0"
@@ -59,17 +65,14 @@
                                                             Spacing="7">
                                                     <StackPanel.Styles>
                                                         <Style Selector="PathIcon">
-                                                            <Setter Property="Height" Value="10" />
-                                                            <Setter Property="Width" Value="10" />
+                                                            <Setter Property="Height" Value="{TemplateBinding TitleBarControlSize}" />
+                                                            <Setter Property="Width" Value="{TemplateBinding TitleBarControlSize}" />
                                                         </Style>
                                                     </StackPanel.Styles>
-                                                    <ItemsControl
-                                                        ItemsSource="{TemplateBinding RightWindowTitleBarControls}">
+                                                    <ItemsControl ItemsSource="{TemplateBinding RightWindowTitleBarControls}">
                                                         <ItemsControl.ItemsPanel>
                                                             <ItemsPanelTemplate>
-                                                                <StackPanel
-                                                                    FlowDirection="{DynamicResource FlowDirectionOpposite}"
-                                                                    Orientation="Horizontal" />
+                                                                <StackPanel FlowDirection="{DynamicResource FlowDirectionOpposite}" Orientation="Horizontal" />
                                                             </ItemsPanelTemplate>
                                                         </ItemsControl.ItemsPanel>
                                                     </ItemsControl>
@@ -77,15 +80,13 @@
                                                             Classes="WindowControlsButton"
                                                             IsEnabled="{TemplateBinding CanFullScreen}"
                                                             IsVisible="{TemplateBinding CanFullScreen}">
-                                                        <PathIcon x:Name="FullScreenIcon"
-                                                                  Data="{x:Static icons:Icons.WindowFullScreen}" />
+                                                        <PathIcon x:Name="FullScreenIcon" Data="{x:Static icons:Icons.WindowFullScreen}" />
                                                     </Button>
                                                     <Button Name="PART_PinButton"
                                                             Classes="WindowControlsButton"
                                                             IsEnabled="{TemplateBinding CanPin}"
                                                             IsVisible="{TemplateBinding CanPin}">
-                                                        <PathIcon x:Name="PinIcon"
-                                                                  Data="{x:Static icons:Icons.WindowPin}" />
+                                                        <PathIcon x:Name="PinIcon" Data="{x:Static icons:Icons.WindowPin}" />
                                                     </Button>
                                                     <Button Name="PART_MinimizeButton"
                                                             VerticalContentAlignment="Bottom"
@@ -98,31 +99,33 @@
                                                     <Button Name="PART_MaximizeButton"
                                                             Classes="WindowControlsButton"
                                                             IsVisible="{TemplateBinding CanMaximize}">
-                                                        <PathIcon x:Name="MaximizeIcon"
-                                                                  Data="{x:Static icons:Icons.WindowMaximize}" />
+                                                        <PathIcon x:Name="MaximizeIcon" Data="{x:Static icons:Icons.WindowMaximize}" />
                                                     </Button>
-                                                    <Button Name="PART_CloseButton"
-                                                            Classes="WindowControlsButton Close">
+                                                    <Button Name="PART_CloseButton" Classes="WindowControlsButton Close">
                                                         <PathIcon Data="{x:Static icons:Icons.WindowClose}" />
                                                     </Button>
                                                 </StackPanel>
-                                                <StackPanel VerticalAlignment="Center"
-                                                            Orientation="Horizontal"
-                                                            Spacing="10">
-                                                    <ContentPresenter Name="PART_Logo"
+
+                                                <Grid ColumnDefinitions="Auto,Auto,*"
+                                                      ColumnSpacing="10"
+                                                      VerticalAlignment="Center">
+                                                    <ContentPresenter Grid.Column="0"
+                                                                      Name="PART_Logo"
                                                                       HorizontalAlignment="Left"
                                                                       Background="Transparent"
                                                                       Content="{TemplateBinding LogoContent}" />
-                                                    <TextBlock VerticalAlignment="Center"
-                                                               IsVisible="{TemplateBinding ShowTitle}"
+                                                    <TextBlock Grid.Column="1"
+                                                               Name="PART_TitleTextBlock"
+                                                               VerticalAlignment="Center" IsVisible="{TemplateBinding ShowTitle}"
                                                                FontSize="{TemplateBinding TitleFontSize}"
                                                                FontWeight="{TemplateBinding TitleFontWeight}"
+                                                               TextWrapping="{TemplateBinding TitleTextWrapping}"
                                                                IsHitTestVisible="False"
                                                                Text="{TemplateBinding Title}" />
-                                                    <ContentPresenter HorizontalAlignment="Left"
+                                                    <ContentPresenter Grid.Column="2" HorizontalAlignment="Left"
                                                                       Content="{TemplateBinding NonClientAreaContent}"
                                                                       IsHitTestVisible="{TemplateBinding NonClientAreaContentIsHitTestVisible}" />
-                                                </StackPanel>
+                                                </Grid>
                                             </DockPanel>
                                         </Panel>
                                     </LayoutTransformControl>
@@ -143,6 +146,7 @@
                                 </StackPanel>
                             </Panel>
                             <ContentPresenter x:Name="PART_ContentPresenter"
+                                              Padding="{TemplateBinding Padding}"
                                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                               Content="{TemplateBinding Content}"
@@ -191,7 +195,7 @@
             <Setter Property="BorderThickness" Value="0,0,0,0" />
         </Style>
 
-        <Style Selector="^[IsTitleBarVisible=True]">
+             <Style Selector="^[IsTitleBarVisible=True]">
             <Style Selector="^[TitleBarAnimationEnabled=True]">
                 <Style Selector="^ /template/ LayoutTransformControl#PART_LayoutTransform">
                     <Style.Animations>

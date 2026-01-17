@@ -1618,6 +1618,9 @@
     <data name="LiveViewSelectOcrRegion" xml:space="preserve">
         <value>Please select an OCR region first</value>
     </data>
+    <data name="LiveViewSelectColorRegion" xml:space="preserve">
+        <value>Please select a color pick region first</value>
+    </data>
     <data name="LiveViewRecognizerUnavailable" xml:space="preserve">
         <value>Recognizer unavailable</value>
     </data>
@@ -1647,6 +1650,9 @@
     </data>
     <data name="HitTest" xml:space="preserve">
         <value>Hit Test</value>
+    </data>
+    <data name="ColorHitTest" xml:space="preserve">
+        <value>Color Hit Test</value>
     </data>
     <data name="OcrHitTest" xml:space="preserve">
         <value>OCR Hit Test</value>
@@ -1689,6 +1695,15 @@
     </data>
     <data name="TemplateSelect" xml:space="preserve">
         <value>Select Template</value>
+    </data>
+    <data name="ColorMatchMethod" xml:space="preserve">
+        <value>Match Method</value>
+    </data>
+    <data name="ColorMatchCount" xml:space="preserve">
+        <value>Count Threshold</value>
+    </data>
+    <data name="ColorMatchConnected" xml:space="preserve">
+        <value>Connected Only</value>
     </data>
     <data name="ToolSettings" xml:space="preserve">
         <value>Tool Settings</value>

@@ -55,6 +55,7 @@ public enum TestPanelMode
     None,
     Ocr,
     Screenshot,
+    Color,
     Click,
     Swipe,
     Key
@@ -750,6 +751,7 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private TestPanelMode _activeTestPanelMode = TestPanelMode.None;
     [ObservableProperty] private bool _isOcrTestPanelVisible;
     [ObservableProperty] private bool _isScreenshotTestPanelVisible;
+    [ObservableProperty] private bool _isColorTestPanelVisible;
     [ObservableProperty] private bool _isClickTestPanelVisible;
     [ObservableProperty] private bool _isSwipeTestPanelVisible;
     [ObservableProperty] private bool _isKeyTestPanelVisible;
@@ -876,6 +878,9 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private string _offsetH = "0";
 
     [ObservableProperty] private int _colorMode;
+    [ObservableProperty] private string _colorMatchMethod = "4";
+    [ObservableProperty] private string _colorMatchCount = "1";
+    [ObservableProperty] private bool _colorMatchConnected;
     [ObservableProperty] private string _rgbUpperR = "0";
     [ObservableProperty] private string _rgbUpperG = "0";
     [ObservableProperty] private string _rgbUpperB = "0";
@@ -912,6 +917,7 @@ public partial class ToolsViewModel : ViewModelBase
     private bool _suppressTestPanelSync;
 
     [ObservableProperty] private bool _isColorPreviewActive;
+    [ObservableProperty] private Color _colorPreviewFillColor = Colors.Black;
     private Bitmap? _colorPreviewImage;
     private WriteableBitmap? _screenshotBrushImage;
 
@@ -2402,11 +2408,13 @@ public partial class ToolsViewModel : ViewModelBase
             && value != LiveViewToolMode.Screenshot
             && value != LiveViewToolMode.Roi
             && value != LiveViewToolMode.Swipe
-            && value != LiveViewToolMode.Key)
+            && value != LiveViewToolMode.Key
+            && value != LiveViewToolMode.ColorPick)
         {
             _suppressTestPanelSync = true;
             IsOcrTestPanelVisible = false;
             IsScreenshotTestPanelVisible = false;
+            IsColorTestPanelVisible = false;
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
             IsKeyTestPanelVisible = false;
@@ -2586,6 +2594,7 @@ public partial class ToolsViewModel : ViewModelBase
         _suppressTestPanelSync = true;
         IsOcrTestPanelVisible = false;
         IsScreenshotTestPanelVisible = false;
+        IsColorTestPanelVisible = false;
         IsClickTestPanelVisible = false;
         IsSwipeTestPanelVisible = false;
         IsKeyTestPanelVisible = false;
@@ -2612,7 +2621,7 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveTestPanelMode = TestPanelMode.Ocr;
             SyncOcrMatchDefaults(true);
         }
-        else if (!IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2638,7 +2647,34 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveTestPanelMode = TestPanelMode.Screenshot;
             SyncTemplateMatchDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+
+    partial void OnIsColorTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsScreenshotTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.Color;
+            SyncColorMatchDefaults(true);
+        }
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2664,7 +2700,7 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveTestPanelMode = TestPanelMode.Click;
             SyncClickTestDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2690,7 +2726,7 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveTestPanelMode = TestPanelMode.Swipe;
             SyncSwipeTestDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2715,7 +2751,7 @@ public partial class ToolsViewModel : ViewModelBase
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Key;
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -3349,6 +3385,14 @@ public partial class ToolsViewModel : ViewModelBase
         }
     }
 
+    partial void OnColorPreviewFillColorChanged(Color value)
+    {
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
+    }
+
     private void DisableColorPreview()
     {
         if (!IsColorPreviewActive)
@@ -3962,6 +4006,74 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task RunColorMatchTest()
+    {
+        IsColorTestPanelVisible = true;
+        SyncColorMatchDefaults();
+
+        if (!TryParseRect(ColorPickExpandedX, ColorPickExpandedY, ColorPickExpandedW, ColorPickExpandedH, out var rect))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectColorRegion.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        if (!int.TryParse(ColorMatchMethod, out var method))
+        {
+            method = GetDefaultColorMatchMethodValue();
+        }
+
+        if (!int.TryParse(ColorMatchCount, out var count) || count <= 0)
+        {
+            count = 1;
+        }
+
+        if (!TryGetColorRange(out var range))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.EditTaskDialog_ColorExtraction_Tooltip.ToLocalization());
+            return;
+        }
+
+        var mode = ResolveColorMatchMode(method);
+        List<int> upper;
+        List<int> lower;
+
+        switch (mode)
+        {
+            case 1:
+                upper = [range.UpperH, range.UpperS, range.UpperV];
+                lower = [range.LowerH, range.LowerS, range.LowerV];
+                break;
+            case 2:
+                upper = [range.UpperGray];
+                lower = [range.LowerGray];
+                break;
+            default:
+                upper = [range.UpperR, range.UpperG, range.UpperB];
+                lower = [range.LowerR, range.LowerG, range.LowerB];
+                break;
+        }
+
+        RecognitionHelper.RunColorMatch(
+            tasker,
+            (int)Math.Round(rect.X),
+            (int)Math.Round(rect.Y),
+            Math.Max(1, (int)Math.Round(rect.Width)),
+            Math.Max(1, (int)Math.Round(rect.Height)),
+            method,
+            upper,
+            lower,
+            count,
+            ColorMatchConnected);
+    }
+
+    [RelayCommand]
     private async Task RunClickHitTest()
     {
         IsClickTestPanelVisible = true;
@@ -4556,6 +4668,40 @@ public partial class ToolsViewModel : ViewModelBase
         }
     }
 
+    private void SyncColorMatchDefaults(bool force = false)
+    {
+        if (force || !int.TryParse(ColorMatchMethod, out _))
+        {
+            ColorMatchMethod = GetDefaultColorMatchMethodValue().ToString();
+        }
+
+        if (force || !int.TryParse(ColorMatchCount, out var count) || count <= 0)
+        {
+            ColorMatchCount = "1";
+        }
+    }
+
+    private int GetDefaultColorMatchMethodValue()
+    {
+        return ColorMode switch
+        {
+            1 => 40,
+            2 => 6,
+            _ => 4
+        };
+    }
+
+    private int ResolveColorMatchMode(int method)
+    {
+        return method switch
+        {
+            40 => 1,
+            6 => 2,
+            4 => 0,
+            _ => ColorMode
+        };
+    }
+
     private void SyncClickTestDefaults(bool force = false)
     {
         var baseRect = IsTargetMode ? _originTargetRect : _roiRect;
@@ -4786,6 +4932,12 @@ public partial class ToolsViewModel : ViewModelBase
             }
         }
 
+        var fillColor = ColorPreviewFillColor;
+        var fillA = fillColor.A;
+        var fillR = (byte)(fillColor.R * fillA / 255);
+        var fillG = (byte)(fillColor.G * fillA / 255);
+        var fillB = (byte)(fillColor.B * fillA / 255);
+
         for (var y = 0; y < height; y++)
         {
             var rowStart = y * stride;
@@ -4798,9 +4950,10 @@ public partial class ToolsViewModel : ViewModelBase
 
                 if (!IsColorInRange(range, r, g, b))
                 {
-                    buffer[index] = 0;
-                    buffer[index + 1] = 0;
-                    buffer[index + 2] = 0;
+                    buffer[index] = fillB;
+                    buffer[index + 1] = fillG;
+                    buffer[index + 2] = fillR;
+                    buffer[index + 3] = fillA;
                 }
             }
         }

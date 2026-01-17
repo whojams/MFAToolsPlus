@@ -223,6 +223,86 @@ public static class RecognitionHelper
         }, "KeyClick Test");
     }
 
+    public static void RunColorMatch(MaaTasker tasker, int x, int y, int w, int h, int color_method, List<int> up, List<int> low, int color_count, bool color_connected = false)
+    {
+        var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
+        if (tempBitmap == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
+            return;
+        }
+
+        var payload = new
+        {
+            recognition = "ColorMatch",
+            method = color_method,
+            upper = up,
+            lower = low,
+            count = color_count,
+            connected = color_connected,
+            roi = new[]
+            {
+                x,
+                y,
+                w,
+                h
+            }
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+
+
+        TaskManager.RunTask(() =>
+        {
+            Instances.ToolsViewModel.IsRunning = true;
+            using var buffer = new MaaImageBuffer();
+            buffer.TrySetEncodedData(BitmapToBytes(tempBitmap));
+            var job = tasker.AppendRecognition("ColorMatch", pipeline, buffer);
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+            {
+                Instances.ToolsViewModel.IsRunning = false;
+                return;
+            }
+            tasker.GetTaskDetail(job.Id, out var enter, out var nodeIdList, out var _);
+            tasker.GetNodeDetail(nodeIdList[0], out var nodeName, out var recognitionId, out var actionId, out var actionCompleted);
+
+            var imageListBuffer = new MaaImageListBuffer();
+
+            using var hitBox = new MaaRectBuffer();
+            tasker.GetRecognitionDetail(recognitionId, out string node,
+                out var algorithm,
+                out var hit,
+                hitBox,
+                out var detailJson,
+                null, imageListBuffer);
+            if (imageListBuffer.IsEmpty)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
+                Instances.ToolsViewModel.IsRunning = false;
+                return;
+            }
+            Instances.ToolsViewModel.IsRunning = false;
+            DispatcherHelper.PostOnMainThread(() =>
+            {
+                var imageBrowser = new SukiImageBrowser();
+                imageBrowser.SetImage(imageListBuffer[0].ToBitmap());
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    imageBrowser.Show(desktop.MainWindow);
+                }
+                else
+                {
+                    imageBrowser.Show();
+                }
+                imageListBuffer.Dispose();
+            });
+        }, "TemplateMatch");
+    }
+
     public static void RunOcrMatch(MaaTasker tasker, int x, int y, int w, int h, string text, double recognition_threshold = 0.3, bool rec = false)
     {
         var payload = new
@@ -385,6 +465,7 @@ public static class RecognitionHelper
             });
         }, "TemplateMatch");
     }
+
     public static byte[] BitmapToBytes(Bitmap bitmap)
     {
         using var ms = new MemoryStream();

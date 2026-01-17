@@ -12,7 +12,7 @@
                  mc:Ignorable="d"
                  x:Class="MFAToolsPlus.Views.RootView"
                  x:DataType="vm:RootViewModel"
-                 Icon="/Assets/logo.ico"
+                 Icon="{x:Static helper:IconHelper.WindowIcon}"
                  BackgroundAnimationEnabled="{Binding BackgroundAnimations, Source={x:Static helper:Instances.GuiSettingsUserControlModel}}"
                  BackgroundStyle="{Binding BackgroundStyle, Source={x:Static helper:Instances.GuiSettingsUserControlModel}}"
                  BackgroundTransitionsEnabled="{Binding BackgroundTransitions, Source={x:Static helper:Instances.GuiSettingsUserControlModel}}"

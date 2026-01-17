@@ -542,6 +542,7 @@ public static class LangKeys
 	public static readonly string LiveViewNoScreenshot = "LiveViewNoScreenshot";
 	public static readonly string LiveViewNoHit = "LiveViewNoHit";
 	public static readonly string LiveViewSelectOcrRegion = "LiveViewSelectOcrRegion";
+	public static readonly string LiveViewSelectColorRegion = "LiveViewSelectColorRegion";
 	public static readonly string LiveViewRecognizerUnavailable = "LiveViewRecognizerUnavailable";
 	public static readonly string LiveViewSelectScreenshotRegion = "LiveViewSelectScreenshotRegion";
 	public static readonly string LiveViewInvalidScreenshotRegion = "LiveViewInvalidScreenshotRegion";
@@ -552,6 +553,7 @@ public static class LangKeys
 	public static readonly string ScreenshotRestore = "ScreenshotRestore";
 	public static readonly string Result = "Result";
 	public static readonly string HitTest = "HitTest";
+	public static readonly string ColorHitTest = "ColorHitTest";
 	public static readonly string OcrHitTest = "OcrHitTest";
 	public static readonly string TemplateHitTest = "TemplateHitTest";
 	public static readonly string ClickHitTest = "ClickHitTest";
@@ -575,4 +577,7 @@ public static class LangKeys
 	public static readonly string GreenMask = "GreenMask";
 	public static readonly string TemplateMethod = "TemplateMethod";
 	public static readonly string TemplateSelect = "TemplateSelect";
+	public static readonly string ColorMatchMethod = "ColorMatchMethod";
+	public static readonly string ColorMatchCount = "ColorMatchCount";
+	public static readonly string ColorMatchConnected = "ColorMatchConnected";
 }

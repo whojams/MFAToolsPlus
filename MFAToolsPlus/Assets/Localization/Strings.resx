@@ -1625,6 +1625,9 @@
     <data name="LiveViewSelectOcrRegion" xml:space="preserve">
         <value>请先选择OCR区域</value>
     </data>
+    <data name="LiveViewSelectColorRegion" xml:space="preserve">
+        <value>请先选择取色区域</value>
+    </data>
     <data name="LiveViewRecognizerUnavailable" xml:space="preserve">
         <value>识别器不可用</value>
     </data>
@@ -1654,6 +1657,9 @@
     </data>
     <data name="HitTest" xml:space="preserve">
         <value>命中测试</value>
+    </data>
+    <data name="ColorHitTest" xml:space="preserve">
+        <value>取色命中测试</value>
     </data>
     <data name="OcrHitTest" xml:space="preserve">
         <value>OCR 命中测试</value>
@@ -1696,6 +1702,15 @@
     </data>
     <data name="TemplateSelect" xml:space="preserve">
         <value>选择模板</value>
+    </data>
+    <data name="ColorMatchMethod" xml:space="preserve">
+        <value>匹配方式</value>
+    </data>
+    <data name="ColorMatchCount" xml:space="preserve">
+        <value>数量阈值</value>
+    </data>
+    <data name="ColorMatchConnected" xml:space="preserve">
+        <value>仅统计相连</value>
     </data>
     <data name="ToolSettings" xml:space="preserve">
         <value>工具设置</value>

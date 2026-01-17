@@ -1313,7 +1313,7 @@
                                 </Grid>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Button Classes="Flat ActionButton"
                                         IsVisible="{Binding !IsColorPreviewActive}"
                                         Command="{Binding ToggleColorPreviewCommand}">
@@ -1324,7 +1324,12 @@
                                         Command="{Binding ToggleColorPreviewCommand}">
                                     <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRestore}}" />
                                 </Button>
+                                <ColorPicker Color="{Binding ColorPreviewFillColor, Mode=TwoWay}"  ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ColorPickerTitle}}" />
                             </StackPanel>
+                            <ToggleButton Classes="Flat ActionButton"
+                                          IsChecked="{Binding IsColorTestPanelVisible, Mode=TwoWay}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
+                            </ToggleButton>
                         </StackPanel>
 
 
@@ -1859,6 +1864,36 @@
                                       SelectedItem="{Binding TemplateMatchMethod, Mode=TwoWay}" />
                             <Button Classes="Flat ActionButton"
                                     Command="{Binding RunTemplateMatchTestCommand}"
+                                    IsEnabled="{calcBinding:Binding '!IsRunning'}">
+                                <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{Binding IsColorTestPanelVisible}"
+                                    Spacing="8">
+                            <TextBlock FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.ColorHitTest}}" />
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchMethod}}" />
+                            <TextBox Text="{Binding ColorMatchMethod, Mode=TwoWay}" />
+                            <TextBlock FontSize="11"
+                                       Foreground="{DynamicResource SukiLowText}"
+                                       Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchCount}}" />
+                            <TextBox Text="{Binding ColorMatchCount, Mode=TwoWay}" />
+                            <DockPanel>
+                                <ToggleSwitch Classes="Switch"
+                                              DockPanel.Dock="Right"
+                                              IsChecked="{Binding ColorMatchConnected, Mode=TwoWay}" />
+                                <TextBlock FontSize="12"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchConnected}}" />
+                            </DockPanel>
+                            <Button Classes="Flat ActionButton"
+                                    Command="{Binding RunColorMatchTestCommand}"
                                     IsEnabled="{calcBinding:Binding '!IsRunning'}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Execute}}" />
                             </Button>

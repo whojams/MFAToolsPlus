@@ -3,6 +3,7 @@
              x:Class="MFAToolsPlus.App"
              xmlns:local="using:MFAToolsPlus"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
              <Application.Resources>
@@ -32,6 +33,7 @@
              </Application.Styles>
     <Application.Styles>
         <FluentTheme />
+        <styling:FluentAvaloniaTheme />
         <suki:SukiTheme ThemeColor="Blue" />
     </Application.Styles>
 </Application>
