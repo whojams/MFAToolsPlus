@@ -80,4 +80,6 @@ public partial class ToolSettingsUserControlModel : ViewModelBase
             ? mode
             : ClipboardCopyFormat.ValuesOnly;
     }
+
+    [ObservableProperty] private int _resizeShortestSide = ConfigurationManager.Current.GetValue(ConfigurationKeys.ResizeShortestSide, 720);
 }

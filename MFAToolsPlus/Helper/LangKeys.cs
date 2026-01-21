@@ -313,6 +313,7 @@ public static class LangKeys
 	public static readonly string TabADB = "TabADB";
 	public static readonly string TabWin32 = "TabWin32";
 	public static readonly string TabPlayCover = "TabPlayCover";
+	public static readonly string TabDbg = "TabDbg";
 	public static readonly string Task = "Task";
 	public static readonly string TaskAbandoned = "TaskAbandoned";
 	public static readonly string TaskAllCompleted = "TaskAllCompleted";
@@ -563,6 +564,14 @@ public static class LangKeys
 	public static readonly string LiveViewSwipeDuration = "LiveViewSwipeDuration";
 	public static readonly string MatchRoi = "MatchRoi";
 	public static readonly string TargetText = "TargetText";
+	public static readonly string RecognitionThreshold = "RecognitionThreshold";
+	public static readonly string OnlyRec = "OnlyRec";
+	public static readonly string GreenMask = "GreenMask";
+	public static readonly string TemplateMethod = "TemplateMethod";
+	public static readonly string TemplateSelect = "TemplateSelect";
+	public static readonly string ColorMatchMethod = "ColorMatchMethod";
+	public static readonly string ColorMatchCount = "ColorMatchCount";
+	public static readonly string ColorMatchConnected = "ColorMatchConnected";
 	public static readonly string ToolSettings = "ToolSettings";
 	public static readonly string RoiExpandSettings = "RoiExpandSettings";
 	public static readonly string RoiExpandX = "RoiExpandX";
@@ -572,12 +581,5 @@ public static class LangKeys
 	public static readonly string ClipboardCopyFormat = "ClipboardCopyFormat";
 	public static readonly string ClipboardCopyFormatValuesOnly = "ClipboardCopyFormatValuesOnly";
 	public static readonly string ClipboardCopyFormatFieldWithValues = "ClipboardCopyFormatFieldWithValues";
-	public static readonly string RecognitionThreshold = "RecognitionThreshold";
-	public static readonly string OnlyRec = "OnlyRec";
-	public static readonly string GreenMask = "GreenMask";
-	public static readonly string TemplateMethod = "TemplateMethod";
-	public static readonly string TemplateSelect = "TemplateSelect";
-	public static readonly string ColorMatchMethod = "ColorMatchMethod";
-	public static readonly string ColorMatchCount = "ColorMatchCount";
-	public static readonly string ColorMatchConnected = "ColorMatchConnected";
+	public static readonly string ResizeShortestSide = "ResizeShortestSide";
 }

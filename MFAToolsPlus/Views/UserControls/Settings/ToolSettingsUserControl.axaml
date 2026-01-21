@@ -16,6 +16,28 @@
         <settings:ToolSettingsUserControlModel />
     </Design.DataContext>
     <StackPanel Spacing="15">
+                <suki:GlassCard Margin="0,15,0,0" Padding="25,10,25,10">
+            <StackPanel Spacing="10">
+                <DockPanel>
+                    <NumericUpDown
+                        DockPanel.Dock="Right"
+                        FormatString="0"
+                        HorizontalAlignment="Center"
+                        Increment="1"
+                        IsEnabled="{Binding Idle, Source={x:Static helper:Instances.RootViewModel}}"
+                        Minimum="1"
+                        Value="{Binding ResizeShortestSide}"
+                        Width="215" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{markup:I18n {x:Static helper:LangKeys.ResizeShortestSide}}"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </suki:GlassCard>
         <suki:GlassCard Margin="0,15,0,0" Padding="25,10,25,10">
             <StackPanel Spacing="10">
                 <DockPanel>

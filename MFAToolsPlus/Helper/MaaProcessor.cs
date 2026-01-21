@@ -335,6 +335,8 @@ public class MaaProcessor
                         ? LangKeys.Emulator.ToLocalization()
                         : LangKeys.Window.ToLocalization()), true,
                 LangKeys.InitControllerFailed.ToLocalization()));
+
+            controller.SetOption_ScreenshotTargetShortSide(Instances.ToolSettingsUserControlModel.ResizeShortestSide);
         }
         catch (OperationCanceledException)
         {
@@ -364,8 +366,7 @@ public class MaaProcessor
                 Global = MaaProcessor.Global,
                 DisposeOptions = DisposeOptions.All,
             };
-
-
+            
             try
             {
                 var tempMFADir = Path.Combine(AppContext.BaseDirectory, "temp_mfa");
@@ -384,7 +385,8 @@ public class MaaProcessor
             {
                 LoggerHelper.Error(e);
             }
-   
+            
+            tasker.Global.SetOption_SaveOnError(false);
             tasker.Global.SetOption_DebugMode(true);
             tasker.Resource.Register(new MFAOCRRecognition());
 

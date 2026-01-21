@@ -1723,4 +1723,7 @@
     <data name="ClipboardCopyFormatFieldWithValues" xml:space="preserve">
         <value>欄位名 + 值</value>
     </data>
+    <data name="ResizeShortestSide" xml:space="preserve">
+        <value>縮放基準邊</value>
+    </data>
 </root>

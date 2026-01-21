@@ -13,6 +13,7 @@
              xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
              xmlns:binding="clr-namespace:MaaFramework.Binding;assembly=MaaFramework.Binding"
              xmlns:converters="clr-namespace:MFAToolsPlus.Helper.Converters"
+             xmlns:other="clr-namespace:MFAToolsPlus.Helper.Other"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MFAToolsPlus.Views.Pages.ToolsView"
              KeyDown="OnKeyCaptureKeyDown"
@@ -414,6 +415,7 @@
                                 Padding="0" ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Custom}}">
                             <avalonia:FluentIcon Height="18" Icon="DesktopEdit" IconSize="Size16"
                                                  IconVariant="Regular" />
+
                         </Button>
                         <Button Classes="BasicTight TaskQueueBasicTight"
                                 Command="{Binding EditPlayCoverCommand}"
@@ -1116,6 +1118,13 @@
                                               Stretch="Uniform"
                                               Fill="IndianRed" />
                                     </Button>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="添加到命中"
+                                            Command="{Binding ExportColorMatchPairCommand}"
+                                            IsVisible="{Binding IsColorTestPanelVisible}">
+                                        <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                             IconVariant="Regular" />
+                                    </Button>
                                 </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
                                     <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
@@ -1126,7 +1135,8 @@
                                     <TextBox Grid.Column="5" Text="{Binding RgbUpperB, Mode=TwoWay}" />
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5"
+                                            HorizontalAlignment="Left">
                                         <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="RGB Lower" />
                                     </Border>
                                     <Button Classes="BasicTight ActionButton"
@@ -1157,6 +1167,13 @@
                                               Height="14"
                                               Stretch="Uniform"
                                               Fill="IndianRed" />
+                                    </Button>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="添加到命中"
+                                            Command="{Binding ExportColorMatchPairCommand}"
+                                            IsVisible="{Binding IsColorTestPanelVisible}">
+                                        <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                             IconVariant="Regular" />
                                     </Button>
                                 </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
@@ -1204,6 +1221,13 @@
                                               Stretch="Uniform"
                                               Fill="IndianRed" />
                                     </Button>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="添加到命中"
+                                            Command="{Binding ExportColorMatchPairCommand}"
+                                            IsVisible="{Binding IsColorTestPanelVisible}">
+                                        <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                             IconVariant="Regular" />
+                                    </Button>
                                 </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
                                     <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
@@ -1214,7 +1238,8 @@
                                     <TextBox Grid.Column="5" Text="{Binding HsvUpperV, Mode=TwoWay}" />
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5"
+                                            HorizontalAlignment="Left">
                                         <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="HSV Lower" />
                                     </Border>
                                     <Button Classes="BasicTight ActionButton"
@@ -1245,6 +1270,13 @@
                                               Height="14"
                                               Stretch="Uniform"
                                               Fill="IndianRed" />
+                                    </Button>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="添加到命中"
+                                            Command="{Binding ExportColorMatchPairCommand}"
+                                            IsVisible="{Binding IsColorTestPanelVisible}">
+                                        <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                             IconVariant="Regular" />
                                     </Button>
                                 </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*">
@@ -1292,13 +1324,21 @@
                                               Stretch="Uniform"
                                               Fill="IndianRed" />
                                     </Button>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="添加到命中"
+                                            Command="{Binding ExportColorMatchPairCommand}"
+                                            IsVisible="{Binding IsColorTestPanelVisible}">
+                                        <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                             IconVariant="Regular" />
+                                    </Button>
                                 </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*">
                                     <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
                                     <TextBox Grid.Column="1" Text="{Binding GrayUpper, Mode=TwoWay}" />
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <Border CornerRadius="5" Background="Orange" Padding="8 5" HorizontalAlignment="Left">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5"
+                                            HorizontalAlignment="Left">
                                         <TextBlock FontSize="11" Foreground="White" FontWeight="Bold" Text="Gray Lower" />
                                     </Border>
                                     <Button Classes="BasicTight ActionButton"
@@ -1330,6 +1370,13 @@
                                               Stretch="Uniform"
                                               Fill="IndianRed" />
                                     </Button>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="添加到命中"
+                                            Command="{Binding ExportColorMatchPairCommand}"
+                                            IsVisible="{Binding IsColorTestPanelVisible}">
+                                        <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                             IconVariant="Regular" />
+                                    </Button>
                                 </StackPanel>
                                 <Grid ColumnDefinitions="Auto,3*">
                                     <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
@@ -1337,19 +1384,6 @@
                                 </Grid>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Button Classes="Flat ActionButton"
-                                        IsVisible="{Binding !IsColorPreviewActive}"
-                                        Command="{Binding ToggleColorPreviewCommand}">
-                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewPreview}}" />
-                                </Button>
-                                <Button Classes="Flat ActionButton"
-                                        IsVisible="{Binding IsColorPreviewActive}"
-                                        Command="{Binding ToggleColorPreviewCommand}">
-                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRestore}}" />
-                                </Button>
-                                <ColorPicker Color="{Binding ColorPreviewFillColor, Mode=TwoWay}"  ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ColorPickerTitle}}" />
-                            </StackPanel>
                             <ToggleButton Classes="Flat ActionButton"
                                           IsChecked="{Binding IsColorTestPanelVisible, Mode=TwoWay}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.HitTest}}" />
@@ -1728,7 +1762,8 @@
                                     Command="{Binding StartKeyCaptureCommand}">
                                 <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureButton}}" />
                             </Button>
-                            <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5"
+                                    Background="DodgerBlue" Padding="8 5">
                                 <TextBlock FontSize="11"
                                            FontWeight="Bold"
                                            Foreground="White"
@@ -1744,7 +1779,8 @@
                                              Watermark="{markup:I18n {x:Static helper:LangKeys.KeyInputWatermark}}"
                                              Text="{Binding Win32KeyInput, Mode=TwoWay}"
                                              FilterMode="Contains" />
-                            <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5" Background="Orange" Padding="8 5">
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="5"
+                                    Background="Orange" Padding="8 5">
                                 <TextBlock FontSize="11" FontWeight="Bold"
                                            Foreground="White"
                                            Text="{markup:I18n {x:Static helper:LangKeys.KeyCaptureCodeLabel}}" />
@@ -1916,7 +1952,8 @@
                             <TextBlock FontSize="11"
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchMethod}}" />
-                            <TextBox Text="{Binding ColorMatchMethod, Mode=TwoWay}" />
+                            <ComboBox ItemsSource="{Binding ColorMethods}"
+                                      SelectedValue="{Binding ColorMatchMethod, Mode=TwoWay}" />
                             <TextBlock FontSize="11"
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchCount}}" />
@@ -1930,6 +1967,497 @@
                                            VerticalAlignment="Center"
                                            Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchConnected}}" />
                             </DockPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.MatchRoi}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                        Command="{Binding PasteColorMatchRectCommand}">
+                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
+                                        Command="{Binding ClearColorMatchRectCommand}">
+                                    <Path Data="{StaticResource TrashGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="IndianRed" />
+                                </Button>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding ColorMatchRoiX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" />
+                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
+                                <TextBox Text="{Binding ColorMatchRoiY, Mode=TwoWay}" Grid.Row="0" Grid.Column="3" />
+                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding ColorMatchRoiW, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" />
+                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
+                                <TextBox Text="{Binding ColorMatchRoiH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
+                            </Grid>
+                            <Button Classes="Flat ActionButton" ex:BubbleExtensions.EnableBubble="True"
+                                    ex:BubbleExtensions.BubbleContent="{markup:I18n {x:Static helper:LangKeys.CopiedToClipboard}}"
+                                    Command="{Binding CopyColorMatchPairsCommand}">
+                                <TextBlock Text="总复制" />
+                            </Button>
+
+                            <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 0'}"
+                                        Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="RGB Upper" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                            Command="{Binding AddRgbUpperRowCommand}">
+                                        <Path Data="{StaticResource AddGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding RgbUpperRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="other:TripletRow">
+                                            <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*,Auto,Auto,Auto"
+                                                  ColumnSpacing="6">
+                                                <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding First, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="2" Text="G:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="3" Text="{Binding Second, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="4" Text="B:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="5" Text="{Binding Third, Mode=TwoWay}" />
+                                                <Button Grid.Column="6"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                        Command="{Binding PasteRgbUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Grid.Column="7"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                        Command="{Binding ClearRgbUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource TrashGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="IndianRed" />
+                                                </Button>
+                                                <Button Grid.Column="8"
+                                                        Classes="BasicTight ActionButton"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        HorizontalContentAlignment="Center"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                        Command="{Binding RemoveRgbUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource SubGeometry}"
+                                                          Width="14" VerticalAlignment="Center"
+
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="RGB Lower" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                            Command="{Binding AddRgbLowerRowCommand}">
+                                        <Path Data="{StaticResource AddGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding RgbLowerRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="other:TripletRow">
+                                            <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*,Auto,Auto,Auto"
+                                                  ColumnSpacing="6">
+                                                <TextBlock Grid.Column="0" Text="R:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding First, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="2" Text="G:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="3" Text="{Binding Second, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="4" Text="B:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="5" Text="{Binding Third, Mode=TwoWay}" />
+                                                <Button Grid.Column="6"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                        Command="{Binding PasteRgbLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Grid.Column="7"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                        Command="{Binding ClearRgbLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource TrashGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="IndianRed" />
+                                                </Button>
+                                                <Button Grid.Column="8"
+                                                        Classes="BasicTight ActionButton"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        HorizontalContentAlignment="Center"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                        Command="{Binding RemoveRgbLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource SubGeometry}"
+                                                          Width="14" VerticalAlignment="Center"
+
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 1'}"
+                                        Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="HSV Upper" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                            Command="{Binding AddHsvUpperRowCommand}">
+                                        <Path Data="{StaticResource AddGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding HsvUpperRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="other:TripletRow">
+                                            <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*,Auto,Auto,Auto"
+                                                  ColumnSpacing="6">
+                                                <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding First, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="2" Text="S:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="3" Text="{Binding Second, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="4" Text="V:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="5" Text="{Binding Third, Mode=TwoWay}" />
+                                                <Button Grid.Column="6"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                        Command="{Binding PasteHsvUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Grid.Column="7"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                        Command="{Binding ClearHsvUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource TrashGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="IndianRed" />
+                                                </Button>
+                                                <Button Grid.Column="8"
+                                                        Classes="BasicTight ActionButton"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        HorizontalContentAlignment="Center"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                        Command="{Binding RemoveHsvUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource SubGeometry}"
+                                                          Width="14" VerticalAlignment="Center"
+
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="HSV Lower" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                            Command="{Binding AddHsvLowerRowCommand}">
+                                        <Path Data="{StaticResource AddGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding HsvLowerRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="other:TripletRow">
+                                            <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,3*,Auto,Auto,Auto"
+                                                  ColumnSpacing="6">
+                                                <TextBlock Grid.Column="0" Text="H:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding First, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="2" Text="S:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="3" Text="{Binding Second, Mode=TwoWay}" />
+                                                <TextBlock Grid.Column="4" Text="V:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="5" Text="{Binding Third, Mode=TwoWay}" />
+                                                <Button Grid.Column="6"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                        Command="{Binding PasteHsvLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Grid.Column="7"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                        Command="{Binding ClearHsvLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource TrashGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="IndianRed" />
+                                                </Button>
+                                                <Button Grid.Column="8"
+                                                        Classes="BasicTight ActionButton"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        HorizontalContentAlignment="Center"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                        Command="{Binding RemoveHsvLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource SubGeometry}"
+                                                          Width="14" VerticalAlignment="Center"
+
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel IsVisible="{calcBinding:Binding 'ColorMode == 2'}"
+                                        Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="Gray Upper" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                            Command="{Binding AddGrayUpperRowCommand}">
+                                        <Path Data="{StaticResource AddGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding GrayUpperRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="other:SingleRow">
+                                            <Grid ColumnDefinitions="Auto,3*,Auto,Auto,Auto"
+                                                  ColumnSpacing="6">
+                                                <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding Value, Mode=TwoWay}" />
+                                                <Button Grid.Column="2"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                        Command="{Binding PasteGrayUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Grid.Column="3"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                        Command="{Binding ClearGrayUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource TrashGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="IndianRed" />
+                                                </Button>
+                                                <Button Grid.Column="4"
+                                                        Classes="BasicTight ActionButton"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        HorizontalContentAlignment="Center"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                        Command="{Binding RemoveGrayUpperRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource SubGeometry}"
+                                                          Width="14" VerticalAlignment="Center"
+
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Border CornerRadius="5" Background="Orange" Padding="8 5"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="White" Text="Gray Lower" />
+                                    </Border>
+                                    <Button Classes="BasicTight ActionButton"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                            Command="{Binding AddGrayLowerRowCommand}">
+                                        <Path Data="{StaticResource AddGeometry}"
+                                              Width="14"
+                                              Height="14"
+                                              Stretch="Uniform"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    </Button>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding GrayLowerRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="other:SingleRow">
+                                            <Grid ColumnDefinitions="Auto,3*,Auto,Auto,Auto"
+                                                  ColumnSpacing="6">
+                                                <TextBlock Grid.Column="0" Text="G:" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding Value, Mode=TwoWay}" />
+                                                <Button Grid.Column="2"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                        Command="{Binding PasteGrayLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Grid.Column="3"
+                                                        Classes="BasicTight ActionButton"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                        Command="{Binding ClearGrayLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource TrashGeometry}"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          Fill="IndianRed" />
+                                                </Button>
+                                                <Button Grid.Column="4"
+                                                        Classes="BasicTight ActionButton"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        HorizontalContentAlignment="Center"
+                                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                        Command="{Binding RemoveGrayLowerRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Path Data="{StaticResource SubGeometry}"
+                                                          Width="14" VerticalAlignment="Center"
+
+                                                          Stretch="Uniform"
+                                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="Flat ActionButton"
+                                        IsVisible="{Binding !IsColorPreviewActive}"
+                                        Command="{Binding ToggleColorPreviewCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewPreview}}" />
+                                </Button>
+                                <Button Classes="Flat ActionButton"
+                                        IsVisible="{Binding IsColorPreviewActive}"
+                                        Command="{Binding ToggleColorPreviewCommand}">
+                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRestore}}" />
+                                </Button>
+                                <ColorPicker Color="{Binding ColorPreviewFillColor, Mode=TwoWay}"
+                                             ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ColorPickerTitle}}" />
+                            </StackPanel>
                             <Button Classes="Flat ActionButton"
                                     Command="{Binding RunColorMatchTestCommand}"
                                     IsEnabled="{calcBinding:Binding '!IsRunning'}">

@@ -167,12 +167,6 @@ public static class ConfigurationKeys
     public const string DashboardCardGridResourceLayoutHash = "UI.DashboardCardGrid.ResourceLayoutHash";
     public const string EnableLiveView = "UI.LiveView.EnableLiveView";
     public const string LiveViewRefreshRate = "UI.LiveView.RefreshRate";
-    public const string LiveViewHorizontalExpansion = "UI.LiveView.HorizontalExpansion";
-    public const string LiveViewVerticalExpansion = "UI.LiveView.VerticalExpansion";
-    public const string LiveViewExpandX = "UI.LiveView.ExpandX";
-    public const string LiveViewExpandY = "UI.LiveView.ExpandY";
-    public const string LiveViewExpandW = "UI.LiveView.ExpandW";
-    public const string LiveViewExpandH = "UI.LiveView.ExpandH";
     public const string ClipboardCopyFormat = "UI.Tools.ClipboardCopyFormat";
     public const string LiveViewScreenshotRelativePath = "UI.LiveView.ScreenshotRelativePath";
     public const string MainWindowWidth = "UI.MainWindow.Width";
@@ -180,6 +174,16 @@ public static class ConfigurationKeys
     public const string MainWindowPositionX = "UI.MainWindow.PositionX";
     public const string MainWindowPositionY = "UI.MainWindow.PositionY";
     public const string MainWindowMaximized = "UI.MainWindow.Maximized";
+
+    #endregion
+
+    #region 工具设置
+
+    public const string ResizeShortestSide = "ResizeShortestSide";
+    public const string LiveViewExpandX = "UI.LiveView.ExpandX";
+    public const string LiveViewExpandY = "UI.LiveView.ExpandY";
+    public const string LiveViewExpandW = "UI.LiveView.ExpandW";
+    public const string LiveViewExpandH = "UI.LiveView.ExpandH";
 
     #endregion
 }

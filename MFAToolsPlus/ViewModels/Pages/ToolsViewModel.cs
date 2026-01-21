@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -878,9 +879,13 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private string _offsetH = "0";
 
     [ObservableProperty] private int _colorMode;
-    [ObservableProperty] private string _colorMatchMethod = "4";
+    [ObservableProperty] private int _colorMatchMethod = 4;
     [ObservableProperty] private string _colorMatchCount = "1";
     [ObservableProperty] private bool _colorMatchConnected;
+    [ObservableProperty] private string _colorMatchRoiX = "0";
+    [ObservableProperty] private string _colorMatchRoiY = "0";
+    [ObservableProperty] private string _colorMatchRoiW = "0";
+    [ObservableProperty] private string _colorMatchRoiH = "0";
     [ObservableProperty] private string _rgbUpperR = "0";
     [ObservableProperty] private string _rgbUpperG = "0";
     [ObservableProperty] private string _rgbUpperB = "0";
@@ -897,6 +902,17 @@ public partial class ToolsViewModel : ViewModelBase
 
     [ObservableProperty] private string _grayUpper = "0";
     [ObservableProperty] private string _grayLower = "0";
+
+    public IAvaloniaReadOnlyList<int> ColorMethods  => new AvaloniaList<int>()
+    {
+4,40,6
+    };
+    [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _rgbUpperRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _rgbLowerRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _hsvUpperRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _hsvLowerRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.SingleRow> _grayUpperRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.SingleRow> _grayLowerRows = [];
 
     private Rect _roiRect;
     private Rect _originTargetRect;
@@ -2672,6 +2688,7 @@ public partial class ToolsViewModel : ViewModelBase
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Color;
+            EnsureColorMatchRowsInitialized();
             SyncColorMatchDefaults(true);
         }
         else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
@@ -2974,7 +2991,7 @@ public partial class ToolsViewModel : ViewModelBase
             RefreshSelectionRects();
         }
     }
-    
+
     [RelayCommand]
     private void CopyOffsetToClipboard()
     {
@@ -3629,6 +3646,494 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ExportColorMatchPair()
+    {
+        switch (ColorMode)
+        {
+            case 1:
+                AddOrUpdateTripletPair(
+                    HsvUpperRows,
+                    HsvLowerRows,
+                    ParseIntOrZero(HsvUpperH),
+                    ParseIntOrZero(HsvUpperS),
+                    ParseIntOrZero(HsvUpperV),
+                    ParseIntOrZero(HsvLowerH),
+                    ParseIntOrZero(HsvLowerS),
+                    ParseIntOrZero(HsvLowerV));
+                break;
+            case 2:
+                AddOrUpdateSinglePair(
+                    GrayUpperRows,
+                    GrayLowerRows,
+                    ParseIntOrZero(GrayUpper),
+                    ParseIntOrZero(GrayLower));
+                break;
+            default:
+                AddOrUpdateTripletPair(
+                    RgbUpperRows,
+                    RgbLowerRows,
+                    ParseIntOrZero(RgbUpperR),
+                    ParseIntOrZero(RgbUpperG),
+                    ParseIntOrZero(RgbUpperB),
+                    ParseIntOrZero(RgbLowerR),
+                    ParseIntOrZero(RgbLowerG),
+                    ParseIntOrZero(RgbLowerB));
+                break;
+        }
+    }
+
+    [RelayCommand]
+    private void CopyColorMatchPairs()
+    {
+        var method = GetColorMatchMethodValue();
+        var mode = ResolveColorMatchMode(method);
+        var text = BuildColorMatchPairsClipboardText(mode);
+        CopyTextToClipboard(text, "复制颜色命中范围到剪贴板");
+    }
+
+    [RelayCommand]
+    private void AddRgbUpperRow() => AddTripletPair(RgbUpperRows, RgbLowerRows);
+
+    [RelayCommand]
+    private void RemoveRgbUpperRow(Helper.Other.TripletRow? row) => RemoveTripletPair(RgbUpperRows, RgbLowerRows, row, true);
+
+    [RelayCommand]
+    private void ClearRgbUpperRow(Helper.Other.TripletRow? row) => ClearTripletRow(row);
+
+    [RelayCommand]
+    private async Task PasteRgbUpperRow(Helper.Other.TripletRow? row) => await PasteTripletRow(row);
+
+    [RelayCommand]
+    private void AddRgbLowerRow() => AddTripletPair(RgbUpperRows, RgbLowerRows);
+
+    [RelayCommand]
+    private void RemoveRgbLowerRow(Helper.Other.TripletRow? row) => RemoveTripletPair(RgbUpperRows, RgbLowerRows, row, false);
+
+    [RelayCommand]
+    private void ClearRgbLowerRow(Helper.Other.TripletRow? row) => ClearTripletRow(row);
+
+    [RelayCommand]
+    private async Task PasteRgbLowerRow(Helper.Other.TripletRow? row) => await PasteTripletRow(row);
+
+    [RelayCommand]
+    private void AddHsvUpperRow() => AddTripletPair(HsvUpperRows, HsvLowerRows);
+
+    [RelayCommand]
+    private void RemoveHsvUpperRow(Helper.Other.TripletRow? row) => RemoveTripletPair(HsvUpperRows, HsvLowerRows, row, true);
+
+    [RelayCommand]
+    private void ClearHsvUpperRow(Helper.Other.TripletRow? row) => ClearTripletRow(row);
+
+    [RelayCommand]
+    private async Task PasteHsvUpperRow(Helper.Other.TripletRow? row) => await PasteTripletRow(row);
+
+    [RelayCommand]
+    private void AddHsvLowerRow() => AddTripletPair(HsvUpperRows, HsvLowerRows);
+
+    [RelayCommand]
+    private void RemoveHsvLowerRow(Helper.Other.TripletRow? row) => RemoveTripletPair(HsvUpperRows, HsvLowerRows, row, false);
+
+    [RelayCommand]
+    private void ClearHsvLowerRow(Helper.Other.TripletRow? row) => ClearTripletRow(row);
+
+    [RelayCommand]
+    private async Task PasteHsvLowerRow(Helper.Other.TripletRow? row) => await PasteTripletRow(row);
+
+    [RelayCommand]
+    private void AddGrayUpperRow() => AddSinglePair(GrayUpperRows, GrayLowerRows);
+
+    [RelayCommand]
+    private void RemoveGrayUpperRow(Helper.Other.SingleRow? row) => RemoveSinglePair(GrayUpperRows, GrayLowerRows, row, true);
+
+    [RelayCommand]
+    private void ClearGrayUpperRow(Helper.Other.SingleRow? row) => ClearSingleRow(row);
+
+    [RelayCommand]
+    private async Task PasteGrayUpperRow(Helper.Other.SingleRow? row) => await PasteSingleRow(row);
+
+    [RelayCommand]
+    private void AddGrayLowerRow() => AddSinglePair(GrayUpperRows, GrayLowerRows);
+
+    [RelayCommand]
+    private void RemoveGrayLowerRow(Helper.Other.SingleRow? row) => RemoveSinglePair(GrayUpperRows, GrayLowerRows, row, false);
+
+    [RelayCommand]
+    private void ClearGrayLowerRow(Helper.Other.SingleRow? row) => ClearSingleRow(row);
+
+    [RelayCommand]
+    private async Task PasteGrayLowerRow(Helper.Other.SingleRow? row) => await PasteSingleRow(row);
+
+    private void AddTripletPair(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows)
+    {
+        EnsureTripletPairCounts(upperRows, lowerRows);
+        upperRows.Add(new Helper.Other.TripletRow());
+        lowerRows.Add(new Helper.Other.TripletRow());
+        UpdateColorPreviewIfActive();
+    }
+
+    private void AddSinglePair(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows)
+    {
+        EnsureSinglePairCounts(upperRows, lowerRows);
+        upperRows.Add(new Helper.Other.SingleRow());
+        lowerRows.Add(new Helper.Other.SingleRow());
+        UpdateColorPreviewIfActive();
+    }
+
+    private static int ParseIntOrZero(string text)
+    {
+        return int.TryParse(text, out var value) ? value : 0;
+    }
+
+    private void AddOrUpdateTripletPair(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows,
+        int upperFirst,
+        int upperSecond,
+        int upperThird,
+        int lowerFirst,
+        int lowerSecond,
+        int lowerThird)
+    {
+        EnsureTripletPairCounts(upperRows, lowerRows);
+        if (upperRows.Count == 0 && lowerRows.Count == 0)
+        {
+            upperRows.Add(new Helper.Other.TripletRow(upperFirst.ToString(), upperSecond.ToString(), upperThird.ToString()));
+            lowerRows.Add(new Helper.Other.TripletRow(lowerFirst.ToString(), lowerSecond.ToString(), lowerThird.ToString()));
+            UpdateColorPreviewIfActive();
+            return;
+        }
+
+        EnsureTripletPairCounts(upperRows, lowerRows);
+        var index = Math.Min(upperRows.Count, lowerRows.Count) - 1;
+        if (index < 0)
+        {
+            upperRows.Add(new Helper.Other.TripletRow(upperFirst.ToString(), upperSecond.ToString(), upperThird.ToString()));
+            lowerRows.Add(new Helper.Other.TripletRow(lowerFirst.ToString(), lowerSecond.ToString(), lowerThird.ToString()));
+            UpdateColorPreviewIfActive();
+            return;
+        }
+
+        var upperRow = upperRows[index];
+        var lowerRow = lowerRows[index];
+        if (IsTripletRowZero(upperRow) && IsTripletRowZero(lowerRow))
+        {
+            upperRow.First = upperFirst.ToString();
+            upperRow.Second = upperSecond.ToString();
+            upperRow.Third = upperThird.ToString();
+            lowerRow.First = lowerFirst.ToString();
+            lowerRow.Second = lowerSecond.ToString();
+            lowerRow.Third = lowerThird.ToString();
+            UpdateColorPreviewIfActive();
+            return;
+        }
+
+        upperRows.Add(new Helper.Other.TripletRow(upperFirst.ToString(), upperSecond.ToString(), upperThird.ToString()));
+        lowerRows.Add(new Helper.Other.TripletRow(lowerFirst.ToString(), lowerSecond.ToString(), lowerThird.ToString()));
+        UpdateColorPreviewIfActive();
+    }
+
+    private void AddOrUpdateSinglePair(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows,
+        int upperValue,
+        int lowerValue)
+    {
+        EnsureSinglePairCounts(upperRows, lowerRows);
+        if (upperRows.Count == 0 && lowerRows.Count == 0)
+        {
+            upperRows.Add(new Helper.Other.SingleRow(upperValue.ToString()));
+            lowerRows.Add(new Helper.Other.SingleRow(lowerValue.ToString()));
+            UpdateColorPreviewIfActive();
+            return;
+        }
+
+        EnsureSinglePairCounts(upperRows, lowerRows);
+        var index = Math.Min(upperRows.Count, lowerRows.Count) - 1;
+        if (index < 0)
+        {
+            upperRows.Add(new Helper.Other.SingleRow(upperValue.ToString()));
+            lowerRows.Add(new Helper.Other.SingleRow(lowerValue.ToString()));
+            UpdateColorPreviewIfActive();
+            return;
+        }
+
+        var upperRow = upperRows[index];
+        var lowerRow = lowerRows[index];
+        if (IsSingleRowZero(upperRow) && IsSingleRowZero(lowerRow))
+        {
+            upperRow.Value = upperValue.ToString();
+            lowerRow.Value = lowerValue.ToString();
+            UpdateColorPreviewIfActive();
+            return;
+        }
+
+        upperRows.Add(new Helper.Other.SingleRow(upperValue.ToString()));
+        lowerRows.Add(new Helper.Other.SingleRow(lowerValue.ToString()));
+        UpdateColorPreviewIfActive();
+    }
+
+    private static bool IsTripletRowZero(Helper.Other.TripletRow row)
+    {
+        return int.TryParse(row.First, out var firstValue)
+            && int.TryParse(row.Second, out var secondValue)
+            && int.TryParse(row.Third, out var thirdValue)
+            && firstValue == 0
+            && secondValue == 0
+            && thirdValue == 0;
+    }
+
+    private static bool IsSingleRowZero(Helper.Other.SingleRow row)
+    {
+        return int.TryParse(row.Value, out var value)
+            && value == 0;
+    }
+
+    private void RemoveTripletPair(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows,
+        Helper.Other.TripletRow? row,
+        bool fromUpper,bool deleteDouble = true)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        var list = fromUpper ? upperRows : lowerRows;
+        var o_list = !fromUpper ? upperRows : lowerRows;
+        var index = list.IndexOf(row);
+        if (index < 0)
+        {
+            return;
+        }
+        var o_row = o_list[index];
+        if (list.Count <= 1)
+        {
+            ClearTripletRow(row);
+            if (deleteDouble)
+                ClearTripletRow(o_row);
+            return;
+        }
+
+        list.RemoveAt(index);
+        if (deleteDouble)
+            o_list.RemoveAt(index);
+        UpdateColorPreviewIfActive();
+    }
+
+    private void RemoveSinglePair(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows,
+        Helper.Other.SingleRow? row,
+        bool fromUpper,
+        bool deleteDouble = true)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        var list = fromUpper ? upperRows : lowerRows;
+        var o_list = !fromUpper ? upperRows : lowerRows;
+        var index = list.IndexOf(row);
+        if (index < 0)
+        {
+            return;
+        }
+        var o_row = o_list[index];
+        if (list.Count <= 1)
+        {
+            ClearSingleRow(row);
+            if (deleteDouble)
+                ClearSingleRow(o_row);
+            return;
+        }
+
+        list.RemoveAt(index);
+        if (deleteDouble)
+            o_list.RemoveAt(index);
+        UpdateColorPreviewIfActive();
+    }
+
+    private static void EnsureTripletPairCounts(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows)
+    {
+        if (upperRows.Count == lowerRows.Count)
+        {
+            return;
+        }
+
+        if (upperRows.Count < lowerRows.Count)
+        {
+            var missing = lowerRows.Count - upperRows.Count;
+            for (var i = 0; i < missing; i++)
+            {
+                upperRows.Add(new Helper.Other.TripletRow());
+            }
+
+            return;
+        }
+
+        var gap = upperRows.Count - lowerRows.Count;
+        for (var i = 0; i < gap; i++)
+        {
+            lowerRows.Add(new Helper.Other.TripletRow());
+        }
+    }
+
+    private static void EnsureSinglePairCounts(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows)
+    {
+        if (upperRows.Count == lowerRows.Count)
+        {
+            return;
+        }
+
+        if (upperRows.Count < lowerRows.Count)
+        {
+            var missing = lowerRows.Count - upperRows.Count;
+            for (var i = 0; i < missing; i++)
+            {
+                upperRows.Add(new Helper.Other.SingleRow());
+            }
+
+            return;
+        }
+
+        var gap = upperRows.Count - lowerRows.Count;
+        for (var i = 0; i < gap; i++)
+        {
+            lowerRows.Add(new Helper.Other.SingleRow());
+        }
+    }
+
+    private void ClearTripletPairAt(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows,
+        int index)
+    {
+        if (index < 0)
+        {
+            return;
+        }
+
+        if (index < upperRows.Count)
+        {
+            var upperRow = upperRows[index];
+            upperRow.First = "0";
+            upperRow.Second = "0";
+            upperRow.Third = "0";
+        }
+
+        if (index < lowerRows.Count)
+        {
+            var lowerRow = lowerRows[index];
+            lowerRow.First = "0";
+            lowerRow.Second = "0";
+            lowerRow.Third = "0";
+        }
+
+        EnsureTripletPairCounts(upperRows, lowerRows);
+        UpdateColorPreviewIfActive();
+    }
+
+    private void ClearSinglePairAt(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows,
+        int index)
+    {
+        if (index < 0)
+        {
+            return;
+        }
+
+        if (index < upperRows.Count)
+        {
+            upperRows[index].Value = "0";
+        }
+
+        if (index < lowerRows.Count)
+        {
+            lowerRows[index].Value = "0";
+        }
+
+        EnsureSinglePairCounts(upperRows, lowerRows);
+        UpdateColorPreviewIfActive();
+    }
+
+    private void ClearTripletRow(Helper.Other.TripletRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        row.First = "0";
+        row.Second = "0";
+        row.Third = "0";
+        UpdateColorPreviewIfActive();
+    }
+
+    private void ClearSingleRow(Helper.Other.SingleRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        row.Value = "0";
+        UpdateColorPreviewIfActive();
+    }
+
+    private async Task PasteTripletRow(Helper.Other.TripletRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        if (await TryGetClipboardTripletAsync((first, second, third) =>
+            {
+                row.First = first.ToString();
+                row.Second = second.ToString();
+                row.Third = third.ToString();
+            }))
+        {
+            UpdateColorPreviewIfActive();
+        }
+    }
+
+    private async Task PasteSingleRow(Helper.Other.SingleRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        if (await TryGetClipboardNumberAsync(value =>
+            {
+                row.Value = ((int)Math.Round(value)).ToString();
+            }))
+        {
+            UpdateColorPreviewIfActive();
+        }
+    }
+
+    private void UpdateColorPreviewIfActive()
+    {
+        if (IsColorPreviewActive)
+        {
+            ApplyColorFilter();
+        }
+    }
+
+    [RelayCommand]
     private void ClearColorPick()
     {
         _suppressColorPickSync = true;
@@ -3752,6 +4257,24 @@ public partial class ToolsViewModel : ViewModelBase
         TemplateMatchRoiY = "0";
         TemplateMatchRoiW = "0";
         TemplateMatchRoiH = "0";
+    }
+
+    [RelayCommand]
+    private async Task PasteColorMatchRect()
+    {
+        if (await TryGetClipboardRectAsync(SetColorMatchRect))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearColorMatchRect()
+    {
+        ColorMatchRoiX = "0";
+        ColorMatchRoiY = "0";
+        ColorMatchRoiW = "0";
+        ColorMatchRoiH = "0";
     }
 
     [RelayCommand]
@@ -3881,6 +4404,7 @@ public partial class ToolsViewModel : ViewModelBase
             ApplyColorFilter();
         }
     }
+
     [RelayCommand]
     private async Task RunOcr()
     {
@@ -4011,7 +4535,7 @@ public partial class ToolsViewModel : ViewModelBase
         IsColorTestPanelVisible = true;
         SyncColorMatchDefaults();
 
-        if (!TryParseRect(ColorPickExpandedX, ColorPickExpandedY, ColorPickExpandedW, ColorPickExpandedH, out var rect))
+        if (!TryParseRect(ColorMatchRoiX, ColorMatchRoiY, ColorMatchRoiW, ColorMatchRoiH, out var rect))
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectColorRegion.ToLocalization());
             return;
@@ -4024,40 +4548,18 @@ public partial class ToolsViewModel : ViewModelBase
             return;
         }
 
-        if (!int.TryParse(ColorMatchMethod, out var method))
-        {
-            method = GetDefaultColorMatchMethodValue();
-        }
+        var method = GetColorMatchMethodValue();
 
         if (!int.TryParse(ColorMatchCount, out var count) || count <= 0)
         {
             count = 1;
         }
 
-        if (!TryGetColorRange(out var range))
+        var mode = ResolveColorMatchMode(method);
+        if (!TryBuildColorMatchLists(mode, out var upper, out var lower))
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.EditTaskDialog_ColorExtraction_Tooltip.ToLocalization());
             return;
-        }
-
-        var mode = ResolveColorMatchMode(method);
-        List<int> upper;
-        List<int> lower;
-
-        switch (mode)
-        {
-            case 1:
-                upper = [range.UpperH, range.UpperS, range.UpperV];
-                lower = [range.LowerH, range.LowerS, range.LowerV];
-                break;
-            case 2:
-                upper = [range.UpperGray];
-                lower = [range.LowerGray];
-                break;
-            default:
-                upper = [range.UpperR, range.UpperG, range.UpperB];
-                lower = [range.LowerR, range.LowerG, range.LowerB];
-                break;
         }
 
         RecognitionHelper.RunColorMatch(
@@ -4376,6 +4878,36 @@ public partial class ToolsViewModel : ViewModelBase
         return FormatClipboardValue(label, "[0]");
     }
 
+    private string BuildColorMatchPairsClipboardText(int mode)
+    {
+        if (!TryBuildColorMatchListsForCopy(mode, out var upper, out var lower))
+        {
+            var fallback = mode == 2 ? CreateZeroSingle() : CreateZeroTriplet();
+            upper = [fallback];
+            lower = [fallback];
+        }
+
+        var upperText = FormatColorListForCopy(upper);
+        var lowerText = FormatColorListForCopy(lower);
+        return $"\"upper\": {upperText},\n\"lower\": {lowerText}";
+    }
+
+    private static string FormatColorListForCopy(List<List<int>> values)
+    {
+        if (values.Count == 1)
+        {
+            return FormatColorRow(values[0]);
+        }
+
+        var rows = values.Select(FormatColorRow);
+        return $"[{string.Join(", ", rows)}]";
+    }
+
+    private static string FormatColorRow(IReadOnlyList<int> values)
+    {
+        return $"[{string.Join(", ", values)}]";
+    }
+
     private void UpdateRoiRectFromText()
     {
         if (_suppressRoiSync)
@@ -4530,8 +5062,8 @@ public partial class ToolsViewModel : ViewModelBase
         _suppressOcrSync = false;
         UpdateOcrExpandedRect();
     }
-    
-    
+
+
     private void UpdateColorPickExpandedRect()
     {
         _colorPickExpandedRect = BuildExpandedRect(_colorPickRect);
@@ -4573,6 +5105,14 @@ public partial class ToolsViewModel : ViewModelBase
         TemplateMatchRoiY = ((int)Math.Round(rect.Y)).ToString();
         TemplateMatchRoiW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
         TemplateMatchRoiH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+    }
+
+    private void SetColorMatchRect(Rect rect)
+    {
+        ColorMatchRoiX = ((int)Math.Round(rect.X)).ToString();
+        ColorMatchRoiY = ((int)Math.Round(rect.Y)).ToString();
+        ColorMatchRoiW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
+        ColorMatchRoiH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
     }
 
     private void SetClickTestTargetRect(Rect rect)
@@ -4670,14 +5210,71 @@ public partial class ToolsViewModel : ViewModelBase
 
     private void SyncColorMatchDefaults(bool force = false)
     {
-        if (force || !int.TryParse(ColorMatchMethod, out _))
+        if (force || (ColorMatchMethod != 4 && ColorMatchMethod != 40 && ColorMatchMethod != 6))
         {
-            ColorMatchMethod = GetDefaultColorMatchMethodValue().ToString();
+            ColorMatchMethod = GetDefaultColorMatchMethodValue();
         }
 
         if (force || !int.TryParse(ColorMatchCount, out var count) || count <= 0)
         {
             ColorMatchCount = "1";
+        }
+
+        SyncColorMatchRoiDefaults(force);
+    }
+
+    private void SyncColorMatchRoiDefaults(bool force = false)
+    {
+        if (force)
+        {
+            if (TryParseRect(ColorPickExpandedX, ColorPickExpandedY, ColorPickExpandedW, ColorPickExpandedH, out var expandedRect)
+                && expandedRect.Width > 0
+                && expandedRect.Height > 0)
+            {
+                ColorMatchRoiX = ColorPickExpandedX;
+                ColorMatchRoiY = ColorPickExpandedY;
+                ColorMatchRoiW = ColorPickExpandedW;
+                ColorMatchRoiH = ColorPickExpandedH;
+            }
+        }
+        else if (!TryParseRect(ColorMatchRoiX, ColorMatchRoiY, ColorMatchRoiW, ColorMatchRoiH, out var matchRect)
+                 || matchRect.Width < 0
+                 || matchRect.Height < 0)
+        {
+            ColorMatchRoiX = ColorPickExpandedX;
+            ColorMatchRoiY = ColorPickExpandedY;
+            ColorMatchRoiW = ColorPickExpandedW;
+            ColorMatchRoiH = ColorPickExpandedH;
+        }
+    }
+
+    private void EnsureColorMatchRowsInitialized()
+    {
+        EnsureTripletRowsInitialized(RgbUpperRows, RgbUpperR, RgbUpperG, RgbUpperB);
+        EnsureTripletRowsInitialized(RgbLowerRows, RgbLowerR, RgbLowerG, RgbLowerB);
+        EnsureTripletRowsInitialized(HsvUpperRows, HsvUpperH, HsvUpperS, HsvUpperV);
+        EnsureTripletRowsInitialized(HsvLowerRows, HsvLowerH, HsvLowerS, HsvLowerV);
+        EnsureSingleRowsInitialized(GrayUpperRows, GrayUpper);
+        EnsureSingleRowsInitialized(GrayLowerRows, GrayLower);
+    }
+
+    private static void EnsureTripletRowsInitialized(
+        ObservableCollection<Helper.Other.TripletRow> rows,
+        string first,
+        string second,
+        string third)
+    {
+        if (rows.Count == 0)
+        {
+            rows.Add(new Helper.Other.TripletRow(first, second, third));
+        }
+    }
+
+    private static void EnsureSingleRowsInitialized(ObservableCollection<Helper.Other.SingleRow> rows, string value)
+    {
+        if (rows.Count == 0)
+        {
+            rows.Add(new Helper.Other.SingleRow(value));
         }
     }
 
@@ -4689,6 +5286,13 @@ public partial class ToolsViewModel : ViewModelBase
             2 => 6,
             _ => 4
         };
+    }
+
+    private int GetColorMatchMethodValue()
+    {
+        return ColorMatchMethod == 4 || ColorMatchMethod == 40 || ColorMatchMethod == 6
+            ? ColorMatchMethod
+            : GetDefaultColorMatchMethodValue();
     }
 
     private int ResolveColorMatchMode(int method)
@@ -4915,7 +5519,7 @@ public partial class ToolsViewModel : ViewModelBase
             return;
         }
 
-        if (!TryGetColorRange(out var range))
+        if (!TryBuildColorMatchRanges(ColorMode, out var ranges))
         {
             return;
         }
@@ -4948,7 +5552,7 @@ public partial class ToolsViewModel : ViewModelBase
                 var g = buffer[index + 1];
                 var r = buffer[index + 2];
 
-                if (!IsColorInRange(range, r, g, b))
+                if (!IsColorInRange(ranges, r, g, b))
                 {
                     buffer[index] = fillB;
                     buffer[index + 1] = fillG;
@@ -5329,29 +5933,281 @@ public partial class ToolsViewModel : ViewModelBase
         public int Mode { get; } = mode;
     }
 
-    private bool TryGetColorRange(out ColorRange range)
+    private bool TryBuildColorMatchRanges(int mode, out List<ColorRange> ranges)
     {
-        range = default;
-        if (!int.TryParse(RgbLowerR, out var lowerR)) return false;
-        if (!int.TryParse(RgbLowerG, out var lowerG)) return false;
-        if (!int.TryParse(RgbLowerB, out var lowerB)) return false;
-        if (!int.TryParse(RgbUpperR, out var upperR)) return false;
-        if (!int.TryParse(RgbUpperG, out var upperG)) return false;
-        if (!int.TryParse(RgbUpperB, out var upperB)) return false;
+        ranges = [];
+        if (!TryBuildColorMatchLists(mode, out var upper, out var lower))
+        {
+            return false;
+        }
 
-        if (!int.TryParse(HsvLowerH, out var lowerH)) return false;
-        if (!int.TryParse(HsvLowerS, out var lowerS)) return false;
-        if (!int.TryParse(HsvLowerV, out var lowerV)) return false;
-        if (!int.TryParse(HsvUpperH, out var upperH)) return false;
-        if (!int.TryParse(HsvUpperS, out var upperS)) return false;
-        if (!int.TryParse(HsvUpperV, out var upperV)) return false;
+        for (var index = 0; index < upper.Count; index++)
+        {
+            var upperRow = upper[index];
+            var lowerRow = lower[index];
+            switch (mode)
+            {
+                case 1:
+                    ranges.Add(new ColorRange(
+                        0, 0, 0,
+                        0, 0, 0,
+                        lowerRow[0], lowerRow[1], lowerRow[2],
+                        upperRow[0], upperRow[1], upperRow[2],
+                        0, 0, mode));
+                    break;
+                case 2:
+                    ranges.Add(new ColorRange(
+                        0, 0, 0,
+                        0, 0, 0,
+                        0, 0, 0,
+                        0, 0, 0,
+                        lowerRow[0], upperRow[0], mode));
+                    break;
+                default:
+                    ranges.Add(new ColorRange(
+                        lowerRow[0], lowerRow[1], lowerRow[2],
+                        upperRow[0], upperRow[1], upperRow[2],
+                        0, 0, 0,
+                        0, 0, 0,
+                        0, 0, mode));
+                    break;
+            }
+        }
 
-        if (!int.TryParse(GrayLower, out var lowerGray)) return false;
-        if (!int.TryParse(GrayUpper, out var upperGray)) return false;
+        return ranges.Count > 0;
+    }
 
-        range = new ColorRange(lowerR, lowerG, lowerB, upperR, upperG, upperB,
-            lowerH, lowerS, lowerV, upperH, upperS, upperV, lowerGray, upperGray, ColorMode);
+    private bool TryBuildColorMatchLists(int mode, out List<List<int>> upper, out List<List<int>> lower)
+    {
+        EnsureColorMatchRowsInitialized();
+        return mode switch
+        {
+            1 => TryBuildTripletLists(HsvUpperRows, HsvLowerRows, out upper, out lower),
+            2 => TryBuildSingleLists(GrayUpperRows, GrayLowerRows, out upper, out lower),
+            _ => TryBuildTripletLists(RgbUpperRows, RgbLowerRows, out upper, out lower)
+        };
+    }
+
+    private bool TryBuildColorMatchListsForCopy(int mode, out List<List<int>> upper, out List<List<int>> lower)
+    {
+        EnsureColorMatchRowsInitialized();
+        return mode switch
+        {
+            1 => TryBuildTripletListsForCopy(HsvUpperRows, HsvLowerRows, out upper, out lower),
+            2 => TryBuildSingleListsForCopy(GrayUpperRows, GrayLowerRows, out upper, out lower),
+            _ => TryBuildTripletListsForCopy(RgbUpperRows, RgbLowerRows, out upper, out lower)
+        };
+    }
+
+    private static bool TryBuildTripletListsForCopy(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows,
+        out List<List<int>> upper,
+        out List<List<int>> lower)
+    {
+        upper = [];
+        lower = [];
+        var maxCount = Math.Max(upperRows.Count, lowerRows.Count);
+        if (maxCount <= 0)
+        {
+            maxCount = 1;
+        }
+
+        for (var index = 0; index < maxCount; index++)
+        {
+            if (index < upperRows.Count)
+            {
+                var row = upperRows[index];
+                upper.Add([ParseIntOrZero(row.First), ParseIntOrZero(row.Second), ParseIntOrZero(row.Third)]);
+            }
+            else
+            {
+                upper.Add(CreateZeroTriplet());
+            }
+
+            if (index < lowerRows.Count)
+            {
+                var row = lowerRows[index];
+                lower.Add([ParseIntOrZero(row.First), ParseIntOrZero(row.Second), ParseIntOrZero(row.Third)]);
+            }
+            else
+            {
+                lower.Add(CreateZeroTriplet());
+            }
+        }
+
         return true;
+    }
+
+    private static bool TryBuildSingleListsForCopy(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows,
+        out List<List<int>> upper,
+        out List<List<int>> lower)
+    {
+        upper = [];
+        lower = [];
+        var maxCount = Math.Max(upperRows.Count, lowerRows.Count);
+        if (maxCount <= 0)
+        {
+            maxCount = 1;
+        }
+
+        for (var index = 0; index < maxCount; index++)
+        {
+            if (index < upperRows.Count)
+            {
+                var row = upperRows[index];
+                upper.Add([ParseIntOrZero(row.Value)]);
+            }
+            else
+            {
+                upper.Add(CreateZeroSingle());
+            }
+
+            if (index < lowerRows.Count)
+            {
+                var row = lowerRows[index];
+                lower.Add([ParseIntOrZero(row.Value)]);
+            }
+            else
+            {
+                lower.Add(CreateZeroSingle());
+            }
+        }
+
+        return true;
+    }
+
+    private static bool TryBuildTripletLists(
+        ObservableCollection<Helper.Other.TripletRow> upperRows,
+        ObservableCollection<Helper.Other.TripletRow> lowerRows,
+        out List<List<int>> upper,
+        out List<List<int>> lower)
+    {
+        upper = [];
+        lower = [];
+        var maxCount = Math.Max(upperRows.Count, lowerRows.Count);
+        if (maxCount <= 0)
+        {
+            maxCount = 1;
+        }
+
+        for (var index = 0; index < maxCount; index++)
+        {
+            if (index < upperRows.Count)
+            {
+                if (!TryParseTripletRow(upperRows[index], out var upperValues))
+                {
+                    return false;
+                }
+
+                upper.Add(upperValues);
+            }
+            else
+            {
+                upper.Add(CreateZeroTriplet());
+            }
+
+            if (index < lowerRows.Count)
+            {
+                if (!TryParseTripletRow(lowerRows[index], out var lowerValues))
+                {
+                    return false;
+                }
+
+                lower.Add(lowerValues);
+            }
+            else
+            {
+                lower.Add(CreateZeroTriplet());
+            }
+        }
+
+        return true;
+    }
+
+    private static bool TryBuildSingleLists(
+        ObservableCollection<Helper.Other.SingleRow> upperRows,
+        ObservableCollection<Helper.Other.SingleRow> lowerRows,
+        out List<List<int>> upper,
+        out List<List<int>> lower)
+    {
+        upper = [];
+        lower = [];
+        var maxCount = Math.Max(upperRows.Count, lowerRows.Count);
+        if (maxCount <= 0)
+        {
+            maxCount = 1;
+        }
+
+        for (var index = 0; index < maxCount; index++)
+        {
+            if (index < upperRows.Count)
+            {
+                if (!TryParseSingleRow(upperRows[index], out var upperValues))
+                {
+                    return false;
+                }
+
+                upper.Add(upperValues);
+            }
+            else
+            {
+                upper.Add(CreateZeroSingle());
+            }
+
+            if (index < lowerRows.Count)
+            {
+                if (!TryParseSingleRow(lowerRows[index], out var lowerValues))
+                {
+                    return false;
+                }
+
+                lower.Add(lowerValues);
+            }
+            else
+            {
+                lower.Add(CreateZeroSingle());
+            }
+        }
+
+        return true;
+    }
+
+    private static bool TryParseTripletRow(Helper.Other.TripletRow row, out List<int> values)
+    {
+        values = [];
+        if (!int.TryParse(row.First, out var firstValue)) return false;
+        if (!int.TryParse(row.Second, out var secondValue)) return false;
+        if (!int.TryParse(row.Third, out var thirdValue)) return false;
+        values = [firstValue, secondValue, thirdValue];
+        return true;
+    }
+
+    private static bool TryParseSingleRow(Helper.Other.SingleRow row, out List<int> values)
+    {
+        values = [];
+        if (!int.TryParse(row.Value, out var value)) return false;
+        values = [value];
+        return true;
+    }
+
+    private static List<int> CreateZeroTriplet() => [0, 0, 0];
+
+    private static List<int> CreateZeroSingle() => [0];
+
+    private static bool IsColorInRange(IReadOnlyList<ColorRange> ranges, byte r, byte g, byte b)
+    {
+        foreach (var range in ranges)
+        {
+            if (IsColorInRange(range, r, g, b))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsColorInRange(ColorRange range, byte r, byte g, byte b)
@@ -5908,7 +6764,6 @@ public partial class ToolsViewModel : ViewModelBase
             Key.OemQuotes, "VK_OEM_7"
         },
     };
-
     private static readonly Dictionary<string, int> Win32KeyDefinitions = new(StringComparer.Ordinal)
     {
         {
@@ -6245,7 +7100,6 @@ public partial class ToolsViewModel : ViewModelBase
             "VK_OEM_7", 0xDE
         },
     };
-
     private static readonly string[] Win32KeyOptionList =
     [
         "VK_BACK",
@@ -6360,7 +7214,6 @@ public partial class ToolsViewModel : ViewModelBase
         "VK_OEM_6",
         "VK_OEM_7"
     ];
-
     private static readonly Dictionary<Key, int> Win32KeyMap = new()
     {
         {
@@ -6697,7 +7550,6 @@ public partial class ToolsViewModel : ViewModelBase
             Key.OemQuotes, 0xDE
         },
     };
-
     private static readonly Dictionary<Key, int> AdbKeyMap = new()
     {
         {
@@ -6954,7 +7806,6 @@ public partial class ToolsViewModel : ViewModelBase
     {
         IsKeyCodeAdb = string.Equals(mode, "Adb", StringComparison.OrdinalIgnoreCase);
     }
-
     partial void OnIsKeyCodeAdbChanged(bool value)
     {
         IsKeyCaptureActive = false;
@@ -6967,7 +7818,6 @@ public partial class ToolsViewModel : ViewModelBase
             UpdateWin32KeyFromInput(Win32KeyInput);
         }
     }
-
     partial void OnAdbKeyInputChanged(string value)
     {
         if (IsKeyCodeAdb)
@@ -6975,7 +7825,6 @@ public partial class ToolsViewModel : ViewModelBase
             UpdateAdbKeyFromInput(value);
         }
     }
-
     partial void OnWin32KeyInputChanged(string value)
     {
         if (!IsKeyCodeAdb)
@@ -7015,8 +7864,8 @@ public partial class ToolsViewModel : ViewModelBase
             ? code.ToString()
             : "-";
     }
-    //     return candidates.FirstOrDefault(File.Exists);
-    // }
+//     return candidates.FirstOrDefault(File.Exists);
+// }
 
     public void CaptureKey(Key key)
     {
@@ -7048,7 +7897,6 @@ public partial class ToolsViewModel : ViewModelBase
     {
         return Win32KeyNameMap.TryGetValue(key, out name);
     }
-
     /// <summary>
     /// Live View 刷新率变化事件，参数为计算后的间隔（秒）
     /// </summary>

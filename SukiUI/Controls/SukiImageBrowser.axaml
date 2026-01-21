@@ -3,10 +3,52 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:icons="clr-namespace:SukiUI.Content"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SukiUI.Controls.SukiImageBrowser" WindowStartupLocation="CenterScreen"
         Title="{DynamicResource STRING_IMAGE_VIEWER}">
-    <suki:SukiImageViewer x:Name="ImageViewer"
-                          ShowZoomToolbar="True"
-                          IsDragEnabled="True" />
+    <suki:SukiWindow.Styles>
+        <Style Selector="Button.ImageNav">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Foreground" Value="{DynamicResource SukiLowText}" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+        </Style>
+        <Style Selector="Button.ImageNav:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
+            <Setter Property="RenderTransform" Value="scale(1.15)" />
+        </Style>
+    </suki:SukiWindow.Styles>
+
+    <Grid>
+        <suki:SukiImageViewer x:Name="ImageViewer"
+                              ShowZoomToolbar="True"
+                              IsDragEnabled="True" />
+        <Button x:Name="PrevButton"
+                Classes="BasicTight ImageNav"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="12,0,0,0"
+                IsVisible="False"
+                Click="OnPrevClick">
+            <PathIcon Width="22"
+                      Height="22"
+                      Data="{x:Static icons:Icons.ChevronLeft}" />
+        </Button>
+        <Button x:Name="NextButton"
+                Classes="BasicTight ImageNav"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0,0,12,0"
+                IsVisible="False"
+                Click="OnNextClick">
+            <PathIcon Width="22"
+                      Height="22"
+                      Data="{x:Static icons:Icons.ChevronRight}" />
+        </Button>
+    </Grid>
 </suki:SukiWindow>

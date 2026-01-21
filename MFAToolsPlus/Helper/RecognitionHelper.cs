@@ -10,6 +10,7 @@ using SukiUI.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MFAToolsPlus.Helper;
 
@@ -223,7 +224,7 @@ public static class RecognitionHelper
         }, "KeyClick Test");
     }
 
-    public static void RunColorMatch(MaaTasker tasker, int x, int y, int w, int h, int color_method, List<int> up, List<int> low, int color_count, bool color_connected = false)
+    public static void RunColorMatch(MaaTasker tasker, int x, int y, int w, int h, int color_method, List<List<int>> up,  List<List<int>> low, int color_count, bool color_connected = false)
     {
         var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
         if (tempBitmap == null)
@@ -254,7 +255,7 @@ public static class RecognitionHelper
             DefaultValueHandling = DefaultValueHandling.Ignore
         });
 
-
+        LoggerHelper.Info(pipeline);
         TaskManager.RunTask(() =>
         {
             Instances.ToolsViewModel.IsRunning = true;
@@ -286,10 +287,11 @@ public static class RecognitionHelper
                 return;
             }
             Instances.ToolsViewModel.IsRunning = false;
+            
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
-                imageBrowser.SetImage(imageListBuffer[0].ToBitmap());
+                imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);
@@ -364,7 +366,7 @@ public static class RecognitionHelper
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
-                imageBrowser.SetImage(imageListBuffer[0].ToBitmap());
+                imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);
@@ -452,7 +454,7 @@ public static class RecognitionHelper
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
-                imageBrowser.SetImage(imageListBuffer[0].ToBitmap());
+                imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);

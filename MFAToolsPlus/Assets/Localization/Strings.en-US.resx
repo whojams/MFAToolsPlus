@@ -1732,5 +1732,8 @@
     <data name="ClipboardCopyFormatFieldWithValues" xml:space="preserve">
         <value>Field + Values</value>
     </data>
+    <data name="ResizeShortestSide" xml:space="preserve">
+        <value>scaling base side</value>
+    </data>
 </root>
 
