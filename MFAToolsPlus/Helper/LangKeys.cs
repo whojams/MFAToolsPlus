@@ -335,6 +335,7 @@ public static class LangKeys
 	public static readonly string Tip = "Tip";
 	public static readonly string TooltipDragLabel = "TooltipDragLabel";
 	public static readonly string TooltipRefresh = "TooltipRefresh";
+	public static readonly string TooltipAddToMatch = "TooltipAddToMatch";
 	public static readonly string TryToReconnect = "TryToReconnect";
 	public static readonly string TryToStartEmulator = "TryToStartEmulator";
 	public static readonly string UiSettings = "UiSettings";

@@ -999,6 +999,9 @@
     <data name="TooltipRefresh" xml:space="preserve">
         <value>刷新</value>
     </data>
+    <data name="TooltipAddToMatch" xml:space="preserve">
+        <value>添加到命中</value>
+    </data>
     <data name="TryToReconnect" xml:space="preserve">
         <value>正在尝试重连</value>
     </data>

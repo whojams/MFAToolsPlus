@@ -857,6 +857,7 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private string _swipeTestEndX = "0";
     [ObservableProperty] private string _swipeTestEndY = "0";
     [ObservableProperty] private string _swipeTestDuration = "200";
+    [ObservableProperty] private ObservableCollection<Helper.Other.PairRow> _swipeTestEndRows = [];
 
     [ObservableProperty] private string _swipeStartX = "0";
     [ObservableProperty] private string _swipeStartY = "0";
@@ -903,9 +904,11 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private string _grayUpper = "0";
     [ObservableProperty] private string _grayLower = "0";
 
-    public IAvaloniaReadOnlyList<int> ColorMethods  => new AvaloniaList<int>()
+    public IAvaloniaReadOnlyList<int> ColorMethods => new AvaloniaList<int>()
     {
-4,40,6
+        4,
+        40,
+        6
     };
     [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _rgbUpperRows = [];
     [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _rgbLowerRows = [];
@@ -2406,6 +2409,8 @@ public partial class ToolsViewModel : ViewModelBase
     partial void OnSwipeStartYChanged(string value) => UpdateSwipeFromText();
     partial void OnSwipeEndXChanged(string value) => UpdateSwipeFromText();
     partial void OnSwipeEndYChanged(string value) => UpdateSwipeFromText();
+    partial void OnSwipeTestEndXChanged(string value) => SyncSwipeTestEndRows(false);
+    partial void OnSwipeTestEndYChanged(string value) => SyncSwipeTestEndRows(false);
 
     partial void OnActiveToolModeChanged(LiveViewToolMode value)
     {
@@ -2485,26 +2490,23 @@ public partial class ToolsViewModel : ViewModelBase
             ActiveToolMode = LiveViewToolMode.None;
         }
     }
-
     partial void OnIsTargetModeChanged(bool value)
     {
-        if (_suppressRoiTargetSync) return;
-        _suppressRoiTargetSync = true;
-        RoiModeIndex = value ? 1 : 0;
-        _suppressRoiTargetSync = false;
+        if (!_suppressRoiTargetSync)
+        {
+            _suppressRoiTargetSync = true;
+            RoiModeIndex = value ? 1 : 0;
+            _suppressRoiTargetSync = false;
+        }
 
-        if (value && RoiSelectionType == LiveViewRoiSelectionType.OriginRoi)
-        {
-            RoiSelectionType = LiveViewRoiSelectionType.OriginTarget;
-        }
-        else if (!value && RoiSelectionType == LiveViewRoiSelectionType.OriginTarget)
-        {
-            RoiSelectionType = LiveViewRoiSelectionType.OriginRoi;
-        }
+        RoiSelectionType = value
+            ? LiveViewRoiSelectionType.OriginTarget
+            : LiveViewRoiSelectionType.OriginRoi;
 
         ApplySelectionPreview();
         UpdateOffsets();
     }
+
 
     partial void OnIsSelectingTargetChanged(bool value)
     {
@@ -2995,7 +2997,8 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopyOffsetToClipboard()
     {
-        CopyTextToClipboard(BuildRectClipboardText("offset", OffsetX, OffsetY, OffsetW, OffsetH), "复制Offset到剪贴板");
+        var label = IsTargetMode ? "target_offset" : "roi_offset";
+        CopyTextToClipboard(BuildRectClipboardText(label, OffsetX, OffsetY, OffsetW, OffsetH), "复制Offset到剪贴板");
     }
 
     private string BuildRectClipboardText(string label, string xText, string yText, string wText, string hText)
@@ -3441,6 +3444,60 @@ public partial class ToolsViewModel : ViewModelBase
     private void CopyColorPickExpandedRect()
     {
         CopyTextToClipboard(BuildRectClipboardText("roi", ColorPickExpandedX, ColorPickExpandedY, ColorPickExpandedW, ColorPickExpandedH), "复制取色扩展ROI到剪贴板");
+    }
+
+    [RelayCommand]
+    private void ApplyColorPickRoiToMatch()
+    {
+        ApplyRectToColorMatch(_colorPickRect);
+    }
+
+    [RelayCommand]
+    private void ApplyColorPickExpandedRoiToMatch()
+    {
+        ApplyRectToColorMatch(_colorPickExpandedRect);
+    }
+
+    [RelayCommand]
+    private void ApplyRoiToMatch()
+    {
+        ApplyRectToClickTestTarget(_roiRect);
+    }
+
+    [RelayCommand]
+    private void ApplyOriginTargetToMatch()
+    {
+        ApplyRectToClickTestTarget(_originTargetRect);
+    }
+
+    [RelayCommand]
+    private void ApplyTargetToMatch()
+    {
+        ApplyRectToClickTestTarget(_targetRect);
+    }
+
+    [RelayCommand]
+    private void ApplyScreenshotRoiToMatch()
+    {
+        ApplyRectToTemplateMatch(_screenshotRect);
+    }
+
+    [RelayCommand]
+    private void ApplyScreenshotExpandedRoiToMatch()
+    {
+        ApplyRectToTemplateMatch(_screenshotExpandedRect);
+    }
+
+    [RelayCommand]
+    private void ApplyOcrRoiToMatch()
+    {
+        ApplyRectToOcrMatch(_ocrRect);
+    }
+
+    [RelayCommand]
+    private void ApplyOcrExpandedRoiToMatch()
+    {
+        ApplyRectToOcrMatch(_ocrExpandedRect);
     }
 
     [RelayCommand]
@@ -3896,7 +3953,8 @@ public partial class ToolsViewModel : ViewModelBase
         ObservableCollection<Helper.Other.TripletRow> upperRows,
         ObservableCollection<Helper.Other.TripletRow> lowerRows,
         Helper.Other.TripletRow? row,
-        bool fromUpper,bool deleteDouble = true)
+        bool fromUpper,
+        bool deleteDouble = true)
     {
         if (row == null)
         {
@@ -4343,6 +4401,11 @@ public partial class ToolsViewModel : ViewModelBase
     {
         SwipeTestEndX = "0";
         SwipeTestEndY = "0";
+        if (SwipeTestEndRows.Count > 0)
+        {
+            SwipeTestEndRows[0].First = "0";
+            SwipeTestEndRows[0].Second = "0";
+        }
     }
 
     [RelayCommand]
@@ -4358,6 +4421,80 @@ public partial class ToolsViewModel : ViewModelBase
     private void ClearSwipeTestDuration()
     {
         SwipeTestDuration = "0";
+    }
+
+    [RelayCommand]
+    private void AddSwipeTestEndRow()
+    {
+        EnsureSwipeTestEndRowsInitialized();
+        SwipeTestEndRows.Add(new Helper.Other.PairRow());
+    }
+
+    [RelayCommand]
+    private void RemoveSwipeTestEndRow(Helper.Other.PairRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        if (SwipeTestEndRows.Count <= 1)
+        {
+            ClearSwipeTestEndRow(row);
+            return;
+        }
+
+        var index = SwipeTestEndRows.IndexOf(row);
+        if (index < 0)
+        {
+            return;
+        }
+
+        SwipeTestEndRows.RemoveAt(index);
+        if (index == 0 && SwipeTestEndRows.Count > 0)
+        {
+            SwipeTestEndX = SwipeTestEndRows[0].First;
+            SwipeTestEndY = SwipeTestEndRows[0].Second;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSwipeTestEndRow(Helper.Other.PairRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        row.First = "0";
+        row.Second = "0";
+        if (SwipeTestEndRows.IndexOf(row) == 0)
+        {
+            SwipeTestEndX = row.First;
+            SwipeTestEndY = row.Second;
+        }
+    }
+
+    [RelayCommand]
+    private async Task PasteSwipeTestEndRow(Helper.Other.PairRow? row)
+    {
+        if (row == null)
+        {
+            return;
+        }
+
+        if (await TryGetClipboardPointAsync(point =>
+            {
+                row.First = ((int)Math.Round(point.X)).ToString();
+                row.Second = ((int)Math.Round(point.Y)).ToString();
+            }))
+        {
+            if (SwipeTestEndRows.IndexOf(row) == 0)
+            {
+                SwipeTestEndX = row.First;
+                SwipeTestEndY = row.Second;
+            }
+        }
     }
 
     [RelayCommand]
@@ -4622,7 +4759,7 @@ public partial class ToolsViewModel : ViewModelBase
         SyncSwipeTestDefaults();
 
         if (!TryParsePoint(SwipeTestStartX, SwipeTestStartY, out var start)
-            || !TryParsePoint(SwipeTestEndX, SwipeTestEndY, out var end))
+            || !TryBuildSwipeTestEndList(out var ends))
         {
             ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectScreenshotRegion.ToLocalization());
             return;
@@ -4644,10 +4781,11 @@ public partial class ToolsViewModel : ViewModelBase
             IsLiveViewPaused = false;
         RecognitionHelper.RunSwipeTest(
             tasker,
-            (int)Math.Round(start.X),
-            (int)Math.Round(start.Y),
-            (int)Math.Round(end.X),
-            (int)Math.Round(end.Y),
+            [
+                (int)Math.Round(start.X),
+                (int)Math.Round(start.Y)
+            ],
+            ends,
             duration);
     }
 
@@ -5115,6 +5253,46 @@ public partial class ToolsViewModel : ViewModelBase
         ColorMatchRoiH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
     }
 
+    private void ApplyRectToColorMatch(Rect rect)
+    {
+        if (rect.Width <= 0 || rect.Height <= 0)
+        {
+            return;
+        }
+
+        SetColorMatchRect(rect);
+    }
+
+    private void ApplyRectToTemplateMatch(Rect rect)
+    {
+        if (rect.Width <= 0 || rect.Height <= 0)
+        {
+            return;
+        }
+
+        SetTemplateMatchRect(rect);
+    }
+
+    private void ApplyRectToOcrMatch(Rect rect)
+    {
+        if (rect.Width <= 0 || rect.Height <= 0)
+        {
+            return;
+        }
+
+        SetOcrMatchRect(rect);
+    }
+
+    private void ApplyRectToClickTestTarget(Rect rect)
+    {
+        if (rect.Width <= 0 || rect.Height <= 0)
+        {
+            return;
+        }
+
+        SetClickTestTargetRect(rect);
+    }
+
     private void SetClickTestTargetRect(Rect rect)
     {
         ClickTestTargetX = ((int)Math.Round(rect.X)).ToString();
@@ -5141,6 +5319,12 @@ public partial class ToolsViewModel : ViewModelBase
     {
         SwipeTestEndX = ((int)Math.Round(point.X)).ToString();
         SwipeTestEndY = ((int)Math.Round(point.Y)).ToString();
+        EnsureSwipeTestEndRowsInitialized();
+        if (SwipeTestEndRows.Count > 0)
+        {
+            SwipeTestEndRows[0].First = SwipeTestEndX;
+            SwipeTestEndRows[0].Second = SwipeTestEndY;
+        }
     }
 
     private void SetSwipeTestDuration(double duration)
@@ -5346,6 +5530,79 @@ public partial class ToolsViewModel : ViewModelBase
         }
     }
 
+    private void EnsureSwipeTestEndRowsInitialized()
+    {
+        if (SwipeTestEndRows.Count == 0)
+        {
+            SwipeTestEndRows.Add(new Helper.Other.PairRow(SwipeTestEndX, SwipeTestEndY));
+        }
+    }
+
+    private void SyncSwipeTestEndRows(bool force)
+    {
+        EnsureSwipeTestEndRowsInitialized();
+        if (SwipeTestEndRows.Count == 0)
+        {
+            return;
+        }
+
+        var firstRow = SwipeTestEndRows[0];
+        if (force)
+        {
+            if (TryParsePoint(SwipeEndX, SwipeEndY, out _))
+            {
+                firstRow.First = SwipeEndX;
+                firstRow.Second = SwipeEndY;
+            }
+        }
+        else if (!TryParsePoint(firstRow.First, firstRow.Second, out _))
+        {
+            if (TryParsePoint(SwipeEndX, SwipeEndY, out _))
+            {
+                firstRow.First = SwipeEndX;
+                firstRow.Second = SwipeEndY;
+            }
+        }
+
+        SwipeTestEndX = firstRow.First;
+        SwipeTestEndY = firstRow.Second;
+    }
+
+    private bool TryBuildSwipeTestEndList(out List<List<int>> ends)
+    {
+        ends = [];
+        if (SwipeTestEndRows.Count == 0)
+        {
+            if (!TryParsePoint(SwipeTestEndX, SwipeTestEndY, out var fallback))
+            {
+                return false;
+            }
+
+            ends.Add(
+            [
+                (int)Math.Round(fallback.X),
+                (int)Math.Round(fallback.Y)
+            ]);
+            return true;
+        }
+
+        foreach (var row in SwipeTestEndRows)
+        {
+            if (!TryParsePoint(row.First, row.Second, out var point))
+            {
+                return false;
+            }
+
+            ends.Add(
+            [
+                (int)Math.Round(point.X),
+                (int)Math.Round(point.Y)
+            ]);
+        }
+
+        return ends.Count > 0;
+    }
+
     private void SyncSwipeTestDefaults(bool force = false)
     {
         if (force)
@@ -5354,12 +5611,6 @@ public partial class ToolsViewModel : ViewModelBase
             {
                 SwipeTestStartX = SwipeStartX;
                 SwipeTestStartY = SwipeStartY;
-            }
-
-            if (TryParsePoint(SwipeEndX, SwipeEndY, out _))
-            {
-                SwipeTestEndX = SwipeEndX;
-                SwipeTestEndY = SwipeEndY;
             }
         }
         else
@@ -5372,16 +5623,9 @@ public partial class ToolsViewModel : ViewModelBase
                     SwipeTestStartY = SwipeStartY;
                 }
             }
-
-            if (!TryParsePoint(SwipeTestEndX, SwipeTestEndY, out _))
-            {
-                if (TryParsePoint(SwipeEndX, SwipeEndY, out _))
-                {
-                    SwipeTestEndX = SwipeEndX;
-                    SwipeTestEndY = SwipeEndY;
-                }
-            }
         }
+
+        SyncSwipeTestEndRows(force);
 
         if (!int.TryParse(SwipeTestDuration, out var duration) || duration <= 0)
         {
@@ -7936,7 +8180,34 @@ public partial class ToolsViewModel : ViewModelBase
     partial void OnIsConnectedChanged(bool value)
     {
         OnPropertyChanged(nameof(IsLiveViewVisible));
+        if (!value)
+        {
+            return;
+        }
+
+        if (ActiveToolMode == LiveViewToolMode.None)
+        {
+            if (IsLiveViewPaused)
+            {
+                IsLiveViewPaused = false;
+            }
+            return;
+        }
+        if (IsLiveViewPaused)
+        {
+            TaskManager.RunTask(async () =>
+            {
+                if (IsLiveViewPaused)
+                {
+                    IsLiveViewPaused = false;
+                    await Task.Delay(500);
+                    IsLiveViewPaused = true;
+                }
+            }, name: "刷新实时画面");
+        }
+
     }
+
     partial void OnLiveViewImageChanged(Bitmap? value)
     {
         OnPropertyChanged(nameof(IsLiveViewVisible));

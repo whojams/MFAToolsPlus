@@ -828,6 +828,13 @@
                                           Fill="IndianRed" />
                                 </Button>
                                 <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyRoiToMatchCommand}"
+                                        IsVisible="{calcBinding:Binding '!IsTargetMode and IsClickTestPanelVisible'}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
                                         ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
                                         Command="{Binding ClearOriginTargetCommand}"
                                         IsVisible="{Binding IsTargetMode}">
@@ -836,6 +843,12 @@
                                           Height="14"
                                           Stretch="Uniform"
                                           Fill="IndianRed" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyOriginTargetToMatchCommand}"
+                                        IsVisible="{calcBinding:Binding 'IsTargetMode and IsClickTestPanelVisible'}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16" IconVariant="Regular" />
                                 </Button>
                             </StackPanel>
                             <Border Height="1"
@@ -918,6 +931,13 @@
                                           Height="14"
                                           Stretch="Uniform"
                                           Fill="IndianRed" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyTargetToMatchCommand}"
+                                        IsVisible="{Binding IsClickTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
                                 </Button>
                             </StackPanel>
                             <Border Height="1"
@@ -1012,6 +1032,13 @@
                                           Stretch="Uniform"
                                           Fill="IndianRed" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyColorPickRoiToMatchCommand}"
+                                        IsVisible="{Binding IsColorTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
+                                </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
@@ -1042,6 +1069,13 @@
                                           Height="14"
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyColorPickExpandedRoiToMatchCommand}"
+                                        IsVisible="{Binding IsColorTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
                                 </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
@@ -1119,7 +1153,7 @@
                                               Fill="IndianRed" />
                                     </Button>
                                     <Button Classes="BasicTight ActionButton"
-                                            ToolTip.Tip="添加到命中"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
                                             Command="{Binding ExportColorMatchPairCommand}"
                                             IsVisible="{Binding IsColorTestPanelVisible}">
                                         <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
@@ -1169,7 +1203,7 @@
                                               Fill="IndianRed" />
                                     </Button>
                                     <Button Classes="BasicTight ActionButton"
-                                            ToolTip.Tip="添加到命中"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
                                             Command="{Binding ExportColorMatchPairCommand}"
                                             IsVisible="{Binding IsColorTestPanelVisible}">
                                         <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
@@ -1222,7 +1256,7 @@
                                               Fill="IndianRed" />
                                     </Button>
                                     <Button Classes="BasicTight ActionButton"
-                                            ToolTip.Tip="添加到命中"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
                                             Command="{Binding ExportColorMatchPairCommand}"
                                             IsVisible="{Binding IsColorTestPanelVisible}">
                                         <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
@@ -1272,7 +1306,7 @@
                                               Fill="IndianRed" />
                                     </Button>
                                     <Button Classes="BasicTight ActionButton"
-                                            ToolTip.Tip="添加到命中"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
                                             Command="{Binding ExportColorMatchPairCommand}"
                                             IsVisible="{Binding IsColorTestPanelVisible}">
                                         <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
@@ -1325,7 +1359,7 @@
                                               Fill="IndianRed" />
                                     </Button>
                                     <Button Classes="BasicTight ActionButton"
-                                            ToolTip.Tip="添加到命中"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
                                             Command="{Binding ExportColorMatchPairCommand}"
                                             IsVisible="{Binding IsColorTestPanelVisible}">
                                         <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
@@ -1371,7 +1405,7 @@
                                               Fill="IndianRed" />
                                     </Button>
                                     <Button Classes="BasicTight ActionButton"
-                                            ToolTip.Tip="添加到命中"
+                                            ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
                                             Command="{Binding ExportColorMatchPairCommand}"
                                             IsVisible="{Binding IsColorTestPanelVisible}">
                                         <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
@@ -1463,6 +1497,13 @@
                                           Stretch="Uniform"
                                           Fill="IndianRed" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyScreenshotRoiToMatchCommand}"
+                                        IsVisible="{Binding IsScreenshotTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
+                                </Button>
                             </StackPanel>
 
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
@@ -1494,6 +1535,13 @@
                                           Height="14"
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyScreenshotExpandedRoiToMatchCommand}"
+                                        IsVisible="{Binding IsScreenshotTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
                                 </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
@@ -1661,6 +1709,13 @@
                                           Stretch="Uniform"
                                           Fill="IndianRed" />
                                 </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyOcrRoiToMatchCommand}"
+                                        IsVisible="{Binding IsOcrTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
+                                </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
@@ -1691,6 +1746,13 @@
                                           Height="14"
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
+                                        Command="{Binding ApplyOcrExpandedRoiToMatchCommand}"
+                                        IsVisible="{Binding IsOcrTestPanelVisible}">
+                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
+                                                         IconVariant="Regular" />
                                 </Button>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
@@ -2598,30 +2660,66 @@
                                                Text="{markup:I18n {x:Static helper:LangKeys.LiveViewSwipeEnd}}" />
                                 </Border>
                                 <Button Classes="BasicTight ActionButton"
-                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
-                                        Command="{Binding PasteSwipeTestEndCommand}">
-                                    <Path Data="{StaticResource ImportImageGeometry}"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonAdd}}"
+                                        Command="{Binding AddSwipeTestEndRowCommand}">
+                                    <Path Data="{StaticResource AddGeometry}"
                                           Width="14"
                                           Height="14"
                                           Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
-                                <Button Classes="BasicTight ActionButton"
-                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.DeleteRoi}}"
-                                        Command="{Binding ClearSwipeTestEndCommand}">
-                                    <Path Data="{StaticResource TrashGeometry}"
-                                          Width="14"
-                                          Height="14"
-                                          Stretch="Uniform"
-                                          Fill="IndianRed" />
-                                </Button>
                             </StackPanel>
-                            <Grid ColumnDefinitions="Auto,3*,Auto,3*">
-                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Column="0" />
-                                <TextBox Text="{Binding SwipeTestEndX, Mode=TwoWay}" Grid.Column="1" />
-                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Column="2" />
-                                <TextBox Text="{Binding SwipeTestEndY, Mode=TwoWay}" Grid.Column="3" />
-                            </Grid>
+                            <ItemsControl ItemsSource="{Binding SwipeTestEndRows}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="other:PairRow">
+                                        <Grid ColumnDefinitions="Auto,3*,Auto,3*,Auto,Auto,Auto"
+                                              ColumnSpacing="6">
+                                            <TextBlock Grid.Column="0" Text="X:" VerticalAlignment="Center" />
+                                            <TextBox Grid.Column="1" Text="{Binding First, Mode=TwoWay}" />
+                                            <TextBlock Grid.Column="2" Text="Y:" VerticalAlignment="Center" />
+                                            <TextBox Grid.Column="3" Text="{Binding Second, Mode=TwoWay}" />
+                                            <Button Grid.Column="4"
+                                                    Classes="BasicTight ActionButton"
+                                                    ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ReadFromClipboard}}"
+                                                    Command="{Binding PasteSwipeTestEndRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                    CommandParameter="{Binding}">
+                                                <Path Data="{StaticResource ImportImageGeometry}"
+                                                      Width="14"
+                                                      Height="14"
+                                                      Stretch="Uniform"
+                                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                            </Button>
+                                            <Button Grid.Column="5"
+                                                    Classes="BasicTight ActionButton"
+                                                    ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.ButtonClear}}"
+                                                    Command="{Binding ClearSwipeTestEndRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                    CommandParameter="{Binding}">
+                                                <Path Data="{StaticResource TrashGeometry}"
+                                                      Width="14"
+                                                      Height="14"
+                                                      Stretch="Uniform"
+                                                      Fill="IndianRed" />
+                                            </Button>
+                                            <Button Grid.Column="6"
+                                                    Classes="BasicTight ActionButton"
+                                                    ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.Delete}}"
+                                                    Command="{Binding RemoveSwipeTestEndRowCommand, Source={x:Static helper:Instances.ToolsViewModel}}"
+                                                    CommandParameter="{Binding}">
+                                                <Path Data="{StaticResource SubGeometry}"
+                                                      Width="14"
+                                                      VerticalAlignment="Center"
+                                                      Stretch="Uniform"
+                                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
                                 <Border CornerRadius="5" Background="LimeGreen" Padding="8 5">
                                     <TextBlock FontSize="11"

@@ -17,6 +17,18 @@ public partial class TripletRow : ObservableObject
     }
 }
 
+public partial class PairRow : ObservableObject
+{
+    [ObservableProperty] private string _first;
+    [ObservableProperty] private string _second;
+
+    public PairRow(string first = "0", string second = "0")
+    {
+        _first = first;
+        _second = second;
+    }
+}
+
 public partial class SingleRow : ObservableObject
 {
     [ObservableProperty] private string _value;

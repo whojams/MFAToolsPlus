@@ -160,21 +160,13 @@ public static class RecognitionHelper
         }, "Click Test");
     }
 
-    public static void RunSwipeTest(MaaTasker tasker, int sx, int sy, int ex, int ey, int time = 200)
+    public static void RunSwipeTest(MaaTasker tasker, List<int> start, List<List<int>> ends, int time = 200)
     {
         var payload = new
         {
             action = "Swipe",
-            begin = new[]
-            {
-                sx,
-                sy
-            },
-            end = new[]
-            {
-                ex,
-                ey
-            },
+            begin = start,
+            end = ends,
             duration = time
         };
         var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings

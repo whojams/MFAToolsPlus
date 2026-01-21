@@ -990,6 +990,9 @@
     <data name="TooltipRefresh" xml:space="preserve">
         <value>Refresh</value>
     </data>
+    <data name="TooltipAddToMatch" xml:space="preserve">
+        <value>Add to Match</value>
+    </data>
     <data name="TryToReconnect" xml:space="preserve">
         <value>Attempting to reconnect</value>
     </data>
