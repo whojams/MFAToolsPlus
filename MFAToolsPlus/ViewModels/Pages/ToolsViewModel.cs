@@ -17,6 +17,7 @@ using MFAToolsPlus.Configuration;
 using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Extensions.MaaFW;
 using MFAToolsPlus.Helper;
+using MFAToolsPlus.Helper.Other;
 using MFAToolsPlus.ViewModels.UsersControls;
 using Newtonsoft.Json;
 using SukiUI.Dialogs;
@@ -42,7 +43,8 @@ public enum LiveViewToolMode
     Swipe,
     Ocr,
     Screenshot,
-    Key
+    Key,
+    NeuralNetworkDetect
 }
 
 public enum KeyCodeMode
@@ -50,7 +52,6 @@ public enum KeyCodeMode
     Win32,
     Adb
 }
-
 public enum TestPanelMode
 {
     None,
@@ -59,7 +60,8 @@ public enum TestPanelMode
     Color,
     Click,
     Swipe,
-    Key
+    Key,
+    NeuralNetworkDetect
 }
 
 public enum LiveViewRoiSelectionType
@@ -756,7 +758,9 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private bool _isClickTestPanelVisible;
     [ObservableProperty] private bool _isSwipeTestPanelVisible;
     [ObservableProperty] private bool _isKeyTestPanelVisible;
+    [ObservableProperty] private bool _isNeuralNetworkDetectTestPanelVisible;
     [ObservableProperty] private bool _isDragMode = true;
+    [ObservableProperty] private bool _isNeuralNetworkDetectMode;
     [ObservableProperty] private bool _isRoiMode;
     [ObservableProperty] private bool _isColorPickMode;
     [ObservableProperty] private bool _isSwipeMode;
@@ -904,11 +908,36 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private string _grayUpper = "0";
     [ObservableProperty] private string _grayLower = "0";
 
-    public IAvaloniaReadOnlyList<int> ColorMethods => new AvaloniaList<int>()
+    [ObservableProperty] private string _neuralNetworkDetectRoiX = "0";
+    [ObservableProperty] private string _neuralNetworkDetectRoiY = "0";
+    [ObservableProperty] private string _neuralNetworkDetectRoiW = "0";
+    [ObservableProperty] private string _neuralNetworkDetectRoiH = "0";
+    [ObservableProperty] private string _neuralNetworkDetectExpandedX = "0";
+    [ObservableProperty] private string _neuralNetworkDetectExpandedY = "0";
+    [ObservableProperty] private string _neuralNetworkDetectExpandedW = "0";
+    [ObservableProperty] private string _neuralNetworkDetectExpandedH = "0";
+    [ObservableProperty] private string _neuralNetworkDetectIndex = "0";
+    [ObservableProperty] private string _neuralNetworkDetectOrderBy = "Horizontal";
+    [ObservableProperty] private string _neuralNetworkDetectModelPath = string.Empty;
+    [ObservableProperty] private ObservableCollection<string> _orderByOptions = ["Horizontal", "Vertical", "Score", "Area", "Random", "Expected"];
+    [ObservableProperty] private ObservableCollection<Helper.Other.SingleRow> _classifyLabelRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.SingleRow> _expectedRows = [];
+    [ObservableProperty] private ObservableCollection<Helper.Other.SingleRow> _thresholdRows = [];
+
+    public IAvaloniaReadOnlyList<LocalizationBlock> ColorMethods => new AvaloniaList<LocalizationBlock>()
     {
-        4,
-        40,
-        6
+        new ()
+        {
+            Name ="RGB",Other = 4
+        },
+        new ()
+        {
+            Name ="HSV",Other = 40
+        },
+        new ()
+        {
+            Name ="Gray",Other = 6
+        }
     };
     [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _rgbUpperRows = [];
     [ObservableProperty] private ObservableCollection<Helper.Other.TripletRow> _rgbLowerRows = [];
@@ -926,7 +955,10 @@ public partial class ToolsViewModel : ViewModelBase
     private Rect _screenshotExpandedRect;
     private Rect _ocrRect;
     private Rect _ocrExpandedRect;
+    private Rect _neuralNetworkDetectRect;
+    private Rect _neuralNetworkDetectExpandedRect;
     private bool _suppressRoiSync;
+    private bool _suppressNeuralNetworkDetectSync;
     private bool _suppressTargetSync;
     private bool _suppressToolModeSync;
     private bool _suppressRoiTargetSync;
@@ -2405,6 +2437,11 @@ public partial class ToolsViewModel : ViewModelBase
     partial void OnOcrWChanged(string value) => UpdateOcrRectFromText();
     partial void OnOcrHChanged(string value) => UpdateOcrRectFromText();
 
+    partial void OnNeuralNetworkDetectRoiXChanged(string value) => UpdateNeuralNetworkDetectRectFromText();
+    partial void OnNeuralNetworkDetectRoiYChanged(string value) => UpdateNeuralNetworkDetectRectFromText();
+    partial void OnNeuralNetworkDetectRoiWChanged(string value) => UpdateNeuralNetworkDetectRectFromText();
+    partial void OnNeuralNetworkDetectRoiHChanged(string value) => UpdateNeuralNetworkDetectRectFromText();
+
     partial void OnSwipeStartXChanged(string value) => UpdateSwipeFromText();
     partial void OnSwipeStartYChanged(string value) => UpdateSwipeFromText();
     partial void OnSwipeEndXChanged(string value) => UpdateSwipeFromText();
@@ -2589,6 +2626,19 @@ public partial class ToolsViewModel : ViewModelBase
         }
     }
 
+    partial void OnIsNeuralNetworkDetectModeChanged(bool value)
+    {
+        if (_suppressToolModeSync) return;
+        if (value)
+        {
+            ActiveToolMode = LiveViewToolMode.NeuralNetworkDetect;
+        }
+        else if (ActiveToolMode == LiveViewToolMode.NeuralNetworkDetect)
+        {
+            ActiveToolMode = LiveViewToolMode.None;
+        }
+    }
+
     partial void OnIsScreenshotModeChanged(bool value)
     {
         if (_suppressToolModeSync) return;
@@ -2616,6 +2666,7 @@ public partial class ToolsViewModel : ViewModelBase
         IsClickTestPanelVisible = false;
         IsSwipeTestPanelVisible = false;
         IsKeyTestPanelVisible = false;
+        IsNeuralNetworkDetectTestPanelVisible = false;
         _suppressTestPanelSync = false;
         ActiveTestPanelMode = TestPanelMode.None;
     }
@@ -2634,12 +2685,13 @@ public partial class ToolsViewModel : ViewModelBase
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
             IsKeyTestPanelVisible = false;
+            IsNeuralNetworkDetectTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Ocr;
             SyncOcrMatchDefaults(true);
         }
-        else if (!IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible && !IsNeuralNetworkDetectTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2687,13 +2739,14 @@ public partial class ToolsViewModel : ViewModelBase
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
             IsKeyTestPanelVisible = false;
+            IsNeuralNetworkDetectTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Color;
             EnsureColorMatchRowsInitialized();
             SyncColorMatchDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible && !IsNeuralNetworkDetectTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2714,12 +2767,13 @@ public partial class ToolsViewModel : ViewModelBase
             IsScreenshotTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
             IsKeyTestPanelVisible = false;
+            IsNeuralNetworkDetectTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Click;
             SyncClickTestDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible && !IsNeuralNetworkDetectTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2740,12 +2794,13 @@ public partial class ToolsViewModel : ViewModelBase
             IsScreenshotTestPanelVisible = false;
             IsClickTestPanelVisible = false;
             IsKeyTestPanelVisible = false;
+            IsNeuralNetworkDetectTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Swipe;
             SyncSwipeTestDefaults(true);
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsKeyTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsKeyTestPanelVisible && !IsNeuralNetworkDetectTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -2766,11 +2821,39 @@ public partial class ToolsViewModel : ViewModelBase
             IsScreenshotTestPanelVisible = false;
             IsClickTestPanelVisible = false;
             IsSwipeTestPanelVisible = false;
+            IsNeuralNetworkDetectTestPanelVisible = false;
             _suppressTestPanelSync = false;
             IsTestPanelVisible = true;
             ActiveTestPanelMode = TestPanelMode.Key;
         }
-        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible)
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsNeuralNetworkDetectTestPanelVisible)
+        {
+            IsTestPanelVisible = false;
+            ActiveTestPanelMode = TestPanelMode.None;
+        }
+    }
+
+    partial void OnIsNeuralNetworkDetectTestPanelVisibleChanged(bool value)
+    {
+        if (_suppressTestPanelSync)
+        {
+            return;
+        }
+
+        if (value)
+        {
+            _suppressTestPanelSync = true;
+            IsOcrTestPanelVisible = false;
+            IsScreenshotTestPanelVisible = false;
+            IsClickTestPanelVisible = false;
+            IsSwipeTestPanelVisible = false;
+            IsKeyTestPanelVisible = false;
+            _suppressTestPanelSync = false;
+            IsTestPanelVisible = true;
+            ActiveTestPanelMode = TestPanelMode.NeuralNetworkDetect;
+            SyncNeuralNetworkDetectDefaults(true);
+        }
+        else if (!IsOcrTestPanelVisible && !IsScreenshotTestPanelVisible && !IsColorTestPanelVisible && !IsClickTestPanelVisible && !IsSwipeTestPanelVisible && !IsKeyTestPanelVisible)
         {
             IsTestPanelVisible = false;
             ActiveTestPanelMode = TestPanelMode.None;
@@ -3221,6 +3304,7 @@ public partial class ToolsViewModel : ViewModelBase
         IsOcrMode = ActiveToolMode == LiveViewToolMode.Ocr;
         IsScreenshotMode = ActiveToolMode == LiveViewToolMode.Screenshot;
         IsKeyMode = ActiveToolMode == LiveViewToolMode.Key;
+        IsNeuralNetworkDetectMode = ActiveToolMode == LiveViewToolMode.NeuralNetworkDetect;
         _suppressToolModeSync = false;
     }
 
@@ -3279,6 +3363,9 @@ public partial class ToolsViewModel : ViewModelBase
                 break;
             case LiveViewToolMode.Ocr:
                 SetOcrRect(rect);
+                break;
+            case LiveViewToolMode.NeuralNetworkDetect:
+                SetNeuralNetworkDetectRect(rect);
                 break;
         }
 
@@ -4276,6 +4363,77 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void CopyNeuralNetworkDetectRect()
+    {
+        CopyTextToClipboard(BuildRectClipboardText("roi", NeuralNetworkDetectRoiX, NeuralNetworkDetectRoiY, NeuralNetworkDetectRoiW, NeuralNetworkDetectRoiH), "复制神经网络检测ROI到剪贴板");
+    }
+
+    [RelayCommand]
+    private async Task PasteNeuralNetworkDetectRect()
+    {
+        if (await TryGetClipboardRectAsync(SetNeuralNetworkDetectRect))
+        {
+            ApplySelectionPreview();
+        }
+    }
+
+    [RelayCommand]
+    private void CopyNeuralNetworkDetectExpandedRect()
+    {
+        CopyTextToClipboard(BuildRectClipboardText("roi", NeuralNetworkDetectExpandedX, NeuralNetworkDetectExpandedY, NeuralNetworkDetectExpandedW, NeuralNetworkDetectExpandedH), "复制神经网络检测扩展ROI到剪贴板");
+    }
+
+    [RelayCommand]
+    private void ClearNeuralNetworkDetect()
+    {
+        _suppressNeuralNetworkDetectSync = true;
+        _neuralNetworkDetectRect = default;
+        NeuralNetworkDetectRoiX = "0";
+        NeuralNetworkDetectRoiY = "0";
+        NeuralNetworkDetectRoiW = "0";
+        NeuralNetworkDetectRoiH = "0";
+        _suppressNeuralNetworkDetectSync = false;
+        UpdateNeuralNetworkDetectExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    [RelayCommand]
+    private void ApplyNeuralNetworkDetectRoiToMatch()
+    {
+        // Currently test runs on the main ROI, so this might be redundant unless we introduce separate Match ROI later.
+        // For consistency with View bindings if present.
+        ApplySelectionPreview();
+    }
+
+    [RelayCommand]
+    private void ApplyNeuralNetworkDetectExpandedRoiToMatch()
+    {
+        // Applies the expanded rect as the new ROI
+        SetNeuralNetworkDetectRect(_neuralNetworkDetectExpandedRect);
+    }
+
+    private void SetNeuralNetworkDetectRect(Rect rect)
+    {
+        _suppressNeuralNetworkDetectSync = true;
+        _neuralNetworkDetectRect = rect;
+        NeuralNetworkDetectRoiX = ((int)Math.Round(rect.X)).ToString();
+        NeuralNetworkDetectRoiY = ((int)Math.Round(rect.Y)).ToString();
+        NeuralNetworkDetectRoiW = Math.Max(1, (int)Math.Round(rect.Width)).ToString();
+        NeuralNetworkDetectRoiH = Math.Max(1, (int)Math.Round(rect.Height)).ToString();
+        _suppressNeuralNetworkDetectSync = false;
+        UpdateNeuralNetworkDetectExpandedRect();
+    }
+
+    private void UpdateNeuralNetworkDetectRectFromText()
+    {
+        if (_suppressNeuralNetworkDetectSync) return;
+        if (!TryParseRect(NeuralNetworkDetectRoiX, NeuralNetworkDetectRoiY, NeuralNetworkDetectRoiW, NeuralNetworkDetectRoiH, out var rect)) return;
+        _neuralNetworkDetectRect = rect;
+        UpdateNeuralNetworkDetectExpandedRect();
+        ApplySelectionPreview();
+    }
+
+    [RelayCommand]
     private void CopyOcrResult()
     {
         CopyTextToClipboard(OcrResult ?? string.Empty, "复制OCR结果到剪贴板");
@@ -4821,6 +4979,164 @@ public partial class ToolsViewModel : ViewModelBase
         RecognitionHelper.RunKeyClickTest(tasker, list);
     }
 
+    [RelayCommand]
+    private async Task RunNeuralNetworkDetectTest()
+    {
+        IsNeuralNetworkDetectTestPanelVisible = true;
+        SyncNeuralNetworkDetectDefaults();
+
+        if (string.IsNullOrWhiteSpace(NeuralNetworkDetectModelPath))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.SelectExecutableFile.ToLocalization()); 
+            return;
+        }
+
+        if (!TryParseRect(NeuralNetworkDetectRoiX, NeuralNetworkDetectRoiY, NeuralNetworkDetectRoiW, NeuralNetworkDetectRoiH, out var rect))
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewSelectScreenshotRegion.ToLocalization());
+            return;
+        }
+
+        var tasker = await MaaProcessor.Instance.GetTaskerAsync();
+        if (tasker == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewRecognizerUnavailable.ToLocalization());
+            return;
+        }
+
+        var labels = ClassifyLabelRows.Select(r => r.Value).ToList();
+        var expecteds = ExpectedRows.Select(r => ParseIntOrZero(r.Value)).ToList();
+        var thresholds = ThresholdRows.Select(r => double.TryParse(r.Value, out var v) ? v : 0.7).ToList();
+
+        object thresholdArg = thresholds.Count == 1 ? thresholds[0] : thresholds;
+        if (thresholds.Count == 0) thresholdArg = 0.3; // Default
+
+        if (!int.TryParse(NeuralNetworkDetectIndex, out var idx))
+        {
+            idx = 0;
+        }
+
+        RecognitionHelper.RunNeuralNetworkDetect(
+            tasker,
+            (int)Math.Round(rect.X),
+            (int)Math.Round(rect.Y),
+            Math.Max(0, (int)Math.Round(rect.Width)),
+            Math.Max(0, (int)Math.Round(rect.Height)),
+            NeuralNetworkDetectModelPath,
+            labels,
+            expecteds,
+            thresholdArg,
+            idx,
+            NeuralNetworkDetectOrderBy
+            );
+    }
+
+    private void SyncNeuralNetworkDetectDefaults(bool force = false)
+    {
+        if (force)
+        {
+            if (TryParseRect(NeuralNetworkDetectExpandedX, NeuralNetworkDetectExpandedY, NeuralNetworkDetectExpandedW, NeuralNetworkDetectExpandedH, out var expandedRect)
+                && expandedRect.Width > 0
+                && expandedRect.Height > 0)
+            {
+                NeuralNetworkDetectRoiX = NeuralNetworkDetectExpandedX;
+                NeuralNetworkDetectRoiY = NeuralNetworkDetectExpandedY;
+                NeuralNetworkDetectRoiW = NeuralNetworkDetectExpandedW;
+                NeuralNetworkDetectRoiH = NeuralNetworkDetectExpandedH;
+            }
+        }
+        else if (!TryParseRect(NeuralNetworkDetectRoiX, NeuralNetworkDetectRoiY, NeuralNetworkDetectRoiW, NeuralNetworkDetectRoiH, out var matchRect)
+                 || matchRect.Width <= 0
+                 || matchRect.Height <= 0)
+        {
+            NeuralNetworkDetectRoiX = NeuralNetworkDetectExpandedX;
+            NeuralNetworkDetectRoiY = NeuralNetworkDetectExpandedY;
+            NeuralNetworkDetectRoiW = NeuralNetworkDetectExpandedW;
+            NeuralNetworkDetectRoiH = NeuralNetworkDetectExpandedH;
+        }
+
+        EnsureSingleRowsInitialized(ClassifyLabelRows, string.Empty);
+        EnsureSingleRowsInitialized(ExpectedRows, string.Empty);
+        EnsureSingleRowsInitialized(ThresholdRows, "0.3");
+    }
+
+    [RelayCommand]
+    private async Task SelectModelPath()
+    {
+        var topLevel = TopLevel.GetTopLevel(Instances.RootView);
+        if (topLevel == null) return;
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = LangKeys.SelectExecutableFile.ToLocalization(), // Reuse or add new key
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("ONNX Model") { Patterns = ["*.onnx"] }]
+        });
+
+        var file = files?.FirstOrDefault();
+        if (file == null) return;
+
+        // Make path relative if possible or use full path?
+        // Usually models are in resource directory.
+        // For now use full path or filename if in resource.
+        // Assuming path relative to MAA or resource.
+        // Let's just put the name if it is in the standard location or full path.
+        // Actually MAA expects path relative to resource or absolute.
+        var path = file.Path.LocalPath;
+        // Try get relative path from execution dir?
+        // Simplest is to just set it.
+        NeuralNetworkDetectModelPath = path;
+    }
+
+    [RelayCommand]
+    private void AddClassifyLabelRow() => AddSingleRow(ClassifyLabelRows, string.Empty);
+    [RelayCommand]
+    private void RemoveClassifyLabelRow(Helper.Other.SingleRow? row) => RemoveSingleRow(ClassifyLabelRows, row);
+    [RelayCommand]
+    private void ClearClassifyLabelRow(Helper.Other.SingleRow? row) => ClearSingleRow(row);
+    [RelayCommand]
+    private async Task PasteClassifyLabelRow(Helper.Other.SingleRow? row) {
+         if (row == null) return;
+         var clipboard = Instances.RootView?.Clipboard;
+         if (clipboard == null) return;
+         var text = await clipboard.TryGetTextAsync();
+         if (!string.IsNullOrEmpty(text)) row.Value = text;
+    }
+
+    [RelayCommand]
+    private void AddExpectedRow() => AddSingleRow(ExpectedRows);
+    [RelayCommand]
+    private void RemoveExpectedRow(Helper.Other.SingleRow? row) => RemoveSingleRow(ExpectedRows, row);
+    [RelayCommand]
+    private void ClearExpectedRow(Helper.Other.SingleRow? row) => ClearSingleRow(row);
+    [RelayCommand]
+    private async Task PasteExpectedRow(Helper.Other.SingleRow? row) => await PasteSingleRow(row);
+
+    [RelayCommand]
+    private void AddThresholdRow() => AddSingleRow(ThresholdRows, "0.3");
+    [RelayCommand]
+    private void RemoveThresholdRow(Helper.Other.SingleRow? row) => RemoveSingleRow(ThresholdRows, row);
+    [RelayCommand]
+    private void ClearThresholdRow(Helper.Other.SingleRow? row) => ClearSingleRow(row);
+    [RelayCommand]
+    private async Task PasteThresholdRow(Helper.Other.SingleRow? row) => await PasteSingleRow(row);
+
+    private void AddSingleRow(ObservableCollection<Helper.Other.SingleRow> rows, string defaultValue = "0")
+    {
+        rows.Add(new Helper.Other.SingleRow(defaultValue));
+    }
+
+    private void RemoveSingleRow(ObservableCollection<Helper.Other.SingleRow> rows, Helper.Other.SingleRow? row)
+    {
+        if (row == null) return;
+        if (rows.Count <= 1)
+        {
+            ClearSingleRow(row);
+            return;
+        }
+        rows.Remove(row);
+    }
+
     private static bool TryParseKeyCode(string? value, out int code)
     {
         code = 0;
@@ -5227,6 +5543,15 @@ public partial class ToolsViewModel : ViewModelBase
         OcrExpandedY = ((int)Math.Round(_ocrExpandedRect.Y)).ToString();
         OcrExpandedW = Math.Max(1, (int)Math.Round(_ocrExpandedRect.Width)).ToString();
         OcrExpandedH = Math.Max(1, (int)Math.Round(_ocrExpandedRect.Height)).ToString();
+    }
+
+    private void UpdateNeuralNetworkDetectExpandedRect()
+    {
+        _neuralNetworkDetectExpandedRect = BuildExpandedRect(_neuralNetworkDetectRect);
+        NeuralNetworkDetectExpandedX = ((int)Math.Round(_neuralNetworkDetectExpandedRect.X)).ToString();
+        NeuralNetworkDetectExpandedY = ((int)Math.Round(_neuralNetworkDetectExpandedRect.Y)).ToString();
+        NeuralNetworkDetectExpandedW = Math.Max(1, (int)Math.Round(_neuralNetworkDetectExpandedRect.Width)).ToString();
+        NeuralNetworkDetectExpandedH = Math.Max(1, (int)Math.Round(_neuralNetworkDetectExpandedRect.Height)).ToString();
     }
 
     private void SetOcrMatchRect(Rect rect)
@@ -5670,6 +5995,7 @@ public partial class ToolsViewModel : ViewModelBase
         UpdateColorPickExpandedRect();
         UpdateScreenshotExpandedRect();
         UpdateOcrExpandedRect();
+        UpdateNeuralNetworkDetectExpandedRect();
         ApplySelectionPreview();
     }
 
@@ -5751,6 +6077,10 @@ public partial class ToolsViewModel : ViewModelBase
             case LiveViewToolMode.Key:
                 HasSwipeArrow = false;
                 ClearSelectionPreview();
+                break;
+            case LiveViewToolMode.NeuralNetworkDetect:
+                HasSwipeArrow = false;
+                UpdateSelectionPreviewWithExpanded(_neuralNetworkDetectRect, _neuralNetworkDetectExpandedRect);
                 break;
         }
     }

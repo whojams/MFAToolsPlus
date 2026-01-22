@@ -583,4 +583,15 @@ public static class LangKeys
 	public static readonly string ClipboardCopyFormatValuesOnly = "ClipboardCopyFormatValuesOnly";
 	public static readonly string ClipboardCopyFormatFieldWithValues = "ClipboardCopyFormatFieldWithValues";
 	public static readonly string ResizeShortestSide = "ResizeShortestSide";
+	public static readonly string LiveViewNeuralNetworkDetect = "LiveViewNeuralNetworkDetect";
+	public static readonly string LiveViewNeuralNetworkDetectRoi = "LiveViewNeuralNetworkDetectRoi";
+	public static readonly string NeuralNetworkDetectHitTest = "NeuralNetworkDetectHitTest";
+	public static readonly string ClassifyLabel = "ClassifyLabel";
+	public static readonly string Expected = "Expected";
+	public static readonly string ConfidenceThreshold = "ConfidenceThreshold";
+	public static readonly string Index = "Index";
+	public static readonly string OrderBy = "OrderBy";
+	public static readonly string ModelPath = "ModelPath";
+	public static readonly string SelectModel = "SelectModel";
+	public static readonly string LiveViewNeuralNetworkDetectExpandedRoi = "LiveViewNeuralNetworkDetectExpandedRoi";
 }

@@ -372,7 +372,90 @@ public static class RecognitionHelper
         }, "OcrMatch");
     }
 
-    public static void RunTemplateMatch(MaaTasker tasker, int x, int y, int w, int h, Bitmap? bitmap, bool mask = false, double recognition_threshold = 0.7, int method_nodes = 5)
+    public static void RunNeuralNetworkDetect(MaaTasker tasker, int x, int y, int w, int h, string model_path, List<string> classify_labels, List<int> expecteds, object recognition_threshold, int index, string order_by, int method_nodes = 5)
+    {
+        var tempBitmap = Instances.ToolsViewModel.LiveViewImage ?? Instances.ToolsViewModel.LiveViewDisplayImage;
+        if (tempBitmap == null)
+        {
+            ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoScreenshot.ToLocalization());
+            return;
+        }
+
+        var payload = new
+        {
+            recognition = "NeuralNetworkDetect",
+            expected = expecteds,
+            model = model_path,
+            threshold = recognition_threshold,
+            labels = classify_labels,
+            method = method_nodes,
+            index,
+            order_by,
+            roi = new[]
+            {
+                x,
+                y,
+                w,
+                h
+            }
+        };
+        var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        });
+
+
+        TaskManager.RunTask(() =>
+        {
+            Instances.ToolsViewModel.IsRunning = true;
+            using var buffer = new MaaImageBuffer();
+            buffer.TrySetEncodedData(BitmapToBytes(tempBitmap));
+
+            var job = tasker.AppendRecognition("NeuralNetworkDetect", pipeline, buffer);
+            var status = job.Wait();
+            if (status != MaaJobStatus.Succeeded)
+            {
+                Instances.ToolsViewModel.IsRunning = false;
+                return;
+            }
+            tasker.GetTaskDetail(job.Id, out var enter, out var nodeIdList, out var _);
+            tasker.GetNodeDetail(nodeIdList[0], out var nodeName, out var recognitionId, out var actionId, out var actionCompleted);
+
+            var imageListBuffer = new MaaImageListBuffer();
+
+            using var hitBox = new MaaRectBuffer();
+            tasker.GetRecognitionDetail(recognitionId, out string node,
+                out var algorithm,
+                out var hit,
+                hitBox,
+                out var detailJson,
+                null, imageListBuffer);
+            if (imageListBuffer.IsEmpty)
+            {
+                ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
+                Instances.ToolsViewModel.IsRunning = false;
+                return;
+            }
+            Instances.ToolsViewModel.IsRunning = false;
+            DispatcherHelper.PostOnMainThread(() =>
+            {
+                var imageBrowser = new SukiImageBrowser();
+                imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    imageBrowser.Show(desktop.MainWindow);
+                }
+                else
+                {
+                    imageBrowser.Show();
+                }
+                imageListBuffer.Dispose();
+            });
+        }, "NeuralNetworkDetect");
+    }
+
+      public static void RunTemplateMatch(MaaTasker tasker, int x, int y, int w, int h, Bitmap? bitmap, bool mask = false, double recognition_threshold = 0.7, int method_nodes = 5)
     {
         if (bitmap == null)
         {
@@ -459,7 +542,7 @@ public static class RecognitionHelper
             });
         }, "TemplateMatch");
     }
-
+      
     public static byte[] BitmapToBytes(Bitmap bitmap)
     {
         using var ms = new MemoryStream();

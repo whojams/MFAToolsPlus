@@ -1745,5 +1745,38 @@
     <data name="ResizeShortestSide" xml:space="preserve">
         <value>缩放最短边</value>
     </data>
+    <data name="LiveViewNeuralNetworkDetect" xml:space="preserve">
+        <value>深度学习检测</value>
+    </data>
+    <data name="LiveViewNeuralNetworkDetectRoi" xml:space="preserve">
+        <value>检测区域</value>
+    </data>
+    <data name="NeuralNetworkDetectHitTest" xml:space="preserve">
+        <value>深度学习检测测试</value>
+    </data>
+    <data name="ClassifyLabel" xml:space="preserve">
+        <value>分类标签</value>
+    </data>
+    <data name="Expected" xml:space="preserve">
+        <value>期望结果</value>
+    </data>
+    <data name="ConfidenceThreshold" xml:space="preserve">
+        <value>置信度阈值</value>
+    </data>
+    <data name="Index" xml:space="preserve">
+        <value>目标索引</value>
+    </data>
+    <data name="OrderBy" xml:space="preserve">
+        <value>排序方式</value>
+    </data>
+    <data name="ModelPath" xml:space="preserve">
+        <value>模型路径</value>
+    </data>
+    <data name="SelectModel" xml:space="preserve">
+        <value>选择模型</value>
+    </data>
+    <data name="LiveViewNeuralNetworkDetectExpandedRoi" xml:space="preserve">
+        <value>扩展检测区域</value>
+    </data>
 </root>
 
