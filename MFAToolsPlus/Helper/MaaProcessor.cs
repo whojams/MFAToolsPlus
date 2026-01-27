@@ -78,9 +78,10 @@ public class MaaProcessor
     public static MaaFWConfiguration Config { get; set; } = new();
     public void SetTasker(MaaTasker? maaTasker = null)
     {
-        if (maaTasker == null && MaaTasker != null)
+        if (maaTasker == null)
         {
-            MaaTasker.Dispose();
+            Instances.ToolsViewModel.SetConnected(false);
+            MaaTasker?.Dispose();
         }
         MaaTasker = maaTasker;
     }

@@ -1581,7 +1581,7 @@
         <value>取色ROI</value>
     </data>
     <data name="LiveViewExpandedRoi" xml:space="preserve">
-        <value>扩展ROI</value>
+        <value>拓展 ROI</value>
     </data>
     <data name="LiveViewPreview" xml:space="preserve">
         <value>预览</value>
@@ -1748,9 +1748,6 @@
     <data name="LiveViewNeuralNetworkDetect" xml:space="preserve">
         <value>深度学习检测</value>
     </data>
-    <data name="LiveViewNeuralNetworkDetectRoi" xml:space="preserve">
-        <value>检测区域</value>
-    </data>
     <data name="NeuralNetworkDetectHitTest" xml:space="preserve">
         <value>深度学习检测测试</value>
     </data>
@@ -1774,9 +1771,6 @@
     </data>
     <data name="SelectModel" xml:space="preserve">
         <value>选择模型</value>
-    </data>
-    <data name="LiveViewNeuralNetworkDetectExpandedRoi" xml:space="preserve">
-        <value>扩展检测区域</value>
     </data>
 </root>
 

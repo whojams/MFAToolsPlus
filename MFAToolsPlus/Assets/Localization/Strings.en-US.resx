@@ -1738,5 +1738,26 @@
     <data name="ResizeShortestSide" xml:space="preserve">
         <value>scaling base side</value>
     </data>
+    <data name="SelectModel" xml:space="preserve">
+        <value>Select a model</value>
+    </data>
+    <data name="Index" xml:space="preserve">
+        <value>Target Index</value>
+    </data>
+    <data name="ConfidenceThreshold" xml:space="preserve">
+        <value>Threshold</value>
+    </data>
+    <data name="Expected" xml:space="preserve">
+        <value>Expected</value>
+    </data>
+    <data name="ModelPath" xml:space="preserve">
+        <value>Model Path</value>
+    </data>
+    <data name="NeuralNetworkDetectHitTest" xml:space="preserve">
+        <value>Neural Network Detect Hit Test</value>
+    </data>
+    <data name="OrderBy" xml:space="preserve">
+        <value>Order By</value>
+    </data>
 </root>
 

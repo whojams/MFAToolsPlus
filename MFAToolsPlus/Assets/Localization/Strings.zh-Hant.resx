@@ -1729,4 +1729,28 @@
     <data name="ResizeShortestSide" xml:space="preserve">
         <value>縮放基準邊</value>
     </data>
+    <data name="SelectModel" xml:space="preserve">
+        <value>選擇模型</value>
+    </data>
+    <data name="Index" xml:space="preserve">
+        <value>目標索引</value>
+    </data>
+    <data name="ConfidenceThreshold" xml:space="preserve">
+        <value>置信度閾值</value>
+    </data>
+    <data name="Expected" xml:space="preserve">
+        <value>期望結果</value>
+    </data>
+    <data name="LiveViewNeuralNetworkDetect" xml:space="preserve">
+        <value>深度學習檢測</value>
+    </data>
+    <data name="ModelPath" xml:space="preserve">
+        <value>模型路徑</value>
+    </data>
+    <data name="NeuralNetworkDetectHitTest" xml:space="preserve">
+        <value>深度學習檢測測試</value>
+    </data>
+    <data name="OrderBy" xml:space="preserve">
+        <value>排序方式</value>
+    </data>
 </root>

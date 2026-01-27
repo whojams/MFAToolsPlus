@@ -239,23 +239,24 @@ public partial class ToolsView : UserControl
         var hasSelection = rect.Width >= 1 && rect.Height >= 1;
         vm.UpdateSelection(rect, hasSelection);
 
-        if (hasSelection)
-        {
-            switch (vm.ActiveToolMode)
-            {
-                case LiveViewToolMode.Roi:
-                    vm.ApplySelection(rect);
-                    break;
-                case LiveViewToolMode.ColorPick:
-                    vm.UpdateColorRangeFromSelection(rect);
-                    vm.ApplySelectionForTool(rect);
-                    break;
-                case LiveViewToolMode.Screenshot:
-                case LiveViewToolMode.Ocr:
-                    vm.ApplySelectionForTool(rect);
-                    break;
-            }
-        }
+                if (hasSelection)
+                {
+                    switch (vm.ActiveToolMode)
+                    {
+                        case LiveViewToolMode.Roi:
+                            vm.ApplySelection(rect);
+                            break;
+                        case LiveViewToolMode.ColorPick:
+                            vm.UpdateColorRangeFromSelection(rect);
+                            vm.ApplySelectionForTool(rect);
+                            break;
+                        case LiveViewToolMode.Screenshot:
+                        case LiveViewToolMode.Ocr:
+                        case LiveViewToolMode.NeuralNetworkDetect:
+                            vm.ApplySelectionForTool(rect);
+                            break;
+                    }
+                }
 
         e.Handled = true;
     }

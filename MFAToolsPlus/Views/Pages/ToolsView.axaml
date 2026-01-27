@@ -1570,11 +1570,14 @@
                                 <TextBox Text="{Binding ScreenshotExpandedH}" IsReadOnly="True" Grid.Row="1"
                                          Grid.Column="3" />
                             </Grid>
-
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRelativePathPrefix}}" />
-                            <TextBox Text="{Binding ScreenshotRelativePath, Mode=TwoWay}" />
+                            <Border CornerRadius="5" Background="CornflowerBlue" Padding="8 5"
+                                    HorizontalAlignment="Left">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.LiveViewRelativePathPrefix}}" />
+                            </Border>
+                             <TextBox Text="{Binding ScreenshotRelativePath, Mode=TwoWay}" />
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
                                 <Border CornerRadius="5" Background="LimeGreen" Padding="8 5"
                                         HorizontalAlignment="Left">
@@ -1818,7 +1821,7 @@
                                     <TextBlock FontSize="11"
                                                FontWeight="Bold"
                                                Foreground="White"
-                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewNeuralNetworkDetectRoi}}" />
+                                               Text="{markup:I18n {x:Static helper:LangKeys.OriginRoiTitle}}" />
                                 </Border>
                                 <Button Classes="BasicTight ActionButton"
                                         ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
@@ -1860,16 +1863,16 @@
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiX, Mode=TwoWay}" Grid.Row="0"
+                                <TextBox Text="{Binding NeuralNetworkDetectX, Mode=TwoWay}" Grid.Row="0"
                                          Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiY, Mode=TwoWay}" Grid.Row="0"
+                                <TextBox Text="{Binding NeuralNetworkDetectY, Mode=TwoWay}" Grid.Row="0"
                                          Grid.Column="3" />
                                 <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiW, Mode=TwoWay}" Grid.Row="1"
+                                <TextBox Text="{Binding NeuralNetworkDetectW, Mode=TwoWay}" Grid.Row="1"
                                          Grid.Column="1" />
                                 <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiH, Mode=TwoWay}" Grid.Row="1"
+                                <TextBox Text="{Binding NeuralNetworkDetectH, Mode=TwoWay}" Grid.Row="1"
                                          Grid.Column="3" />
                             </Grid>
 
@@ -2028,13 +2031,19 @@
                                 <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
                                 <TextBox Text="{Binding OcrMatchRoiH, Mode=TwoWay}" Grid.Row="1" Grid.Column="3" />
                             </Grid>
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.TargetText}}" />
-                            <TextBox Text="{Binding OcrMatchTargetText, Mode=TwoWay}" />
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.RecognitionThreshold}}" />
+                            <Border CornerRadius="5" Background="HotPink" Padding="8 5" HorizontalAlignment="Left">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.TargetText}}" />
+                            </Border>                 
+                            <TextBox Text="{Binding OcrMatchTargetText, Mode=TwoWay}"  HorizontalAlignment="Left"/>
+                            <Border CornerRadius="5" Background="MediumPurple" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.RecognitionThreshold}}" />
+                            </Border>
                             <TextBox Text="{Binding OcrMatchThreshold, Mode=TwoWay}" />
                             <DockPanel>
                                 <ToggleSwitch Classes="Switch"
@@ -2103,9 +2112,12 @@
                                            Source="{Binding TemplateMatchImage}" />
                                 </StackPanel>
                             </Button>
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.RecognitionThreshold}}" />
+                            <Border CornerRadius="5" Background="MediumPurple" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.RecognitionThreshold}}" />
+                            </Border>
                             <TextBox Text="{Binding TemplateMatchThreshold, Mode=TwoWay}" />
                             <DockPanel>
                                 <ToggleSwitch Classes="Switch"
@@ -2115,9 +2127,12 @@
                                            FontWeight="SemiBold" VerticalAlignment="Center"
                                            Text="{markup:I18n {x:Static helper:LangKeys.GreenMask}}" />
                             </DockPanel>
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.TemplateMethod}}" />
+                            <Border CornerRadius="5" Background="Brown" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.TemplateMethod}}" />
+                            </Border> 
                             <ComboBox ItemsSource="{Binding TemplateMatchMethodOptions}"
                                       SelectedItem="{Binding TemplateMatchMethod, Mode=TwoWay}" />
                             <Button Classes="Flat ActionButton"
@@ -2133,15 +2148,21 @@
                                        FontWeight="Bold"
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.ColorHitTest}}" />
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchMethod}}" />
+                            <Border CornerRadius="5" Background="OrangeRed" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchMethod}}" />
+                            </Border>
                             <ComboBox ItemsSource="{Binding ColorMethods}"
                                       SelectedValueBinding="{Binding Other}" DisplayMemberBinding="{Binding Name}"
                                       SelectedValue="{Binding ColorMatchMethod, Mode=TwoWay}" />
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchCount}}" />
+                            <Border CornerRadius="5" Background="HotPink" Padding="8 5">
+                                <TextBlock FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="{markup:I18n {x:Static helper:LangKeys.ColorMatchCount}}" />
+                            </Border>
                             <TextBox Text="{Binding ColorMatchCount, Mode=TwoWay}" />
                             <DockPanel>
                                 <ToggleSwitch Classes="Switch"
@@ -2896,18 +2917,29 @@
                                        FontWeight="Bold"
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.NeuralNetworkDetectHitTest}}" />
-                            <TextBlock FontSize="11"
-                                       Foreground="{DynamicResource SukiLowText}"
-                                       Text="{markup:I18n {x:Static helper:LangKeys.ModelPath}}" />
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBox Grid.Column="0" MinWidth="120" ex:DragDropExtensions.EnableFileDragDrop="True"
-                                         Text="{Binding NeuralNetworkDetectModelPath, Mode=TwoWay}" />
-                                <Button Grid.Column="1"
-                                        Classes="BasicTight ActionButton"
+                    
+                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
+                                    <TextBlock FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="{markup:I18n {x:Static helper:LangKeys.ModelPath}}" />
+                                </Border>
+                                <Button Classes="BasicTight ActionButton"
+                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.SelectModel}}"
                                         Command="{Binding SelectModelPathCommand}">
-                                    <TextBlock Text="{markup:I18n {x:Static helper:LangKeys.Select}}" />
+                                    <Path Data="{StaticResource SelectModelGeometry}"
+                                          Width="14"
+                                          Height="14"
+                                          Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </Button>
-                            </Grid>
+                  
+                            </StackPanel>
+                         
+                                <TextBox MinWidth="120" ex:DragDropExtensions.EnableFileDragDrop="True"
+                                         Text="{Binding NeuralNetworkDetectModelPath, Mode=TwoWay}" />
+                         
 
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
                                 <Border CornerRadius="5" Background="DodgerBlue" Padding="8 5">
@@ -2938,60 +2970,19 @@
                             <Grid ColumnDefinitions="Auto,3*,Auto,3*"
                                   RowDefinitions="Auto,Auto">
                                 <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiX, Mode=TwoWay}" Grid.Row="0"
+                                <TextBox Text="{Binding NeuralNetworkDetectMatchRoiX, Mode=TwoWay}" Grid.Row="0"
                                          Grid.Column="1" />
                                 <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiY, Mode=TwoWay}" Grid.Row="0"
+                                <TextBox Text="{Binding NeuralNetworkDetectMatchRoiY, Mode=TwoWay}" Grid.Row="0"
                                          Grid.Column="3" />
                                 <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiW, Mode=TwoWay}" Grid.Row="1"
+                                <TextBox Text="{Binding NeuralNetworkDetectMatchRoiW, Mode=TwoWay}" Grid.Row="1"
                                          Grid.Column="1" />
                                 <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
-                                <TextBox Text="{Binding NeuralNetworkDetectRoiH, Mode=TwoWay}" Grid.Row="1"
+                                <TextBox Text="{Binding NeuralNetworkDetectMatchRoiH, Mode=TwoWay}" Grid.Row="1"
                                          Grid.Column="3" />
                             </Grid>
 
-                            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
-                                <Border CornerRadius="5" Background="Orange" Padding="8 5">
-                                    <TextBlock FontSize="11"
-                                               FontWeight="Bold"
-                                               Foreground="White"
-                                               Text="{markup:I18n {x:Static helper:LangKeys.LiveViewNeuralNetworkDetectExpandedRoi}}" />
-                                </Border>
-                                <Button Classes="BasicTight ActionButton"
-                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.CopyToClipboard}}"
-                                        ex:BubbleExtensions.EnableBubble="True"
-                                        ex:BubbleExtensions.BubbleContent="{markup:I18n {x:Static helper:LangKeys.CopiedToClipboard}}"
-                                        Command="{Binding CopyNeuralNetworkDetectExpandedRectCommand}">
-                                    <Path Data="{StaticResource CopyGeometry}"
-                                          Width="14"
-                                          Height="14"
-                                          Stretch="Uniform"
-                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                </Button>
-                                <Button Classes="BasicTight ActionButton"
-                                        ToolTip.Tip="{markup:I18n {x:Static helper:LangKeys.TooltipAddToMatch}}"
-                                        Command="{Binding ApplyNeuralNetworkDetectExpandedRoiToMatchCommand}"
-                                        IsVisible="{Binding IsNeuralNetworkDetectTestPanelVisible}">
-                                    <avalonia:FluentIcon Height="18" Icon="ArrowExport" IconSize="Size16"
-                                                         IconVariant="Regular" />
-                                </Button>
-                            </StackPanel>
-                            <Grid ColumnDefinitions="Auto,3*,Auto,3*"
-                                  RowDefinitions="Auto,Auto">
-                                <TextBlock Text="X:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
-                                <TextBox Text="{Binding NeuralNetworkDetectExpandedX}" IsReadOnly="True" Grid.Row="0"
-                                         Grid.Column="1" />
-                                <TextBlock Text="Y:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" />
-                                <TextBox Text="{Binding NeuralNetworkDetectExpandedY}" IsReadOnly="True" Grid.Row="0"
-                                         Grid.Column="3" />
-                                <TextBlock Text="W:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
-                                <TextBox Text="{Binding NeuralNetworkDetectExpandedW}" IsReadOnly="True" Grid.Row="1"
-                                         Grid.Column="1" />
-                                <TextBlock Text="H:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" />
-                                <TextBox Text="{Binding NeuralNetworkDetectExpandedH}" IsReadOnly="True" Grid.Row="1"
-                                         Grid.Column="3" />
-                            </Grid>
                             <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
                                 <Border CornerRadius="5" Background="OrangeRed" Padding="8 5">
                                     <TextBlock FontSize="11" FontWeight="Bold"
