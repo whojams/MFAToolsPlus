@@ -2038,7 +2038,7 @@
                                            Text="{markup:I18n {x:Static helper:LangKeys.TargetText}}" />
                             </Border>                 
                             <TextBox Text="{Binding OcrMatchTargetText, Mode=TwoWay}"  HorizontalAlignment="Left"/>
-                            <Border CornerRadius="5" Background="MediumPurple" Padding="8 5">
+                            <Border CornerRadius="5" Background="MediumPurple" HorizontalAlignment="Left" Padding="8 5">
                                 <TextBlock FontSize="11"
                                            FontWeight="Bold"
                                            Foreground="White"
@@ -2112,7 +2112,7 @@
                                            Source="{Binding TemplateMatchImage}" />
                                 </StackPanel>
                             </Button>
-                            <Border CornerRadius="5" Background="MediumPurple" Padding="8 5">
+                            <Border CornerRadius="5" Background="MediumPurple" HorizontalAlignment="Left" Padding="8 5">
                                 <TextBlock FontSize="11"
                                            FontWeight="Bold"
                                            Foreground="White"
@@ -2127,7 +2127,7 @@
                                            FontWeight="SemiBold" VerticalAlignment="Center"
                                            Text="{markup:I18n {x:Static helper:LangKeys.GreenMask}}" />
                             </DockPanel>
-                            <Border CornerRadius="5" Background="Brown" Padding="8 5">
+                            <Border CornerRadius="5" Background="Brown" HorizontalAlignment="Left" Padding="8 5">
                                 <TextBlock FontSize="11"
                                            FontWeight="Bold"
                                            Foreground="White"
@@ -2148,7 +2148,7 @@
                                        FontWeight="Bold"
                                        Foreground="{DynamicResource SukiLowText}"
                                        Text="{markup:I18n {x:Static helper:LangKeys.ColorHitTest}}" />
-                            <Border CornerRadius="5" Background="OrangeRed" Padding="8 5">
+                            <Border CornerRadius="5" Background="OrangeRed" HorizontalAlignment="Left" Padding="8 5">
                                 <TextBlock FontSize="11"
                                            FontWeight="Bold"
                                            Foreground="White"
@@ -2157,7 +2157,7 @@
                             <ComboBox ItemsSource="{Binding ColorMethods}"
                                       SelectedValueBinding="{Binding Other}" DisplayMemberBinding="{Binding Name}"
                                       SelectedValue="{Binding ColorMatchMethod, Mode=TwoWay}" />
-                            <Border CornerRadius="5" Background="HotPink" Padding="8 5">
+                            <Border CornerRadius="5" Background="HotPink" HorizontalAlignment="Left" Padding="8 5">
                                 <TextBlock FontSize="11"
                                            FontWeight="Bold"
                                            Foreground="White"
