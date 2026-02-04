@@ -1,4 +1,4 @@
-<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+ <suki:SukiWindow xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:vm="using:MFAToolsPlus.ViewModels"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,6 +9,7 @@
                  xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent.Markup;assembly=FluentIcons.Avalonia.Fluent"
                  xmlns:extensions="clr-namespace:MFAToolsPlus.Extensions"
                  xmlns:pages="clr-namespace:MFAToolsPlus.Views.Pages"
+                 xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
                  mc:Ignorable="d"
                  x:Class="MFAToolsPlus.Views.RootView"
                  x:DataType="vm:RootViewModel"
@@ -124,13 +125,19 @@
                 </TextBlock>
             </Button>
 
-
+ 
+            
             <TextBlock VerticalAlignment="Center"
                        FontSize="13" Text="{markup:I18n {x:Static helper:LangKeys.AppTitle}}" IsHitTestVisible="False"
                        FontWeight="Bold" />
-            <TextBlock VerticalAlignment="Center" Margin="5 0 0 0" 
+            <TextBlock VerticalAlignment="Center" Margin="5 0 0 0"
                        Foreground="{DynamicResource SukiLowText}" IsHitTestVisible="False"
                        FontSize="13" Text="{x:Static vm:RootViewModel.Version}" />
+            
+            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsAdmin}" VerticalAlignment="Center" Margin="10,0,0,0">
+                <avalonia:FluentIcon Icon="Shield" Foreground="{DynamicResource SukiPrimaryColor}" Width="14" Height="14" Margin="0,0,5,0"/>
+                <TextBlock Text="Administrator" Foreground="{DynamicResource SukiPrimaryColor}" FontSize="12" VerticalAlignment="Center"/>
+            </StackPanel>
         </StackPanel>
     </suki:SukiWindow.NonClientAreaContent>
     <suki:SukiWindow.Hosts>

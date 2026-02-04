@@ -39,6 +39,7 @@ public class HotKeyEditor : TemplatedControl
         // 过滤无效按键（适配 Avalonia 的键值系统）
         if (key == Key.LeftCtrl
             || key == Key.RightCtrl
+            || key == Key.LeftAlt
             || key == Key.RightAlt
             || key == Key.LeftShift
             || key == Key.RightShift

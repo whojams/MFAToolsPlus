@@ -32,10 +32,16 @@
     </suki:SukiWindow.Styles>
 
     <Grid x:Name="ImageBrowserRoot">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
         <suki:SukiImageViewer x:Name="ImageViewer"
+                              Grid.Column="0"
                               ShowZoomToolbar="True"
                               IsDragEnabled="True" />
         <Button x:Name="PrevButton"
+                Grid.Column="0"
                 Classes="BasicTight ImageNav"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
@@ -57,5 +63,17 @@
                       Height="22"
                       Data="{x:Static icons:Icons.ChevronRight}" />
         </Button>
+        <Border Grid.Column="1" x:Name="DetailsPanel" IsVisible="False" Width="250" Background="{DynamicResource SukiBackground}">
+            <ListBox x:Name="DetailsListBox" Background="Transparent" Margin="10">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,5">
+                            <TextBlock Text="{Binding Title}" FontWeight="Bold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Subtitle}" FontSize="12" Opacity="0.8" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
     </Grid>
 </suki:SukiWindow>

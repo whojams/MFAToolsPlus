@@ -59,6 +59,26 @@ public partial class SukiImageBrowser : Window
         SetPendingImage(bitmap, preserveTransform: false);
     }
 
+    public class ImageBrowserDetailItem
+    {
+        public string Title { get; set; } = "";
+        public string Subtitle { get; set; } = "";
+    }
+
+    public void SetDetails(IEnumerable<ImageBrowserDetailItem> items)
+    {
+        var list = new List<ImageBrowserDetailItem>(items);
+        if (list.Count > 0)
+        {
+            DetailsPanel.IsVisible = true;
+            DetailsListBox.ItemsSource = list;
+        }
+        else
+        {
+            DetailsPanel.IsVisible = false;
+        }
+    }
+
     private void OnPrevClick(object? sender, RoutedEventArgs e)
     {
         if (_images.Count == 0 || _currentIndex <= 0)

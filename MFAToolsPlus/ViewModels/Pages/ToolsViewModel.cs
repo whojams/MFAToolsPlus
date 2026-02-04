@@ -214,13 +214,13 @@ public partial class ToolsViewModel : ViewModelBase
         adbController.InitializeDisplayName();
         List<MaaInterface.MaaResourceController> controllers = [adbController];
 
-        // var dbgController = new MaaInterface.MaaResourceController
-        // {
-        //     Name = "Dbg",
-        //     Type = MaaControllerTypes.Dbg.ToJsonKey()
-        // };
-        // dbgController.InitializeDisplayName();
-        // controllers.Add(dbgController);
+        var dbgController = new MaaInterface.MaaResourceController
+        {
+            Name = "Dbg",
+            Type = MaaControllerTypes.Dbg.ToJsonKey()
+        };
+        dbgController.InitializeDisplayName();
+        controllers.Add(dbgController);
 
         if (OperatingSystem.IsWindows())
         {
@@ -848,14 +848,15 @@ public partial class ToolsViewModel : ViewModelBase
     [ObservableProperty] private Bitmap? _templateMatchImage;
     [ObservableProperty] private ObservableCollection<int> _templateMatchMethodOptions = [5, 3, 10001];
 
-    [ObservableProperty] private string _clickTestTargetX = "0";
-    [ObservableProperty] private string _clickTestTargetY = "0";
-    [ObservableProperty] private string _clickTestTargetW = "0";
-    [ObservableProperty] private string _clickTestTargetH = "0";
-    [ObservableProperty] private string _clickTestOffsetX = "0";
-    [ObservableProperty] private string _clickTestOffsetY = "0";
-    [ObservableProperty] private string _clickTestOffsetW = "0";
-    [ObservableProperty] private string _clickTestOffsetH = "0";
+        [ObservableProperty] private string _clickTestTargetX = "0";
+        [ObservableProperty] private string _clickTestTargetY = "0";
+        [ObservableProperty] private string _clickTestTargetW = "0";
+        [ObservableProperty] private string _clickTestTargetH = "0";
+        [ObservableProperty] private string _clickTestOffsetX = "0";
+        [ObservableProperty] private string _clickTestOffsetY = "0";
+        [ObservableProperty] private string _clickTestOffsetW = "0";
+        [ObservableProperty] private string _clickTestOffsetH = "0";
+        [ObservableProperty] private string _clickTestContact = "0";
 
     [ObservableProperty] private string _swipeTestStartX = "0";
     [ObservableProperty] private string _swipeTestStartY = "0";
@@ -3841,7 +3842,7 @@ public partial class ToolsViewModel : ViewModelBase
         var method = GetColorMatchMethodValue();
         var mode = ResolveColorMatchMode(method);
         var text = BuildColorMatchPairsClipboardText(mode);
-        CopyTextToClipboard(text, "复制颜色命中范围到剪贴板");
+        CopyTextToClipboard(text, LangKeys.CopyToClipboard.ToLocalization());
     }
 
     [RelayCommand]
@@ -4924,19 +4925,25 @@ public partial class ToolsViewModel : ViewModelBase
             return;
         }
 
-        if (IsLiveViewPaused)
-            IsLiveViewPaused = false;
-        RecognitionHelper.RunClickTest(
-            tasker,
-            (int)Math.Round(targetRect.X),
-            (int)Math.Round(targetRect.Y),
-            Math.Max(0, (int)Math.Round(targetRect.Width)),
-            Math.Max(0, (int)Math.Round(targetRect.Height)),
-            (int)Math.Round(offsetX),
-            (int)Math.Round(offsetY),
-            (int)Math.Round(offsetW),
-            (int)Math.Round(offsetH));
-    }
+                if (!int.TryParse(ClickTestContact, out var contact))
+                {
+                    contact = 0;
+                }
+        
+                if (IsLiveViewPaused)
+                    IsLiveViewPaused = false;
+                RecognitionHelper.RunClickTest(
+                    tasker,
+                    (int)Math.Round(targetRect.X),
+                    (int)Math.Round(targetRect.Y),
+                    Math.Max(0, (int)Math.Round(targetRect.Width)),
+                    Math.Max(0, (int)Math.Round(targetRect.Height)),
+                    (int)Math.Round(offsetX),
+                    (int)Math.Round(offsetY),
+                    (int)Math.Round(offsetW),
+                    (int)Math.Round(offsetH),
+                    contact);
+            }
 
     [RelayCommand]
     private async Task RunSwipeHitTest()
@@ -5307,7 +5314,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopySwipeStart()
     {
-        CopyTextToClipboard(BuildPointClipboardText(SwipeStartX, SwipeStartY), "复制Swipe起点到剪贴板");
+        CopyTextToClipboard(BuildPointClipboardText("begin", SwipeStartX, SwipeStartY), "复制Swipe起点到剪贴板");
     }
 
     [RelayCommand]
@@ -5322,7 +5329,7 @@ public partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void CopySwipeEnd()
     {
-        CopyTextToClipboard(BuildPointClipboardText(SwipeEndX, SwipeEndY), "复制Swipe终点到剪贴板");
+        CopyTextToClipboard(BuildPointClipboardText("end", SwipeEndX, SwipeEndY), "复制Swipe终点到剪贴板");
     }
 
     [RelayCommand]
@@ -5335,6 +5342,43 @@ public partial class ToolsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void CopySwipeMatchPairs()
+    {
+        if (!TryParsePoint(SwipeStartX, SwipeStartY, out var start))
+        {
+            start = new Point(0, 0);
+        }
+
+        if (!TryBuildSwipeTestEndList(out var ends))
+        {
+            if (TryParsePoint(SwipeEndX, SwipeEndY, out var end))
+            {
+                ends = [[(int)Math.Round(end.X), (int)Math.Round(end.Y)]];
+            }
+            else
+            {
+                ends = [[0, 0]];
+            }
+        }
+
+        var startStr = $"[{(int)Math.Round(start.X)}, {(int)Math.Round(start.Y)}, 0, 0]";
+        
+        string endStr;
+        if (ends.Count == 1)
+        {
+            endStr = $"[{ends[0][0]}, {ends[0][1]}, 0, 0]";
+        }
+        else
+        {
+            var endItems = ends.Select(e => $"[{e[0]}, {e[1]}, 0, 0]");
+            endStr = $"[{string.Join(", ", endItems)}]";
+        }
+
+        var text = $"\"begin\": {startStr},\n\"end\": {endStr}";
+        CopyTextToClipboard(text, LangKeys.CopyToClipboard.ToLocalization());
+    }
+
+    [RelayCommand]
     private void ClearSwipe()
     {
         SwipeStartX = "0";
@@ -5344,15 +5388,15 @@ public partial class ToolsViewModel : ViewModelBase
         UpdateSwipeArrow();
     }
 
-    private static string BuildPointClipboardText(string xText, string yText)
+    private string BuildPointClipboardText(string label, string xText, string yText)
     {
         if (double.TryParse(xText, out var x)
             && double.TryParse(yText, out var y))
         {
-            return $"[{(int)Math.Round(x)}, {(int)Math.Round(y)}]";
+            return FormatClipboardValue(label, $"[{(int)Math.Round(x)}, {(int)Math.Round(y)}]");
         }
 
-        return "[0, 0]";
+        return FormatClipboardValue(label, "[0, 0]");
     }
 
     private string BuildColorTripletClipboardText(string label, string first, string second, string third)

@@ -483,7 +483,7 @@ public class MaaProcessor
                     Config.DesktopWindow.Check);
             case MaaControllerTypes.Dbg:
             default:
-                return null;
+                return MaaController.Null;
         }
     }
     public void ConnectToMAA()

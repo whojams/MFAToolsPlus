@@ -7,6 +7,14 @@ public static class ConfigurationKeys
     public const string DefaultConfig = "DefaultConfig";
     public const string ShowGui = "ShowGui";
     public const string Pause = "Pause";
+    public const string HotKeyToolRoi = "HotKeyToolRoi";
+    public const string HotKeyToolColor = "HotKeyToolColor";
+    public const string HotKeyToolOcr = "HotKeyToolOcr";
+    public const string HotKeyToolScreenshot = "HotKeyToolScreenshot";
+    public const string HotKeyToolSwipe = "HotKeyToolSwipe";
+    public const string HotKeyToolKey = "HotKeyToolKey";
+    public const string HotKeyToolNeuralNetworkDetect = "HotKeyToolNeuralNetworkDetect";
+    public const string HotKeyToolNone = "HotKeyToolNone";
     public const string DoNotShowAnnouncementAgain = "AnnouncementInfo.DoNotShowAgain";
     public const string DoNotShowChangelogAgain = "Changelog.DoNotShowAgain";
     public const string ForceScheduledStart = "ForceScheduledStart";

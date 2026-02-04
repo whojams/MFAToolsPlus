@@ -36,6 +36,9 @@ public static class RecognitionHelper
         [JsonProperty("score")]
         public double? Score { get; set; }
 
+        [JsonProperty("count")]
+        public int? Count { get; set; }
+
         [JsonProperty("text")]
         public string? Text { get; set; }
     }
@@ -120,7 +123,7 @@ public static class RecognitionHelper
         return string.Empty;
     }
 
-    public static void RunClickTest(MaaTasker tasker, int x, int y, int w, int h, int offset_x = 0, int offset_y = 0, int offset_w = 0, int offset_h = 0)
+    public static void RunClickTest(MaaTasker tasker, int x, int y, int w, int h, int offset_x = 0, int offset_y = 0, int offset_w = 0, int offset_h = 0,int click_contact = 0)
     {
         var payload = new
         {
@@ -138,7 +141,8 @@ public static class RecognitionHelper
                 offset_y,
                 offset_w,
                 offset_h
-            }
+            },
+            contact = click_contact
         };
         var pipeline = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
         {
@@ -272,6 +276,7 @@ public static class RecognitionHelper
                 hitBox,
                 out var detailJson,
                 null, imageListBuffer);
+            
             if (imageListBuffer.IsEmpty)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
@@ -279,11 +284,12 @@ public static class RecognitionHelper
                 return;
             }
             Instances.ToolsViewModel.IsRunning = false;
-            
+            var details = ParseDetails(detailJson);
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
                 imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
+                imageBrowser.SetDetails(details);
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);
@@ -355,10 +361,12 @@ public static class RecognitionHelper
                 return;
             }
             Instances.ToolsViewModel.IsRunning = false;
+            var details = ParseDetails(detailJson);
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
                 imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
+                imageBrowser.SetDetails(details);
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);
@@ -431,6 +439,7 @@ public static class RecognitionHelper
                 hitBox,
                 out var detailJson,
                 null, imageListBuffer);
+
             if (imageListBuffer.IsEmpty)
             {
                 ToastHelper.Warn(LangKeys.Tip.ToLocalization(), LangKeys.LiveViewNoHit.ToLocalization());
@@ -438,10 +447,12 @@ public static class RecognitionHelper
                 return;
             }
             Instances.ToolsViewModel.IsRunning = false;
+            var details = ParseDetails(detailJson);
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
                 imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
+                imageBrowser.SetDetails(details);
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);
@@ -455,7 +466,7 @@ public static class RecognitionHelper
         }, "NeuralNetworkDetect");
     }
 
-      public static void RunTemplateMatch(MaaTasker tasker, int x, int y, int w, int h, Bitmap? bitmap, bool mask = false, double recognition_threshold = 0.7, int method_nodes = 5)
+    public static void RunTemplateMatch(MaaTasker tasker, int x, int y, int w, int h, Bitmap? bitmap, bool mask = false, double recognition_threshold = 0.7, int method_nodes = 5)
     {
         if (bitmap == null)
         {
@@ -525,11 +536,14 @@ public static class RecognitionHelper
                 Instances.ToolsViewModel.IsRunning = false;
                 return;
             }
+
             Instances.ToolsViewModel.IsRunning = false;
+            var details = ParseDetails(detailJson);
             DispatcherHelper.PostOnMainThread(() =>
             {
                 var imageBrowser = new SukiImageBrowser();
                 imageBrowser.SetImages(imageListBuffer.Select(b => b.ToBitmap()));
+                imageBrowser.SetDetails(details);
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     imageBrowser.Show(desktop.MainWindow);
@@ -558,5 +572,35 @@ public static class RecognitionHelper
         var buffer = new MaaImageBuffer();
         buffer.TrySetEncodedData(bytes);
         return buffer;
+    }
+
+    private static List<SukiImageBrowser.ImageBrowserDetailItem> ParseDetails(string json)
+    {
+        var list = new List<SukiImageBrowser.ImageBrowserDetailItem>();
+        try
+        {
+            var query = JsonConvert.DeserializeObject<RecognitionQuery>(json);
+            if (query?.All != null)
+            {
+                foreach (var item in query.All)
+                {
+                    string title = "";
+                    if (item.Count.HasValue) title = $"Count: {item.Count}";
+                    else if (item.Score.HasValue) title = $"Score: {item.Score:F6}";
+
+                    string boxStr = item.Box != null ? $"Box: [{string.Join(", ", item.Box)}]" : "";
+
+                    if (!string.IsNullOrEmpty(title) || !string.IsNullOrEmpty(boxStr))
+                    {
+                        list.Add(new SukiImageBrowser.ImageBrowserDetailItem { Title = title, Subtitle = boxStr });
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+        return list;
     }
 }

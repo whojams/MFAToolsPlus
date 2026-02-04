@@ -52,6 +52,134 @@
                             VerticalAlignment="Center" />
                     </StackPanel>
                 </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolRoi}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="ROI Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolColor}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Color Pick Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolOcr}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="OCR Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolScreenshot}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Screenshot Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolSwipe}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Swipe Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolKey}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Key Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolNeuralNetworkDetect}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Neural Network Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel>
+                    <userControls:HotKeyEditor
+                        DockPanel.Dock="Right"
+                        Height="40"
+                        HotKey="{Binding HotKeyToolNone}"
+                        IsEnabled="{Binding EnableHotKey}"
+                        Margin="0,0,4,0"
+                        Width="205" />
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="Cancel Tool"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
             </StackPanel>
 
         </suki:GlassCard>
