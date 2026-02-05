@@ -6,6 +6,7 @@ using Lang.Avalonia.MarkupExtensions;
 using MFAToolsPlus.Helper;
 using SukiUI.Controls;
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -73,6 +74,39 @@ public partial class ErrorView : SukiWindow
         {
             try
             {
+                // VC++ 缺失检测逻辑 (仅 Windows)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var baseEx = e;
+                    var isDllNotFound = false;
+
+                    // 解包 TypeInitializationException
+                    if (baseEx is TypeInitializationException && baseEx.InnerException != null)
+                        baseEx = baseEx.InnerException;
+
+                    // 启发式检测：如果包含 MaaFramework 且是 加载错误
+                    var exStr = e.ToString();
+                    if ((exStr.Contains("MaaFramework") || exStr.Contains("MaaCore")) && (exStr.Contains("DllNotFoundException") || baseEx is DllNotFoundException))
+                    {
+                        isDllNotFound = true;
+                    }
+
+                    if (isDllNotFound)
+                    {
+                        var runtimeWin = new RuntimeMissingWindow();
+                        runtimeWin.Show();
+                        _existed = true; // 标记已显示窗口
+                        
+                        // 如果需要退出，绑定关闭事件
+                        if (shouldExit)
+                        {
+                            runtimeWin.Closed += (s, args) => Environment.Exit(1);
+                        }
+                        
+                        return; // 终止后续 ErrorView 的显示
+                    }
+                }
+
                 var rootView = Instances.RootView;
                 // 检查 RootView 是否可用（未关闭且未正在关闭）
                 if (rootView == null || !rootView.IsVisible)

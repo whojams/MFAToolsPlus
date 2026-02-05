@@ -86,7 +86,7 @@
                                                             Classes="WindowControlsButton"
                                                             IsEnabled="{TemplateBinding CanPin}"
                                                             IsVisible="{TemplateBinding CanPin}">
-                                                        <PathIcon x:Name="PinIcon" Data="{x:Static icons:Icons.WindowPin}" />
+                                                        <PathIcon Data="{x:Static icons:Icons.Pin}" Width="16" Height="16"></PathIcon>
                                                     </Button>
                                                     <Button Name="PART_MinimizeButton"
                                                             VerticalContentAlignment="Bottom"

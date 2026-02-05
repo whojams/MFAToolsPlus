@@ -584,7 +584,6 @@ public static class LangKeys
 	public static readonly string ClipboardCopyFormatFieldWithValues = "ClipboardCopyFormatFieldWithValues";
 	public static readonly string ResizeShortestSide = "ResizeShortestSide";
 	public static readonly string LiveViewNeuralNetworkDetect = "LiveViewNeuralNetworkDetect";
-	public static readonly string LiveViewNeuralNetworkDetectRoi = "LiveViewNeuralNetworkDetectRoi";
 	public static readonly string NeuralNetworkDetectHitTest = "NeuralNetworkDetectHitTest";
 	public static readonly string ClassifyLabel = "ClassifyLabel";
 	public static readonly string Expected = "Expected";
@@ -593,5 +592,26 @@ public static class LangKeys
 	public static readonly string OrderBy = "OrderBy";
 	public static readonly string ModelPath = "ModelPath";
 	public static readonly string SelectModel = "SelectModel";
-	public static readonly string LiveViewNeuralNetworkDetectExpandedRoi = "LiveViewNeuralNetworkDetectExpandedRoi";
+	public static readonly string StartupErrorTitle = "StartupErrorTitle";
+	public static readonly string StartupErrorMessage = "StartupErrorMessage";
+	public static readonly string MSVC2022Missing = "MSVC2022Missing";
+	public static readonly string MSVC2022DownloadLink = "MSVC2022DownloadLink";
+	public static readonly string DownloadNowConfirmation = "DownloadNowConfirmation";
+	public static readonly string RuntimeMissingTitle = "RuntimeMissingTitle";
+	public static readonly string RuntimeMissingWarning = "RuntimeMissingWarning";
+	public static readonly string RuntimeMissingDescription = "RuntimeMissingDescription";
+	public static readonly string DownloadAndInstall = "DownloadAndInstall";
+	public static readonly string DownloadingStatus = "DownloadingStatus";
+	public static readonly string InstallingStatus = "InstallingStatus";
+	public static readonly string InstallSuccess = "InstallSuccess";
+	public static readonly string DownloadError = "DownloadError";
+	public static readonly string Retry = "Retry";
+	public static readonly string Close = "Close";
+	public static readonly string RuntimeMissingPrompt = "RuntimeMissingPrompt";
+	public static readonly string TempDirWarningTitle = "TempDirWarningTitle";
+	public static readonly string TempDirWarningMain = "TempDirWarningMain";
+	public static readonly string TempDirWarningDesc = "TempDirWarningDesc";
+	public static readonly string TempDirWarningHint = "TempDirWarningHint";
+	public static readonly string ExitProgram = "ExitProgram";
+	public static readonly string PreventSleep = "PreventSleep";
 }

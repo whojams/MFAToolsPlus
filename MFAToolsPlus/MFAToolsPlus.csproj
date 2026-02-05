@@ -11,8 +11,8 @@
 		 <CETCompat>false</CETCompat>
         <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <AssemblyVersion>1.2.2</AssemblyVersion>
-        <FileVersion>1.2.2</FileVersion>
+        <AssemblyVersion>1.4.0</AssemblyVersion>
+        <FileVersion>1.4.0</FileVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -64,7 +64,7 @@
         <PackageReference Include="Lang.Avalonia" Version="11.3.9" />
         <PackageReference Include="Maa.AgentBinary" Version="1.2.0" />
         <PackageReference Include="Maa.Framework" Version="5.4.0-preview.1" />
-        <PackageReference Include="Maa.Framework.Runtimes" Version="5.5.0-beta.8" />
+        <PackageReference Include="Maa.Framework.Runtimes" Version="5.6.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />

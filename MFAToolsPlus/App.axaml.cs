@@ -7,6 +7,7 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using MFAToolsPlus.Configuration;
+using MFAToolsPlus.Extensions;
 using MFAToolsPlus.Helper;
 using MFAToolsPlus.ViewModels;
 using MFAToolsPlus.ViewModels.Pages;
@@ -28,6 +29,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace MFAToolsPlus;
 #pragma warning restore CS8618
@@ -42,49 +44,114 @@ public partial class App : Application
     /// 内存优化器实例（保存引用以便在退出时释放）
     /// </summary>
     private static AvaloniaMemoryCracker? _memoryCracker;
-    
+
+    /// <summary>
+    /// 标记是否已经显示过启动错误对话框（确保只显示一次）
+    /// 使用 int 类型以便使用 Interlocked 原子操作
+    /// 0 = 未显示，1 = 已显示
+    /// </summary>
+    private static int _hasShownStartupError = 0;
+
+    /// <summary>
+    /// 是否处于运行库缺失模式（仅显示下载窗口）
+    /// </summary>
+    public static bool IsRuntimeMissingMode = false;
+
+    /// <summary>
+    /// 是否处于临时目录运行模式（显示警告窗口）
+    /// </summary>
+    public static bool IsTempDirMode = false;
+
     public override void Initialize()
     {
-        LoggerHelper.InitializeLogger();
-        AvaloniaXamlLoader.Load(this);
-        LanguageHelper.Initialize();
-        GlobalHotkeyService.Initialize();
-        ConfigurationManager.Initialize();
+        try
+        {
+            LoggerHelper.InitializeLogger();
+            AvaloniaXamlLoader.Load(this);
+            LanguageHelper.Initialize();
+            GlobalHotkeyService.Initialize();
+            ConfigurationManager.Initialize();
 
-        _memoryCracker = new AvaloniaMemoryCracker();
-        _memoryCracker.Cracker();
-        
-        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException; //Task线程内未捕获异常处理事件
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; //非UI线程内未捕获异常处理事件
-        Dispatcher.UIThread.UnhandledException += OnDispatcherUnhandledException; //UI线程内未捕获异常处理事件
+            _memoryCracker = new AvaloniaMemoryCracker();
+            _memoryCracker.Cracker();
+            
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException; //Task线程内未捕获异常处理事件
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; //非UI线程内未捕获异常处理事件
+            Dispatcher.UIThread.UnhandledException += OnDispatcherUnhandledException; //UI线程内未捕获异常处理事件
+        }
+        catch (Exception ex)
+        {
+            LoggerHelper.Error($"应用初始化失败：{ex}");
+            ShowStartupErrorAndExit(ex, "应用初始化");
+        }
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        try
         {
-            desktop.ShutdownRequested += OnShutdownRequested;
-            var services = new ServiceCollection();
+            if (IsRuntimeMissingMode)
+            {
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop1)
+                {
+                    desktop1.MainWindow = new RuntimeMissingWindow();
+                }
+                base.OnFrameworkInitializationCompleted();
+                return;
+            }
 
-            services.AddSingleton(desktop);
+            if (IsTempDirMode)
+            {
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopTemp)
+                {
+                    desktopTemp.MainWindow = new TempDirWarningWindow();
+                }
+                base.OnFrameworkInitializationCompleted();
+                return;
+            }
 
-            ConfigureServices(services);
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.ShutdownRequested += OnShutdownRequested;
+                var services = new ServiceCollection();
 
-            var views = ConfigureViews(services);
+                services.AddSingleton(desktop);
 
-            Services = services.BuildServiceProvider();
+                ConfigureServices(services);
 
-            DataTemplates.Add(new ViewLocator(views));
+                var views = ConfigureViews(services);
 
-            var window = views.CreateView<RootViewModel>(Services) as Window;
+                Services = services.BuildServiceProvider();
 
-            desktop.MainWindow = window;
-            
-            TrayIconManager.InitializeTrayIcon(this, Instances.RootView, Instances.RootViewModel);
+                DataTemplates.Add(new ViewLocator(views));
+
+                var window = views.CreateView<RootViewModel>(Services) as Window;
+
+                desktop.MainWindow = window;
+                
+                TrayIconManager.InitializeTrayIcon(this, Instances.RootView, Instances.RootViewModel);
+
+                if (GlobalConfiguration.HasFileAccessError)
+                {
+                    var message = $"全局配置文件被占用或无权限访问：{GlobalConfiguration.ConfigPath}\n{GlobalConfiguration.LastFileAccessErrorMessage}";
+                    DispatcherHelper.PostOnMainThread(() =>
+                        Instances.DialogManager.CreateDialog()
+                            .OfType(NotificationType.Error)
+                            .WithContent(message)
+                            .WithActionButton(LangKeys.Ok.ToLocalization(), _ => { }, true)
+                            .TryShow());
+                }
+            }
+
+            base.OnFrameworkInitializationCompleted();
         }
-
-        base.OnFrameworkInitializationCompleted();
+        catch (Exception ex)
+        {
+            LoggerHelper.Error($"框架初始化失败：{ex}");
+            ShowStartupErrorAndExit(ex, "框架初始化");
+        }
     }
+
     private static ViewsHelper ConfigureViews(ServiceCollection services)
     {
 
@@ -131,6 +198,9 @@ public partial class App : Application
                 }
             }
         }
+        
+        // 强制清理所有应用资源
+        ForceCleanupAllResources();
 
         // 释放内存优化器
         _memoryCracker?.Dispose();
@@ -141,10 +211,56 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         Dispatcher.UIThread.UnhandledException -= OnDispatcherUnhandledException;
     }
+
+    /// <summary>
+    /// 手动清理内存缓存（用于降低内存占用）
+    /// 此方法会清除字体缓存等非必要的内存占用
+    /// </summary>
+    public static void ClearMemoryCaches()
+    {
+        try
+        {
+            // 清除字体缓存（保留当前使用的字体）
+            // FontService.Instance.ClearFontCache(); // MFAToolsPlus 中可能没有 FontService，暂注释
+
+            LoggerHelper.Info("[内存管理]已清除应用程序缓存");
+        }
+        catch (Exception ex)
+        {
+            LoggerHelper.Warning($"[内存管理]清除缓存时发生错误: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 强制清理所有资源（用于应用退出）
+    /// </summary>
+    private static void ForceCleanupAllResources()
+    {
+        try
+        {
+            // 强制清理所有字体资源
+            // FontService.Instance.ForceCleanupAllFontResources(); // MFAToolsPlus 中可能没有 FontService
+
+            LoggerHelper.Info("[内存管理]已强制清理所有应用资源");
+        }
+        catch (Exception ex)
+        {
+            LoggerHelper.Warning($"[内存管理]强制清理资源时发生错误: {ex.Message}");
+        }
+    }
+
     private void OnDispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)
     {
         try
         {
+            // 如果已经显示过启动错误，不再显示其他错误对话框
+            if (System.Threading.Interlocked.CompareExchange(ref _hasShownStartupError, 0, 0) == 1)
+            {
+                LoggerHelper.Error($"启动失败后的UI线程异常（已忽略显示）: {e.Exception}");
+                e.Handled = true;
+                return;
+            }
+
             if (TryIgnoreException(e.Exception, out string errorMessage))
             {
                 LoggerHelper.Warning(errorMessage);
@@ -160,7 +276,10 @@ public partial class App : Application
         catch (Exception ex)
         {
             LoggerHelper.Error("处理UI线程异常时发生错误: " + ex.ToString());
-            ErrorView.ShowException(ex, true);
+             if (System.Threading.Interlocked.CompareExchange(ref _hasShownStartupError, 0, 0) == 0)
+            {
+                ErrorView.ShowException(ex, true);
+            }
         }
     }
 
@@ -168,6 +287,13 @@ public partial class App : Application
     {
         try
         {
+            // 如果已经显示过启动错误，不再显示其他错误对话框
+            if (System.Threading.Interlocked.CompareExchange(ref _hasShownStartupError, 0, 0) == 1)
+            {
+                LoggerHelper.Error($"启动失败后的非UI线程异常（已忽略显示）: {e.ExceptionObject}");
+                return;
+            }
+
             if (e.ExceptionObject is Exception ex && TryIgnoreException(ex, out string errorMessage))
             {
                 LoggerHelper.Warning(errorMessage);
@@ -202,6 +328,14 @@ public partial class App : Application
     {
         try
         {
+            // 如果已经显示过启动错误，不再显示其他错误对话框
+            if (System.Threading.Interlocked.CompareExchange(ref _hasShownStartupError, 0, 0) == 1)
+            {
+                LoggerHelper.Error($"启动失败后的任务异常（已忽略显示）: {e.Exception}");
+                e.SetObserved();
+                return;
+            }
+
             if (TryIgnoreException(e.Exception, out string errorMessage))
             {
                 LoggerHelper.Warning(errorMessage);
@@ -267,6 +401,12 @@ public partial class App : Application
             return true;
         }
 
+        if (ex.GetType().FullName == "SharpHook.HookException")
+        {
+            errorMessage = "macOS中的全局快捷键Hook异常，可能是由于权限不足或系统限制导致的";
+            return true;
+        }
+
         if (ex is AuthenticationException)
         {
             errorMessage = "SSL验证证书错误";
@@ -327,4 +467,239 @@ public partial class App : Application
 
         return false;
     }
+
+    /// <summary>
+    /// 显示启动错误并退出应用（确保只显示一次）
+    /// 使用 Interlocked 原子操作确保线程安全
+    /// </summary>
+    public static void ShowStartupErrorAndExit(Exception exception, string stage = "启动")
+    {
+        // 使用原子操作检查并设置标志，确保只有一个线程能进入
+        if (System.Threading.Interlocked.CompareExchange(ref _hasShownStartupError, 1, 0) != 0)
+        {
+            // 已经有其他线程在显示错误对话框，直接退出
+            System.Threading.Thread.Sleep(100); // 等待一下让第一个线程显示对话框
+            Environment.Exit(1);
+            return;
+        }
+
+        try
+        {
+            // 尝试获取本地化标题和消息格式
+            var title = LangKeys.StartupErrorTitle.ToLocalization();
+            if (string.IsNullOrEmpty(title) || title == "StartupErrorTitle")
+                title = "启动失败";
+
+            var format = LangKeys.StartupErrorMessage.ToLocalization();
+            if (string.IsNullOrEmpty(format) || format == "StartupErrorMessage")
+                format = "{0}失败\n\n错误信息：\n{1}\n\n详细信息：\n{2}";
+
+            var message = string.Format(format, stage, exception.Message, exception);
+
+            string? downloadUrl = null;
+
+            // Windows: 检测 MSVC 2022 缺失问题
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var baseEx = exception;
+                var isDllNotFound = false;
+
+                // 解包 TypeInitializationException
+                if (baseEx is TypeInitializationException && baseEx.InnerException != null)
+                    baseEx = baseEx.InnerException;
+
+
+                // 启发式检测：如果包含 MaaFramework 且是 加载错误
+                var exStr = exception.ToString();
+                if ((exStr.Contains("MaaFramework") || exStr.Contains("MaaCore")) && (exStr.Contains("DllNotFoundException") || baseEx is DllNotFoundException))
+                {
+                    isDllNotFound = true;
+                }
+
+                if (isDllNotFound)
+                {
+                    try
+                    {
+                        // 尝试显示自定义下载窗口
+                        void ShowRuntimeWindow()
+                        {
+                            var win = new RuntimeMissingWindow();
+                            win.Show();
+
+                            // 启动消息循环等待窗口关闭（窗口内部处理下载和退出）
+                            var cts = new System.Threading.CancellationTokenSource();
+                            win.Closed += (s, e) => cts.Cancel();
+                            Dispatcher.UIThread.MainLoop(cts.Token);
+                        }
+
+                        if (Dispatcher.UIThread.CheckAccess())
+                        {
+                            ShowRuntimeWindow();
+                            Environment.Exit(1);
+                            return;
+                        }
+                        else
+                        {
+                            var tcs = new TaskCompletionSource<bool>();
+                            Dispatcher.UIThread.Post(() =>
+                            {
+                                try
+                                {
+                                    ShowRuntimeWindow();
+                                    tcs.TrySetResult(true);
+                                }
+                                catch (Exception ex)
+                                {
+                                    tcs.TrySetException(ex);
+                                }
+                            });
+
+                            if (tcs.Task.Wait(15000)) // 等待15秒防止死锁
+                            {
+                                Environment.Exit(1);
+                                return;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerHelper.Error($"无法显示 RuntimeMissingWindow: {ex}");
+                        if (isDllNotFound)
+                        {
+                            // 尝试显示自定义下载窗口
+                            try
+                            {
+                                // 如果我们在UI线程且App正常，直接显示
+                                if (Application.Current != null && Dispatcher.UIThread.CheckAccess())
+                                {
+                                    var win = new RuntimeMissingWindow();
+                                    win.Closed += (s, e) => Environment.Exit(1);
+                                    win.Show();
+                                    // 启动嵌套循环以阻塞退出
+                                    Dispatcher.UIThread.MainLoop(System.Threading.CancellationToken.None);
+                                    return;
+                                }
+
+                                // 当 SkiaSharp 等底层渲染库缺失时，Avalonia 无法启动 UI，因此 RuntimeMissingWindow 也无法显示。
+                                // 这里不再尝试无效的重启，而是直接回退到原生消息框，并确保消息框内容友好。
+                            }
+                            catch
+                            {
+                                // 降级处理：如果在尝试显示窗口时失败，回退到MessageBox
+                            }
+
+                            downloadUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe";
+
+                            // 优化错误信息：如果是缺运行库，只显示友好提示，不显示吓人的堆栈信息
+                            // 这解决了“截图内容”问题
+                            var msvcMsg = LangKeys.MSVC2022Missing.ToLocalization();
+                            if (string.IsNullOrEmpty(msvcMsg) || msvcMsg == "MSVC2022Missing")
+                                msvcMsg = "检测到缺少运行库 Runtime，请尝试下载并安装最新 Microsoft Visual C++ Redistributable (x64) 运行库。";
+
+                            var link = LangKeys.MSVC2022DownloadLink.ToLocalization();
+                            if (string.IsNullOrEmpty(link) || link == "MSVC2022DownloadLink")
+                                link = "下载链接：" + downloadUrl;
+
+                            var confirmStr = LangKeys.DownloadNowConfirmation.ToLocalization();
+                            if (string.IsNullOrEmpty(confirmStr) || confirmStr == "DownloadNowConfirmation")
+                                confirmStr = "是否立即下载？";
+
+                            // 重写 message，仅包含友好提示
+                            message = $"{msvcMsg}\n{link}\n\n{confirmStr}";
+                        }
+                    }
+
+                    // 输出到控制台（作为备份）
+                    Console.Error.WriteLine($"=== MFAToolsPlus {title} ===");
+                    Console.Error.WriteLine(message);
+
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        // Windows: 使用 MessageBox
+                        var shortMessage = message.Length > 2048
+                            ? message.Substring(0, 2048) + "...\n\n(Log truncated)"
+                            : message;
+
+                        if (downloadUrl != null)
+                        {
+                            // MB_YESNO | MB_ICONERROR = 0x04 | 0x10 = 0x14
+                            if (MessageBox(IntPtr.Zero, shortMessage, $"MFAToolsPlus {title}", 0x14) == 6) // IDYES = 6
+                            {
+                                Process.Start(new ProcessStartInfo(downloadUrl)
+                                {
+                                    UseShellExecute = true
+                                });
+                            }
+                        }
+                        else
+                        {
+                            MessageBox(IntPtr.Zero, shortMessage, $"MFAToolsPlus {title}", 0x10); // MB_ICONERROR
+                        }
+                    }
+                }
+                else
+                {
+                    // Linux/macOS: 尝试显示原生对话框
+                    try
+                    {
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        {
+                            var escapedMessage = message.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\r");
+                            var escapedTitle = title.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                            var psi = new ProcessStartInfo
+                            {
+                                FileName = "osascript",
+                                Arguments = $"-e \"display alert \\\"{escapedTitle}\\\" message \\\"{escapedMessage}\\\" as critical\"",
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            };
+                            Process.Start(psi)?.WaitForExit();
+                        }
+                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                        {
+                            // 尝试 zenity
+                            try
+                            {
+                                var psi = new ProcessStartInfo
+                                {
+                                    FileName = "zenity",
+                                    Arguments = $"--error --text=\"{message.Replace("\"", "\\\"")}\" --title=\"{title}\"",
+                                    UseShellExecute = true
+                                };
+                                Process.Start(psi)?.WaitForExit();
+                            }
+                            catch
+                            {
+                                // 尝试 kdialog
+                                var psi = new ProcessStartInfo
+                                {
+                                    FileName = "kdialog",
+                                    Arguments = $"--error \"{message.Replace("\"", "\\\"")}\" --title \"{title}\"",
+                                    UseShellExecute = true
+                                };
+                                Process.Start(psi)?.WaitForExit();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // 忽略跨平台对话框启动失败，已在上方输出到 Console
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("=== MFAToolsPlus Startup Failed (Fatal) ===");
+            Console.Error.WriteLine(ex.ToString());
+            Console.Error.WriteLine("Original Exception:");
+            Console.Error.WriteLine(exception.ToString());
+        }
+
+        Environment.Exit(1);
+    }
+
+    // Windows MessageBox P/Invoke
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);
 }

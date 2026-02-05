@@ -58,14 +58,37 @@ public partial class RootView : SukiWindow
     {
         if (!GlobalHotkeyService.IsStopped)
         {
-            MaaProcessor.Instance.Close();
-            if (!noLog)
-                LoggerHelper.Info("MFA Closed!");
-            MaaProcessor.Instance.SetTasker();
-            TrayIconManager.DisposeTrayIcon(Application.Current);
+            try
+            {
+                MaaProcessor.Instance.Close();
+                if (!noLog)
+                    LoggerHelper.Info("MFA Closed!");
+                MaaProcessor.Instance.SetTasker();
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (!noLog)
+                        LoggerHelper.Error($"Failed to close MaaProcessor: {ex.Message}");
+                }
+                catch { }
+            }
+
+            try
+            {
+                TrayIconManager.DisposeTrayIcon(Application.Current);
+            }
+            catch { }
 
             if (!noLog)
-                LoggerHelper.DisposeLogger();
+            {
+                try
+                {
+                    LoggerHelper.DisposeLogger();
+                }
+                catch { }
+            }
             GlobalHotkeyService.Shutdown();
         }
     }
